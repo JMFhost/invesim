@@ -27232,15 +27232,25 @@
   if (!banner) return;
   var ins = banner.querySelector('ins.adsbygoogle');
   function isFilled() { return !!(ins && ins.querySelector('iframe')); }
+  function adjustLayout() {
+    var h = banner.offsetHeight || 90;
+    document.body.style.paddingBottom = h + 'px';
+    var nav = document.getElementById('androidBottomNav');
+    if (nav) nav.style.bottom = h + 'px';
+  }
   function showBanner() {
-    if (banner.classList.contains('invesim-ads-live')) return;
+    if (banner.classList.contains('invesim-ads-live')) { adjustLayout(); return; }
     banner.classList.add('invesim-ads-live');
-    requestAnimationFrame(function() {
-      var h = banner.offsetHeight || 90;
-      document.body.style.paddingBottom = h + 'px';
-      var nav = document.getElementById('androidBottomNav');
-      if (nav) nav.style.bottom = h + 'px';
-    });
+    requestAnimationFrame(adjustLayout);
+    setTimeout(adjustLayout, 1000);
+    setTimeout(adjustLayout, 3000);
+    if (window.ResizeObserver) {
+      try {
+        var ro = new ResizeObserver(adjustLayout);
+        ro.observe(banner);
+        setTimeout(function() { try { ro.disconnect(); } catch (e) {} }, 30000);
+      } catch (e) {}
+    }
   }
   if (isFilled()) { showBanner(); return; }
   try {
