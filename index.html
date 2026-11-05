@@ -2844,51 +2844,30 @@
   </main>
 
   <!-- ==================== ANDROID PLAY STORE FIXED BOTTOM NAVIGATION BAR (MOBILE) ==================== -->
-  <nav id="androidBottomNav" class="sm:hidden fixed bottom-0 left-0 right-0 z-40 backdrop-blur-md border-t border-[#22262A] px-0.5 py-1 grid grid-cols-11 gap-0.5 text-[8.5px] font-bold" role="navigation" aria-label="Mobile Primary Navigation">
-    <button type="button" onclick="switchMainTab('home')" data-mob-tab="home" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-[#00C805]">
-      <span class="text-xs leading-none">🏠</span>
+  <nav id="androidBottomNav" class="sm:hidden fixed bottom-0 left-0 right-0 z-40 backdrop-blur-md border-t border-[#22262A] px-1.5 py-1.5 grid grid-cols-6 gap-1 text-[10px] font-bold" role="navigation" aria-label="Mobile Primary Navigation">
+    <button type="button" onclick="switchMainTab('home')" data-mob-tab="home" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-[#00C805] bg-[#00C805]/10 font-extrabold">
+      <span class="text-sm leading-none">🏠</span>
       <span class="mt-0.5 truncate">Home</span>
     </button>
+    <button type="button" onclick="switchMainTab('portfolio')" data-mob-tab="portfolio" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-[#8A919E]">
+      <span class="text-sm leading-none">💼</span>
+      <span class="mt-0.5 truncate">Portfolio</span>
+    </button>
     <button type="button" onclick="switchMainTab('stocks')" data-mob-tab="stocks" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-[#8A919E]">
-      <span class="text-xs leading-none">📈</span>
+      <span class="text-sm leading-none">📈</span>
       <span class="mt-0.5 truncate">Stocks</span>
     </button>
     <button type="button" onclick="switchMainTab('etfs')" data-mob-tab="etfs" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-[#8A919E]">
-      <span class="text-xs leading-none">📊</span>
+      <span class="text-sm leading-none">📊</span>
       <span class="mt-0.5 truncate">ETFs</span>
     </button>
-    <button type="button" onclick="switchMainTab('realestate')" data-mob-tab="realestate" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-[#8A919E]">
-      <span class="text-xs leading-none">🏘️</span>
-      <span class="mt-0.5 truncate">RealEst</span>
-    </button>
-    <button type="button" onclick="switchMainTab('privatere')" data-mob-tab="privatere" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-[#8A919E]">
-      <span class="text-xs leading-none">🏢</span>
-      <span class="mt-0.5 truncate">eREIT</span>
-    </button>
-    <button type="button" onclick="switchMainTab('vc')" data-mob-tab="vc" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-[#8A919E]">
-      <span class="text-xs leading-none">🚀</span>
-      <span class="mt-0.5 truncate">VC</span>
-    </button>
-
-    <button type="button" onclick="switchMainTab('forex')" data-mob-tab="forex" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-[#8A919E]">
-      <span class="text-xs leading-none">💱</span>
-      <span class="mt-0.5 truncate">Forex</span>
-    </button>
-    <button type="button" onclick="switchMainTab('managers')" data-mob-tab="managers" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-[#8A919E]">
-      <span class="text-xs leading-none">👔</span>
-      <span class="mt-0.5 truncate">PMs</span>
-    </button>
-    <button type="button" onclick="switchMainTab('portfolio')" data-mob-tab="portfolio" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-[#8A919E]">
-      <span class="text-xs leading-none">💼</span>
-      <span class="mt-0.5 truncate">Portfolio</span>
-    </button>
     <button type="button" onclick="switchMainTab('casino')" data-mob-tab="casino" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-[#8A919E]">
-      <span class="text-xs leading-none">🎰</span>
+      <span class="text-sm leading-none">🎰</span>
       <span class="mt-0.5 truncate">Casino</span>
     </button>
     <button type="button" onclick="switchMainTab('competitors')" data-mob-tab="competitors" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-[#8A919E]">
-      <span class="text-xs leading-none">🏆</span>
-      <span class="mt-0.5 truncate">Ranks</span>
+      <span class="text-sm leading-none">🏆</span>
+      <span class="mt-0.5 truncate">Rank</span>
     </button>
   </nav>
 
@@ -27262,6 +27241,5 @@
   }
 })();
 </script>
-</div>
 </body>
 </html>
