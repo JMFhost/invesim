@@ -27208,11 +27208,10 @@
     })();
   </script>
 <style>
-  body { padding-bottom: 120px !important; }
-  #invesim-ad-banner { position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
-    background: rgba(8,10,14,0.97); border-top: 1px solid #23282e;
-    text-align: center; padding: 6px 4px 8px; min-height: 60px;
-    display: flex; align-items: center; justify-content: center; }
+  #invesim-ad-banner { position: fixed; bottom: 0; left: 0; right: 0; z-index: 9998;
+    text-align: center; display: none; }
+  #invesim-ad-banner.invesim-ads-live { display: block;
+    background: rgba(8,10,14,0.97); border-top: 1px solid #23282e; padding: 6px 4px 8px; }
   #invesim-ad-banner .adsbygoogle { width: 100%; }
 </style>
 <div id="invesim-ad-banner">
@@ -27225,6 +27224,33 @@
      data-full-width-responsive="true"></ins>
 <script>
      (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+<script>
+(function() {
+  var banner = document.getElementById('invesim-ad-banner');
+  if (!banner) return;
+  var ins = banner.querySelector('ins.adsbygoogle');
+  function isFilled() { return !!(ins && ins.querySelector('iframe')); }
+  function showBanner() {
+    if (banner.classList.contains('invesim-ads-live')) return;
+    banner.classList.add('invesim-ads-live');
+    requestAnimationFrame(function() {
+      var h = banner.offsetHeight || 90;
+      document.body.style.paddingBottom = h + 'px';
+      var nav = document.getElementById('androidBottomNav');
+      if (nav) nav.style.bottom = h + 'px';
+    });
+  }
+  if (isFilled()) { showBanner(); return; }
+  try {
+    var obs = new MutationObserver(function() { if (isFilled()) { obs.disconnect(); showBanner(); } });
+    if (ins) obs.observe(ins, { childList: true, subtree: true });
+    setTimeout(function() { try { obs.disconnect(); } catch (e) {} }, 20000);
+  } catch (e) {
+    setTimeout(function() { if (isFilled()) showBanner(); }, 5000);
+  }
+})();
 </script>
 </div>
 </body>
