@@ -13824,7 +13824,7 @@
       // - Stock Market (Stocks, ETFs, Options): Open 8:30 AM to 7:00 PM (minute 510 to 1140)
       // - Real Estate, eREITs, Forex, Commodities & 24H Managers: Open 24 Hours (00:00 to 24:00)
       window.stepSimulationMinute = stepSimulationMinute;
-      function stepSimulationMinute() {
+      function stepSimulationMinute(shouldRender = true) {
         if (!G) return;
         ensureWorldEconomyState(G);
         G.minuteOfDay = (typeof G.minuteOfDay === 'number' ? G.minuteOfDay : 510) + 1;
@@ -13943,6 +13943,13 @@
 
         // 5. Recalculate Net Worth for Human & AI Players Every Minute!
         recalculateAllNetWorths(G);
+
+        // Save lightweight fast-patch every minute & periodic full snapshot
+        if (typeof saveLiveAutoSession === 'function') {
+          saveLiveAutoSession(false);
+        }
+
+        if (!shouldRender) return;
 
         // 6. Refresh Top Bar, Home, and Active Tab (without clobbering focused inputs)
         renderTopBarAndHome();
@@ -25371,6 +25378,37 @@
       // 15. COMPACT SAVE / LOAD SYSTEM
       // =========================================================================
       const SAVE_PREFIX = 'INVESTSIM_SLOT_';
+      const AUTOSAVE_LIVE_KEY = 'INVESTSIM_AUTOSAVE_LIVE';
+      const AUTOSAVE_FAST_KEY = 'INVESTSIM_AUTOSAVE_FAST';
+      let lastFullAutoSaveMs = 0;
+      let lastClockTickWallMs = Date.now();
+      let bgClockWorker = null;
+
+      function saveLiveAutoSession(forceImmediate = false) {
+        if (!G) return;
+        const now = Date.now();
+        try {
+          const fastObj = {
+            seed: G.seed,
+            day: G.day,
+            minuteOfDay: G.minuteOfDay ?? 570,
+            theme: currentTheme,
+            currentTab: currentTab,
+            coaching: G.coaching,
+            autoPlayRunning: Boolean(autoPlayTimer),
+            savedAtMs: now
+          };
+          safeStorageSetItem(AUTOSAVE_FAST_KEY, JSON.stringify(fastObj));
+        } catch (e) {}
+
+        if (forceImmediate || (now - lastFullAutoSaveMs >= 4000)) {
+          lastFullAutoSaveMs = now;
+          try {
+            safeStorageSetItem(AUTOSAVE_LIVE_KEY, createSaveSnapshot(G));
+          } catch (e) {}
+        }
+      }
+      window.saveLiveAutoSession = saveLiveAutoSession;
       window.__investSimMemStorage = window.__investSimMemStorage || {};
 
       function safeStorageSetItem(key, valStr) {
@@ -25500,6 +25538,10 @@
           activeTicker: state.activeTicker,
           activeEtfSym: state.activeEtfSym,
           minuteOfDay: state.minuteOfDay ?? 570,
+          coaching: state.coaching,
+          theme: currentTheme,
+          currentTab: currentTab,
+          autoPlayRunning: Boolean(autoPlayTimer),
           worldEconomy: state.worldEconomy,
           lotteryJackpot: state.lotteryJackpot,
           lotteryTotalTicketsSold: state.lotteryTotalTicketsSold,
@@ -25546,6 +25588,10 @@
         base.activeTicker = snap.activeTicker || base.stocks[0].ticker;
         base.activeEtfSym = snap.activeEtfSym || base.etfs[0].sym;
         base.minuteOfDay = typeof snap.minuteOfDay === 'number' ? snap.minuteOfDay : 570;
+        if (snap.coaching) base.coaching = snap.coaching;
+        if (snap.theme) applyAppTheme(snap.theme);
+        if (snap.currentTab) currentTab = snap.currentTab;
+        base.autoPlayRunning = snap.autoPlayRunning !== undefined ? Boolean(snap.autoPlayRunning) : true;
         if (snap.worldEconomy) base.worldEconomy = snap.worldEconomy;
         if (snap.lotteryYesterdayResult) base.lotteryYesterdayResult = snap.lotteryYesterdayResult;
         base.lotteryJackpot = snap.lotteryJackpot || LOTTERY_BASE_JACKPOT;
@@ -26692,6 +26738,7 @@
         renderForexTab();
         renderFinanceTab();
         renderCompetitorsTab();
+        saveLiveAutoSession(false);
       }
 
       function bindEvents() {
@@ -26793,23 +26840,67 @@
         };
 
         document.getElementById('btnStepDay').addEventListener('click', () => stepSimulationDay(false));
+        const runBackgroundAwareClockTick = () => {
+          if (!autoPlayTimer || !G) return;
+          const now = Date.now();
+          const elapsedSec = Math.floor((now - lastClockTickWallMs) / 1000);
+          if (elapsedSec <= 0) return;
+          lastClockTickWallMs += elapsedSec * 1000;
+          const steps = Math.min(elapsedSec, 720);
+          for (let s = 0; s < steps; s++) {
+            stepSimulationMinute(s === steps - 1);
+          }
+        };
+
         const startRealTimeMinuteClock = () => {
           if (autoPlayTimer) clearInterval(autoPlayTimer);
-          autoPlayTimer = setInterval(stepSimulationMinute, 1000);
+          lastClockTickWallMs = Date.now();
+          autoPlayTimer = setInterval(runBackgroundAwareClockTick, 1000);
+          if (!bgClockWorker && typeof Worker !== 'undefined' && typeof Blob !== 'undefined' && typeof URL !== 'undefined') {
+            try {
+              const wBlob = new Blob(["setInterval(() => postMessage('tick'), 1000);"], { type: 'application/javascript' });
+              bgClockWorker = new Worker(URL.createObjectURL(wBlob));
+              bgClockWorker.onmessage = () => runBackgroundAwareClockTick();
+            } catch (e) {}
+          }
           const icon = document.getElementById('autoPlayIcon');
           if (icon) icon.textContent = '⏸';
+          saveLiveAutoSession(true);
         };
-        document.getElementById('btnAutoPlay').addEventListener('click', () => {
-          const icon = document.getElementById('autoPlayIcon');
+        const stopRealTimeMinuteClock = () => {
           if (autoPlayTimer) {
             clearInterval(autoPlayTimer);
             autoPlayTimer = null;
-            if (icon) icon.textContent = '▶';
+          }
+          const icon = document.getElementById('autoPlayIcon');
+          if (icon) icon.textContent = '▶';
+          saveLiveAutoSession(true);
+        };
+        document.getElementById('btnAutoPlay').addEventListener('click', () => {
+          if (autoPlayTimer) {
+            stopRealTimeMinuteClock();
           } else {
             startRealTimeMinuteClock();
           }
         });
-        startRealTimeMinuteClock();
+        if (!G || G.autoPlayRunning !== false) {
+          startRealTimeMinuteClock();
+        } else {
+          stopRealTimeMinuteClock();
+        }
+
+        // Catch up background elapsed time when switching back to the tab while browser is open,
+        // and flush live auto-save immediately before refresh or browser close!
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            saveLiveAutoSession(true);
+          } else {
+            runBackgroundAwareClockTick();
+            renderAll();
+          }
+        });
+        window.addEventListener('pagehide', () => saveLiveAutoSession(true));
+        window.addEventListener('beforeunload', () => saveLiveAutoSession(true));
 
         document.querySelectorAll('.ticket-side-btn').forEach(btn => {
           btn.addEventListener('click', () => {
@@ -27137,6 +27228,8 @@
           screenerPage = 1;
           rePage = 1;
           smallBizPage = 1;
+          lastClockTickWallMs = Date.now();
+          saveLiveAutoSession(true);
           document.getElementById('modalNewGame').classList.add('hidden');
           openCoachingPromptModal();
           showToast('New InveSim Game Launched!', `Seed #${seed}: Freshly generated ${G.stocks.length.toLocaleString()} stocks, ${(G.smallBusinesses || []).length.toLocaleString()} small businesses, ${G.properties.length.toLocaleString()} properties, 24 eREITs & ${G.aiPlayers.length.toLocaleString()} AI rivals!`, true);
@@ -27164,14 +27257,62 @@
         document.getElementById('filterSector').innerHTML = `<option value="ALL">All 11 Sectors</option>` + SECTORS.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
         document.getElementById('reFilterCity').innerHTML = `<option value="ALL">All 50 Cities</option>` + CITIES_50.map(c => `<option value="${c}">${c}</option>`).join('');
 
-        const initialSeed = Math.floor(100000 + Math.random() * 899999);
-        G = createNewGame(initialSeed, 10000, 'BALANCED');
-        window.createNewGame = createNewGame; window.resetToSeed = (s) => { G = createNewGame(s, 10000, "BALANCED"); renderAll(); return G; };
+        let restoredFromAutoSave = false;
+        try {
+          const rawAuto = safeStorageGetItem(AUTOSAVE_LIVE_KEY);
+          if (rawAuto) {
+            const snap = JSON.parse(rawAuto);
+            if (snap && snap.seed) {
+              G = restoreFromSnapshot(snap);
+              restoredFromAutoSave = true;
+              // Overlay fast-save minute progress if from the same seed & day
+              try {
+                const rawFast = safeStorageGetItem(AUTOSAVE_FAST_KEY);
+                if (rawFast) {
+                  const fast = JSON.parse(rawFast);
+                  if (fast && fast.seed === G.seed) {
+                    if (fast.theme) applyAppTheme(fast.theme);
+                    if (fast.currentTab) currentTab = fast.currentTab;
+                    if (fast.coaching) G.coaching = fast.coaching;
+                    if (fast.autoPlayRunning !== undefined) G.autoPlayRunning = Boolean(fast.autoPlayRunning);
+                    if (fast.day === G.day && typeof fast.minuteOfDay === 'number' && fast.minuteOfDay > G.minuteOfDay) {
+                      const catchUp = Math.min(60, fast.minuteOfDay - G.minuteOfDay);
+                      for (let m = 0; m < catchUp; m++) stepSimulationMinute(false);
+                    }
+                  }
+                }
+              } catch (eFast) {}
+            }
+          }
+        } catch (eRestore) {}
+
+        if (!restoredFromAutoSave || !G) {
+          const initialSeed = Math.floor(100000 + Math.random() * 899999);
+          G = createNewGame(initialSeed, 10000, 'BALANCED');
+          saveLiveAutoSession(true);
+        }
+
+        window.createNewGame = createNewGame;
+        window.resetToSeed = (s) => {
+          G = createNewGame(s, 10000, "BALANCED");
+          saveLiveAutoSession(true);
+          renderAll();
+          return G;
+        };
         window.stepSimulationDay = stepSimulationDay;
         window.triggerSmallBusinessBankruptcy = triggerSmallBusinessBankruptcy;
         window.SeededRNG = SeededRNG;
         window.renderAll = renderAll;
         bindEvents();
+        if (restoredFromAutoSave) {
+          if (G.coaching && G.coaching.promptShown) {
+            const mPrompt = document.getElementById('modalCoachingPrompt');
+            if (mPrompt) mPrompt.classList.add('hidden');
+          }
+          if (currentTab && currentTab !== 'home') {
+            switchMainTab(currentTab);
+          }
+        }
         renderAll();
       }
 
