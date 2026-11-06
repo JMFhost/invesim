@@ -3582,7 +3582,7 @@
       window.ensureFullStockHistory = ensureFullStockHistory;
       function ensureFullStockHistory(st) {
         if (!st) return;
-        const rng = new SeededRNG((st.id || 1) * 9973 + 17);
+        const rng = new SeededRNG(((G && G.seed) || 849201) + (st.id || 1) * 9973 + 17);
         if (!st.quarterlyReports || st.quarterlyReports.length === 0) {
           st.quarterlyReports = [];
           const qBaseRev = ((st.price * (st.shares || 1e6)) / Math.max(1.5, (st.pe || 18) * 0.22)) / 4e6;
@@ -3728,7 +3728,7 @@
         // Brand-new properties (isNewReplacement or built in 2026) have NO occupancy rate yet -> show "No Data" instead of 0%!
         const isHotelProp = tSpec.tier === 'HOTEL' || subtype.includes('Hotel') || subtype.includes('Resort') || subtype.includes('Lodge');
         const currentSimYear = 2026;
-        const isBrandNewBuild = Boolean(isNewReplacement) || (idNum % 12 === 0);
+        const isBrandNewBuild = Boolean(isNewReplacement) || (rng.next() < 0.085);
         const yearBuilt = isBrandNewBuild ? currentSimYear : rng.int(1978, 2025);
         const ageYears = Math.max(0, currentSimYear - yearBuilt);
         const hasOccupancyData = ageYears > 0;
@@ -3877,7 +3877,7 @@
 
       function ensurePropertyOccHistory(p) {
         if (!p || Array.isArray(p.occHistory10Y)) return p ? p.occHistory10Y : [];
-        const pRng = new SeededRNG((p.id || 1) * 6151 + 29);
+        const pRng = new SeededRNG(((G && G.seed) || 849201) + (p.id || 1) * 6151 + 29);
         const currentSimYear = 2026;
         const yearBuilt = p.yearBuilt || 2015;
         const arr = [];
@@ -4155,9 +4155,19 @@
         return [...all].sort((a, b) => b.mktCap - a.mktCap).slice(0, 60);
       }
 
-      function buildEtfHoldingsWeights(stocks, filterType, sectorName, countryCode = null) {
-        const picked = selectCandidateStocksForEtf(stocks, filterType, sectorName, countryCode);
+      function buildEtfHoldingsWeights(stocks, filterType, sectorName, countryCode = null, rng = null) {
+        let picked = selectCandidateStocksForEtf(stocks, filterType, sectorName, countryCode);
         if (!picked.length) return [];
+        if (rng && picked.length > 16) {
+          const pool = [...picked];
+          const targetLen = Math.min(pool.length, rng.int(Math.max(15, Math.floor(pool.length * 0.72)), pool.length));
+          const sub = [];
+          while (sub.length < targetLen && pool.length > 0) {
+            const idx = rng.int(0, Math.min(pool.length - 1, Math.max(4, Math.floor(pool.length * 0.65))));
+            sub.push(pool.splice(idx, 1)[0]);
+          }
+          picked = sub;
+        }
         // Weight by sqrt(mktCap) or factor score so top holdings have realistic 3%–8% weights and sum to 100%
         const rawScores = picked.map((s, idx) => {
           if (filterType === 'HIGH_DIV' || filterType === 'DIV_KINGS') return Math.max(0.5, s.divYield || 1.5);
@@ -4230,7 +4240,7 @@
         const expenseRatio = Number(Math.max(0.03, bp.baseEr * rng.range(0.85, 1.30)).toFixed(2));
 
         // Build constituent stock holdings for this ETF!
-        const holdings = buildEtfHoldingsWeights(stocks, bp.filterType, bp.sectorName, bp.countryCode || null);
+        const holdings = buildEtfHoldingsWeights(stocks, bp.filterType, bp.sectorName, bp.countryCode || null, rng);
         const stockMap = new Map((stocks || []).map(s => [s.ticker, s]));
 
         // Some ETFs (~15%) start with management challenges, but will use survival defenses (fee cuts, PM replacement) to avoid shutting down!
@@ -4411,7 +4421,14 @@
           ...byCountry.JP,
           ...byCountry.AU
         ];
-        return ETF_BLUEPRINTS.map(bp => generateSingleEtf(rng, bp, usedTickers, false, 1, sampleStocks));
+        const shuffledBps = [...ETF_BLUEPRINTS];
+        for (let i = shuffledBps.length - 1; i > 0; i--) {
+          const j = rng.int(0, i);
+          const tmp = shuffledBps[i];
+          shuffledBps[i] = shuffledBps[j];
+          shuffledBps[j] = tmp;
+        }
+        return shuffledBps.map(bp => generateSingleEtf(rng, bp, usedTickers, false, 1, sampleStocks));
       }
 
       function handleEtfClosureAndReplace(state, etfIdx, rng) {
@@ -4567,9 +4584,28 @@
           'Higher refinancing costs on maturing portfolio debt led to a conservative NAV mark.'
         ];
 
-        return templates.map((t, idx) => {
+        const shuffledTemplates = [...templates];
+        for (let i = shuffledTemplates.length - 1; i > 0; i--) {
+          const j = rng.int(0, i);
+          const tmp = shuffledTemplates[i];
+          shuffledTemplates[i] = shuffledTemplates[j];
+          shuffledTemplates[j] = tmp;
+        }
+        const usedEreitSyms = new Set();
+        const ereitAlpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        return shuffledTemplates.map((tBase, idx) => {
           const sponsor = rng.pick(ETF_FICTIONAL_PREFIXES);
-          const nav = Number((t.baseNav * rng.range(1.00, 1.06)).toFixed(2));
+          let randSym = '';
+          while (!randSym || usedEreitSyms.has(randSym)) {
+            const c1 = sponsor.charAt(0).toUpperCase();
+            const c2 = (tBase.sym.split('-')[1] || 'RE').charAt(0).toUpperCase();
+            const c3 = ereitAlpha[rng.int(0, 25)];
+            const c4 = ereitAlpha[rng.int(0, 25)];
+            randSym = `PRE-${c1}${c2}${c3}${rng.next() < 0.4 ? c4 : ''}`;
+          }
+          usedEreitSyms.add(randSym);
+          const t = { ...tBase, sym: randSym };
+          const nav = Number((t.baseNav * rng.range(0.88, 1.24)).toFixed(2));
           const totalShareSupply = rng.int(22000, 65000);
           const subscribedShares = Math.round(totalShareSupply * rng.range(0.54, 0.84));
           const occupancyPct = Number(rng.range(89.5, 97.6).toFixed(1));
@@ -4629,7 +4665,7 @@
           // - Non-Hotel eREITs hire GUARANTEED_MASTER (👑 Master Lease — 18% Fee, 8/8 Perks, 12Mo Vacancy Shield), STANDARD (Local Manager), or BUDGET (Virtual Agent)
           const propertyManagerTier = isHotelEreit
             ? 'SHORT_TERM'
-            : (idx % 3 !== 2 ? 'GUARANTEED_MASTER' : (idx % 2 === 0 ? 'STANDARD' : 'BUDGET'));
+            : (rng.next() < 0.65 ? 'GUARANTEED_MASTER' : (rng.next() < 0.60 ? 'STANDARD' : 'BUDGET'));
           const isMasterOrHotel = (propertyManagerTier === 'GUARANTEED_MASTER' || propertyManagerTier === 'SHORT_TERM');
           const adjOccupancyPct = isMasterOrHotel
             ? Number(rng.range(95.2, 99.1).toFixed(1))
@@ -4784,13 +4820,13 @@
           { stage: 'Series C',     stageIdx: 3, valMin: 360e6, valMax: 880e6,  minCheck: 75000,  failProb: 0.08, ipoMultMin: 3.5,  ipoMultMax: 10.0, minDays: 190, maxDays: 340, arrMin: 35.0, arrMax: 95.0 },
           { stage: 'Pre-IPO Late', stageIdx: 4, valMin: 950e6, valMax: 2400e6, minCheck: 100000, failProb: 0.06, ipoMultMin: 2.2,  ipoMultMax: 6.5,  minDays: 180, maxDays: 360, arrMin: 98.0, arrMax: 280.0 }
         ];
-        const stg = stages[(idNum - 1) % stages.length] || rng.pick(stages);
+        const stg = rng.pick(stages);
         const sectorObj = SECTORS[rng.int(0, SECTORS.length - 1)];
         const sub = rng.pick(sectorObj.subs);
         const prefix = rng.pick(PREFIXES);
         const root = rng.pick(ROOTS);
-        const isVcFund = idNum % 5 === 0;
-        const name = isVcFund ? `${prefix} ${root} Venture Fund ${['I','II','III','IV'][idNum % 4]}` : `${prefix}${root} Labs`;
+        const isVcFund = rng.next() < 0.25;
+        const name = isVcFund ? `${prefix} ${root} Venture Fund ${rng.pick(['I','II','III','IV','V'])}` : `${prefix}${root} Labs`;
         const valuation = Math.round(rng.range(stg.valMin, stg.valMax) / 100000) * 100000;
         const sharePrice = Number(rng.range(2.50, 28.00).toFixed(2));
         const targetIpoMult = Number(rng.range(stg.ipoMultMin, stg.ipoMultMax).toFixed(1));
@@ -4914,97 +4950,11 @@
       // - Higher cash flow directly commands a higher price within each tier!
       // - Businesses losing money (negative cash flow: -1.5% to -13.5%/yr) have dropped prices, and can either turn around or go bankrupt!
       function generateSingleSmallBusiness(rng, idNum, tierSpec, isReplacement = false, currentDay = 1) {
-        // Explicit showcase for #1 and #2: Newly Built Nail Salon ($50,000) vs Well-Managed Established Nail Salon ($165,000 = 3.3x!)
-        if (idNum === 1 && !isReplacement) {
-          return {
-            id: 1,
-            cat: 3, // Salons, Dental, Healthcare & Gyms
-            sub: 0, // Nail Salon & Spa
-            tier: 0,
-            cityIdx: 0,
-            prefixIdx: 0,
-            yearsOpen: 0, // Newly built, 0 years in business, no customer base yet
-            mgmtState: 'NEW_BUILDOUT', // 'NEW_BUILDOUT' | 'WELL_MANAGED' | 'TURNAROUND' | 'MISMANAGED'
-            customerState: 'NO_CUSTOMERS_YET', // 'NO_CUSTOMERS_YET' | 'GROWING' | 'LOYAL_ESTABLISHED' | 'DECLINING'
-            baseVal: 50000,
-            price: 50000,
-            initialBuildCost: 50000,
-            netYieldPct: 4.50, // Newly built ramping up toward 8%-18%
-            staff: 3,
-            insured: true,
-            owner: null,
-            listedForSale: true,
-            sellerId: null,
-            listPremiumPct: 0,
-            lastAutoAction: 'Newly built 8-chair Nail Salon — in-house manager running grand-opening local marketing to build initial clientele.',
-            distressScore: 0,
-            turnaroundPotential: 0.78,
-            isReplacement: false,
-            listedDay: 1
-          };
-        }
-        if (idNum === 2 && !isReplacement) {
-          return {
-            id: 2,
-            cat: 3, // Salons, Dental, Healthcare & Gyms
-            sub: 0, // Nail Salon & Spa
-            tier: 1,
-            cityIdx: 1,
-            prefixIdx: 3,
-            yearsOpen: 8, // 8 years in business with loyal repeat clientele
-            mgmtState: 'WELL_MANAGED',
-            customerState: 'LOYAL_ESTABLISHED',
-            baseVal: 165000, // > 3x the $50,000 newly built Nail Salon!
-            price: 165000,
-            initialBuildCost: 50000,
-            netYieldPct: 14.80, // Strong 14.8%/yr net cashflow ($24,420/yr)
-            staff: 7,
-            insured: true,
-            owner: null,
-            listedForSale: true,
-            sellerId: null,
-            listPremiumPct: 0,
-            lastAutoAction: 'Well-managed Nail Salon in business 8 years — 2,400+ loyal repeat clients, full technician retention & 85% insurance shield.',
-            distressScore: 0,
-            turnaroundPotential: 0.90,
-            isReplacement: false,
-            listedDay: 1
-          };
-        }
-        if (idNum === 3 && !isReplacement) {
-          return {
-            id: 3,
-            cat: 0, // Food, Beverage & Restaurants
-            sub: 0, // Boba & Specialty Coffee Shop
-            tier: 0,
-            cityIdx: 2,
-            prefixIdx: 5,
-            yearsOpen: 3,
-            mgmtState: 'TURNAROUND',
-            customerState: 'DECLINING',
-            baseVal: 68000, // Price dropped from $115,000 due to negative cashflow!
-            price: 68000,
-            initialBuildCost: 115000,
-            netYieldPct: -5.40, // Losing money (-5.4%/yr), price dropped, turnaround candidate!
-            staff: 4,
-            insured: true,
-            owner: null,
-            listedForSale: true,
-            sellerId: null,
-            listPremiumPct: 0,
-            lastAutoAction: 'Temporarily negative cash flow (-5.4%/yr) after prior manager over-ordered inventory; new in-house manager restructuring menu.',
-            distressScore: 2,
-            turnaroundPotential: 0.68,
-            isReplacement: false,
-            listedDay: 1
-          };
-        }
-
-        const catIdx = (idNum + rng.int(0, 7)) % 8;
+        const catIdx = rng.int(0, SMALL_BIZ_CATEGORIES.length - 1);
         const catObj = SMALL_BIZ_CATEGORIES[catIdx];
         const subIdx = Math.min(catObj.subtypes.length - 1, Math.max(0, Math.floor((tierSpec.tier * 1.5) + rng.int(0, 2))));
-        const cityIdx = (idNum * 7 + rng.int(0, 49)) % 50;
-        const prefixIdx = (idNum * 13 + rng.int(0, SMALL_BIZ_PREFIXES.length - 1)) % SMALL_BIZ_PREFIXES.length;
+        const cityIdx = rng.int(0, 49);
+        const prefixIdx = rng.int(0, SMALL_BIZ_PREFIXES.length - 1);
         const staff = rng.int(tierSpec.minStaff, tierSpec.maxStaff);
 
         // Determine Maturity / Management / Cashflow Regime:
@@ -5160,7 +5110,7 @@
       function buildSmallBizFinancialReportData(biz) {
         const info = getSmallBizDisplayInfo(biz);
         const catObj = SMALL_BIZ_CATEGORIES[biz.cat] || SMALL_BIZ_CATEGORIES[0];
-        const rRng = new SeededRNG(biz.id * 9137 + 44109);
+        const rRng = new SeededRNG(((G && G.seed) || 849201) + biz.id * 9137 + 44109);
         const yearsOpen = biz.yearsOpen ?? 4;
         const effectiveYearsOpen = Math.max(0.25, yearsOpen === 0 ? 0.25 : yearsOpen);
 
@@ -7533,7 +7483,7 @@
         const portfolioManagersPool = [];
         for (let i = 0; i < 1000; i++) {
           const name = makeUniqueProfName(i);
-          const styleSpec = UNIQUE_PM_INVESTING_STYLES[i % UNIQUE_PM_INVESTING_STYLES.length];
+          const styleSpec = UNIQUE_PM_INVESTING_STYLES[(i + rng.int(0, UNIQUE_PM_INVESTING_STYLES.length - 1)) % UNIQUE_PM_INVESTING_STYLES.length];
           const city = PROF_CITIES[(i * 3 + rng.int(0, 5)) % PROF_CITIES.length];
           const alma = PROF_ALMA_MATERS[(i * 7 + rng.int(0, 5)) % PROF_ALMA_MATERS.length];
           const expYears = rng.int(4, 34);
@@ -7592,7 +7542,7 @@
           p.mistakeProb = profSpec.mistakeProb;
           p.alphaPerTrade = profSpec.alphaPerTrade;
           p.mistakeLossPerTrade = profSpec.mistakeLossPerTrade;
-          const cSpec = MANAGER_COUNTRY_SPECS[i % MANAGER_COUNTRY_SPECS.length];
+          const cSpec = MANAGER_COUNTRY_SPECS[(i + rng.int(0, MANAGER_COUNTRY_SPECS.length - 1)) % MANAGER_COUNTRY_SPECS.length];
           p.focusCountry = cSpec.code;
           p.countrySpecialty = cSpec.code;
           p.focusCountryFlag = cSpec.flag;
@@ -7611,9 +7561,9 @@
         const deskTypes = ['FOREX', 'COMMODITY', 'OPTIONS', 'ALL_3'];
         for (let i = 0; i < 1000; i++) {
           const name = makeUniqueProfName(1000 + i);
-          const desk = deskTypes[i % deskTypes.length];
+          const desk = deskTypes[(i + rng.int(0, deskTypes.length - 1)) % deskTypes.length];
           const styleArr = UNIQUE_TRADER_STYLES[desk];
-          const stSpec = styleArr[Math.floor(i / 4) % styleArr.length];
+          const stSpec = styleArr[(Math.floor(i / 4) + rng.int(0, styleArr.length - 1)) % styleArr.length];
           const city = PROF_CITIES[(i * 5 + rng.int(0, 7)) % PROF_CITIES.length];
           const alma = PROF_ALMA_MATERS[(i * 11 + rng.int(0, 6)) % PROF_ALMA_MATERS.length];
           const expYears = rng.int(3, 30);
@@ -7735,14 +7685,14 @@
         const robotTradersPool = new Array(TOTAL_ROBOT_TRADERS);
         for (let i = 0; i < TOTAL_ROBOT_TRADERS; i++) {
           const botIdNum = i + 1;
-          const assetDesk = robotAssetDesks[i % robotAssetDesks.length];
+          const assetDesk = robotAssetDesks[(i + rng.int(0, robotAssetDesks.length - 1)) % robotAssetDesks.length];
           const catMeta = robotCategoryMeta[assetDesk] || robotCategoryMeta.ALL_ASSETS;
           const pref = robotPrefixes[(i + rng.int(0, robotPrefixes.length - 1)) % robotPrefixes.length];
           const eng = catMeta.engines[(Math.floor(i / 6) + rng.int(0, catMeta.engines.length - 1)) % catMeta.engines.length];
           const verMajor = rng.int(1, 9);
           const verMinor = rng.int(0, 9);
           const name = `${pref}-${verMajor}.${verMinor} #${botIdNum}`;
-          const cSpec = MANAGER_COUNTRY_SPECS[i % MANAGER_COUNTRY_SPECS.length];
+          const cSpec = MANAGER_COUNTRY_SPECS[(i + rng.int(0, MANAGER_COUNTRY_SPECS.length - 1)) % MANAGER_COUNTRY_SPECS.length];
 
           // Distribute win rates across all 5 filter brackets — Higher Win % strictly equals Higher Profits Overall!
           // - Below 50% (32.0%–49.8%): ~27% of bots -> Monthly Rent: $4.99–$9.95/mo (<$10/mo) -> Negative expected annual return
@@ -7751,7 +7701,7 @@
           // - 70.0%–79.9% (Over 70%): ~16% of bots -> Monthly Rent: $310–$960/mo -> +54% to +78% / yr
           // - Over 80% (80.0%–89.5%): ~11% of bots -> Monthly Rent: $1,050–$2,450/mo (>$1,000/mo) -> +80% to +100% / yr (Up to 2x!)
           let winRatePct, monthlyRent, targetLowPct, targetHighPct;
-          const bucketRoll = i % 100;
+          const bucketRoll = (i + rng.int(0, 99)) % 100;
           if (bucketRoll < 27) {
             winRatePct = Number(rng.range(32.0, 49.8).toFixed(1));
             monthlyRent = Number(rng.range(4.99, 9.95).toFixed(2));
@@ -16726,6 +16676,203 @@
         });
       }
 
+      window.buildStockCandles120 = buildStockCandles120;
+      function buildStockCandles120(st, tf, annotatedDaily) {
+        const TARGET = 120;
+        const endPrice = Number(st.price || 100);
+        const prevClose = Number(st.prevClose || endPrice * 0.99);
+        const daily = (annotatedDaily && annotatedDaily.length) ? annotatedDaily : (st.history || []);
+        const annualVol = Number(st.annualVol || 0.25);
+        const baseVol = Math.max(1000, Math.round((st.shares || 10000000) * 0.008));
+
+        let tfSeed = ((G && G.seed) || 849201) + (st.id || 1) * 19937;
+        const tfStr = String(tf || '1M');
+        for (let i = 0; i < tfStr.length; i++) tfSeed = (tfSeed * 31 + tfStr.charCodeAt(i)) % 2147483647;
+        const cRng = new SeededRNG(tfSeed);
+
+        let srcBars = [];
+        let stepVol = annualVol / Math.sqrt(252);
+
+        if (tf === '1H') {
+          const startP = Math.max(0.05, Number((prevClose * 0.35 + endPrice * 0.65).toFixed(2)));
+          srcBars = [{ open: startP, high: Math.max(startP, endPrice), low: Math.min(startP, endPrice), close: endPrice, vol: Math.round(baseVol * 0.05) }];
+          stepVol = annualVol / Math.sqrt(252 * 78);
+        } else if (tf === '1D') {
+          const startP = Math.max(0.05, prevClose);
+          srcBars = [{ open: startP, high: Math.max(startP, endPrice), low: Math.min(startP, endPrice), close: endPrice, vol: Math.round(baseVol * 0.15) }];
+          stepVol = annualVol / Math.sqrt(252 * 26);
+        } else if (tf === '1W') {
+          srcBars = daily.slice(-5);
+          stepVol = annualVol / Math.sqrt(252 * 16);
+        } else if (tf === '1M') {
+          srcBars = daily.slice(-22);
+          stepVol = annualVol / Math.sqrt(252 * 5.5);
+        } else if (tf === '3M') {
+          srcBars = daily.slice(-63);
+          stepVol = annualVol / Math.sqrt(252 * 2);
+        } else if (tf === '6M') {
+          srcBars = daily.slice(-120);
+          stepVol = annualVol / Math.sqrt(252);
+        } else if (tf === '9M') {
+          srcBars = daily.slice(-189);
+          stepVol = annualVol / Math.sqrt(252);
+        } else if (tf === '1Y') {
+          srcBars = daily.slice(-252);
+          stepVol = annualVol / Math.sqrt(126);
+        } else {
+          // 5Y, 10Y, 20Y, 30Y
+          const maxY = tf === '5Y' ? 5 : (tf === '10Y' ? 10 : (tf === '20Y' ? 20 : 30));
+          const yh = (st.yearlyHistory && st.yearlyHistory.length) ? st.yearlyHistory.slice(-maxY) : [];
+          if (yh.length >= maxY) {
+            srcBars = yh.map((y, idx) => ({
+              open: y.open,
+              high: y.high,
+              low: y.low,
+              close: idx === yh.length - 1 ? endPrice : y.close,
+              vol: Math.round(baseVol * 18)
+            }));
+          } else {
+            // Ensure full maxY multi-year anchor bars so 5Y, 10Y, 20Y, 30Y always have rich multi-year structure
+            const existingY = yh.map((y, idx) => ({
+              open: y.open,
+              high: y.high,
+              low: y.low,
+              close: idx === yh.length - 1 ? endPrice : y.close,
+              vol: Math.round(baseVol * 18)
+            }));
+            const anchorStart = existingY.length ? existingY[0].open : (daily[0] ? daily[0].open : endPrice);
+            const missingY = Math.max(0, maxY - existingY.length);
+            const revCloses = [anchorStart];
+            const yrDrift = (st.revGrowth || 8) > 15 ? 0.11 : 0.06;
+            const yrVol = Math.min(0.40, Math.max(0.12, annualVol * 0.75));
+            for (let m = 0; m < missingY; m++) {
+              const prevC = revCloses[revCloses.length - 1];
+              const r = cRng.normal(yrDrift, yrVol);
+              revCloses.push(Math.max(0.25, Number((prevC / Math.max(0.55, 1 + r)).toFixed(2))));
+            }
+            revCloses.reverse();
+            const preY = [];
+            for (let m = 0; m < missingY; m++) {
+              const o = revCloses[m];
+              const c = revCloses[m + 1] || o;
+              preY.push({
+                open: o,
+                high: Number((Math.max(o, c) * cRng.range(1.04, 1.18)).toFixed(2)),
+                low: Number(Math.max(0.15, Math.min(o, c) * cRng.range(0.82, 0.96)).toFixed(2)),
+                close: c,
+                vol: Math.round(baseVol * 18)
+              });
+            }
+            srcBars = [...preY, ...existingY];
+          }
+          const barsPerYr = TARGET / maxY;
+          stepVol = annualVol / Math.sqrt(Math.max(4, barsPerYr * 1.6));
+        }
+
+        if (!srcBars || srcBars.length === 0) {
+          srcBars = [{ open: prevClose, high: Math.max(prevClose, endPrice), low: Math.min(prevClose, endPrice), close: endPrice, vol: baseVol }];
+        }
+
+        let raw120 = [];
+        if (srcBars.length === TARGET) {
+          raw120 = srcBars.map((b, idx) => ({
+            open: b.open,
+            high: idx === TARGET - 1 ? Math.max(b.high, endPrice) : b.high,
+            low: idx === TARGET - 1 ? Math.min(b.low, endPrice) : b.low,
+            close: idx === TARGET - 1 ? endPrice : b.close,
+            vol: b.vol || baseVol
+          }));
+        } else if (srcBars.length > TARGET) {
+          // Resample/aggregate >120 bars (e.g., 9M=189d, 1Y=252d) into exact 120 OHLCV candles
+          for (let i = 0; i < TARGET; i++) {
+            const i0 = Math.floor((i * srcBars.length) / TARGET);
+            const i1 = Math.max(i0, Math.floor(((i + 1) * srcBars.length) / TARGET) - 1);
+            const openP = i === 0 ? srcBars[i0].open : raw120[i - 1].close;
+            const closeP = i === TARGET - 1 ? endPrice : srcBars[i1].close;
+            let hi = Math.max(openP, closeP);
+            let lo = Math.min(openP, closeP);
+            let vSum = 0;
+            for (let k = i0; k <= i1; k++) {
+              if (srcBars[k].high > hi) hi = srcBars[k].high;
+              if (srcBars[k].low < lo) lo = srcBars[k].low;
+              vSum += (srcBars[k].vol || baseVol);
+            }
+            raw120.push({
+              open: openP,
+              high: Number(hi.toFixed(2)),
+              low: Number(Math.max(0.02, lo).toFixed(2)),
+              close: closeP,
+              vol: Math.round(vSum / Math.max(1, i1 - i0 + 1))
+            });
+          }
+        } else {
+          // Subdivide <120 anchor bars (1H, 1D, 1W, 1M, 3M, 5Y, 10Y, 20Y, 30Y) into exact 120 OHLCV candles
+          const knots = [srcBars[0].open, ...srcBars.map((b, idx) => idx === srcBars.length - 1 ? endPrice : b.close)];
+          const numSegs = knots.length - 1;
+          // Generate Brownian bridge noise within each segment so path passes through every anchor knot and ends at endPrice
+          const closes = new Array(TARGET);
+          for (let s = 0; s < numSegs; s++) {
+            const idxStart = Math.round((s * TARGET) / numSegs);
+            const idxEnd = Math.round(((s + 1) * TARGET) / numSegs) - 1;
+            const count = idxEnd - idxStart + 1;
+            if (count <= 0) continue;
+            const startVal = knots[s];
+            const endVal = knots[s + 1];
+            const walk = [0];
+            for (let k = 1; k <= count; k++) {
+              walk.push(walk[k - 1] + cRng.normal(0, stepVol));
+            }
+            const totalWalk = walk[count];
+            for (let k = 1; k <= count; k++) {
+              const frac = k / count;
+              const bridge = walk[k] - frac * totalWalk;
+              const interp = startVal + (endVal - startVal) * frac;
+              const cVal = (s === numSegs - 1 && k === count)
+                ? endPrice
+                : Math.max(0.05, Number((interp * Math.max(0.45, 1 + bridge)).toFixed(2)));
+              closes[idxStart + k - 1] = cVal;
+            }
+          }
+          for (let i = 0; i < TARGET; i++) {
+            const openP = i === 0 ? knots[0] : raw120[i - 1].close;
+            const closeP = i === TARGET - 1 ? endPrice : (closes[i] || endPrice);
+            const body = Math.abs(closeP - openP);
+            const wickUp = Math.max(0.01, body * cRng.range(0.25, 0.85) + closeP * stepVol * cRng.range(0.20, 0.65));
+            const wickDn = Math.max(0.01, body * cRng.range(0.25, 0.85) + closeP * stepVol * cRng.range(0.20, 0.65));
+            const highP = Number((Math.max(openP, closeP) + wickUp).toFixed(2));
+            const lowP  = Number(Math.max(0.02, Math.min(openP, closeP) - wickDn).toFixed(2));
+            raw120.push({
+              open: openP,
+              high: highP,
+              low: lowP,
+              close: closeP,
+              vol: Math.round(baseVol * cRng.range(0.55, 1.65))
+            });
+          }
+        }
+
+        // Compute smooth 10, 25, 100, and 200 moving averages across the 120 candles
+        return raw120.map((bar, idx) => {
+          const calcMa = (period) => {
+            const effP = Math.min(raw120.length, period);
+            const s = Math.max(0, idx - effP + 1);
+            let sum = 0, c = 0;
+            for (let k = s; k <= idx; k++) {
+              sum += raw120[k].close;
+              c++;
+            }
+            return c > 0 ? (sum / c) : bar.close;
+          };
+          return {
+            ...bar,
+            ma10:  calcMa(10),
+            ma25:  calcMa(25),
+            ma100: calcMa(60),
+            ma200: calcMa(110)
+          };
+        });
+      }
+
       function drawStockDetailChart(st) {
         const canvas = document.getElementById('stockPriceCanvas');
         if (!canvas || !st) return;
@@ -16767,47 +16914,7 @@
           };
         });
 
-        let hist = [];
-        const dailySliceMap = { '1M': 22, '3M': 63, '6M': 126, '9M': 189, '1Y': 252 };
-        if (stockChartTimeframe === '1H' || stockChartTimeframe === '1D' || stockChartTimeframe === '1W') {
-          hist = buildIntradayChartBars(st, stockChartTimeframe, annotatedDaily);
-        } else if (dailySliceMap[stockChartTimeframe]) {
-          const count = dailySliceMap[stockChartTimeframe];
-          hist = annotatedDaily.slice(-count);
-        } else if (st.yearlyHistory && st.yearlyHistory.length >= 1) {
-          const maxY = stockChartTimeframe === '5Y' ? 5 : (stockChartTimeframe === '10Y' ? 10 : (stockChartTimeframe === '20Y' ? 20 : 30));
-          const fullY = st.yearlyHistory.map((y, idx, arr) => {
-            const closeVal = y.year === 2026 ? st.price : y.close;
-            const calcYrMa = (p) => {
-              const s = Math.max(0, idx - p + 1);
-              let sum = 0, c = 0;
-              for (let k = s; k <= idx; k++) {
-                sum += (arr[k].year === 2026 ? st.price : arr[k].close);
-                c++;
-              }
-              return c > 0 ? sum / c : closeVal;
-            };
-            return {
-              open: y.open,
-              high: y.high,
-              low: y.low,
-              close: closeVal,
-              vol: st.shares * 0.12,
-              label: String(y.year),
-              ma10:  calcYrMa(2),
-              ma25:  calcYrMa(3),
-              ma100: calcYrMa(5),
-              ma200: calcYrMa(8)
-            };
-          });
-          const sliceY = fullY.slice(-maxY);
-          if (sliceY.length === 1) {
-            sliceY.unshift({ ...sliceY[0], close: sliceY[0].open, label: String(st.foundedYear || 2025) });
-          }
-          hist = sliceY;
-        } else {
-          hist = annotatedDaily.slice(-22);
-        }
+        const hist = buildStockCandles120(st, stockChartTimeframe, annotatedDaily);
 
         if (!hist || hist.length < 2) return;
 
