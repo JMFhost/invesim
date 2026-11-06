@@ -6212,7 +6212,11 @@
           activeTicker: stocks[0].ticker,
           activeEtfSym: etfs[0].sym,
           newsFeed: [
-            { day: 1, cat: 'RISK', tag: '💼 CASINO JOB & SCRATCH-OFFS', text: `Work at the Casino for $5/day net (+$1/day annual raise, $1,000/d cap, resets on quit) when rebuilding your bankroll, or play $5, $10, $20, $50 & $100 Instant Scratch-Off Tickets!` },
+            { day: 1, cat: 'AI', tag: '🤖 AI RIVALS DESK ACTIVE', text: `100 AI Rivals initialized with $10,000 starting capital each—actively trading global stocks, ETFs, options, forex, real estate, small businesses & 2D Casino games, with new AI challengers joining every few days!` },
+            { day: 1, cat: 'COMPANY', tag: '🏢 CORPORATE EARNINGS & M&A', text: `Top market leader ${stocks[0].name} (${stocks[0].ticker}) opens at $${stocks[0].price.toFixed(2)} (${stocks[0].sector}, P/E ${stocks[0].pe.toFixed(1)}x) as corporate buybacks, dividends & M&A desk go live.` },
+            { day: 1, cat: 'SECTOR', tag: '🏭 SECTOR ROTATION WIRE', text: `Institutional flows open balanced across all 11 sectors led by ${stocks[0].sector} and ${stocks[1] ? stocks[1].sector : 'Technology'}.` },
+            { day: 1, cat: 'IPO', tag: '🚨 EXCHANGE IPO & LISTING DESK', text: `Global IPO & delisting monitor active across ${stocks.length.toLocaleString()} stocks and ${etfs.length} ETFs—distressed companies face bankruptcy & immediate IPO replacement.` },
+            { day: 1, cat: 'RISK', tag: '💼 CASINO JOB & RISK MONITOR', text: `Work at the Casino for $10/hr net (+$1/hr annual raise, $1,000/d cap, resets on quit) when rebuilding your bankroll, or play 2D Blackjack, 2D Baccarat, 2D Rocket & Scratch-Offs!` },
             { day: 1, cat: 'COUNTRY', tag: '🇺🇸 US FED & MACRO', text: `InveSim Seed #${seed} initialized: Fed Rate at ${fedRate.toFixed(2)}%, 30-Yr Fixed Mortgage at ${(fedRate + 1.75).toFixed(2)}% APR.` },
             { day: 1, cat: 'WORLD', tag: '🌍 MASSIVE UNIVERSE', text: `${stocks.length.toLocaleString()} stocks, ${etfs.length} ETFs, ${properties.length.toLocaleString()} properties, 24 eREITs, 28 VC funds, and AI rivals active!` }
           ]
@@ -11639,8 +11643,29 @@
             badgeColor
           };
           state.aiInspectionsOfHuman.unshift(logRec);
+          if (state.newsFeed && chosen.indexOf(ai) === 0) {
+            const latestAiLog = (ai.logs && ai.logs[0]) ? ai.logs[0].replace(/^Day \d+:\s*/, '') : actionTaken;
+            state.newsFeed.unshift({
+              day: state.day,
+              cat: 'AI',
+              tag: `🤖 AI RIVAL #${aiRank} (${ai.name.toUpperCase()})`,
+              text: `${ai.name} (${ai.fundName} • NW ${fmtMoney(ai.netWorth)}): ${latestAiLog} | Portfolio Audit: ${actionTaken}`
+            });
+          }
           ai.logs.unshift(`Day ${state.day}: 👁️ Inspected You (${fmtMoney(h.netWorth)}) — ${findingTitle.replace(/^[^a-zA-Z0-9]+/, "")}.`);
           if (ai.logs.length > 20) ai.logs.length = 20;
+        }
+
+        if (state.newsFeed && sortedAi.length > 0 && state.day > 1) {
+          const leader = sortedAi[0];
+          const randomActiveAi = state.aiPlayers[rng.int(0, state.aiPlayers.length - 1)] || leader;
+          const actLog = (randomActiveAi.logs && randomActiveAi.logs[0]) ? randomActiveAi.logs[0].replace(/^Day \d+:\s*/, '') : `Rebalanced ${randomActiveAi.shortTag} portfolio.`;
+          state.newsFeed.unshift({
+            day: state.day,
+            cat: 'AI',
+            tag: '🤖 AI RIVALS ACTIVITY WIRE',
+            text: `${randomActiveAi.name} (${randomActiveAi.shortTag} • NW ${fmtMoney(randomActiveAi.netWorth)}): ${actLog} (Current #1 AI Leader: ${leader.name} at ${fmtMoney(leader.netWorth)}).`
+          });
         }
 
         if (state.aiInspectionsOfHuman.length > 36) {
@@ -11688,9 +11713,9 @@
           if (lastNewAi) {
             G.newsFeed.unshift({
               day: G.day,
-              cat: 'WORLD',
+              cat: 'AI',
               tag: '🤖 NEW AI CHALLENGERS JOINED',
-              text: `${newJoinCount} new AI player${newJoinCount === 1 ? '' : 's'} (including ${lastNewAi.name}) joined InveSim! Active AI Competitors: ${G.aiPlayers.length.toLocaleString()} (No Limit).`
+              text: `${newJoinCount} new AI player${newJoinCount === 1 ? '' : 's'} (including ${lastNewAi.name}, ${lastNewAi.shortTag}) joined InveSim! Active AI Competitors: ${G.aiPlayers.length.toLocaleString()} (No Limit).`
             });
           }
         }
@@ -13338,7 +13363,7 @@
           refreshMonthlyCasinoAiPlayers(true);
         }
 
-        if (G.newsFeed.length > 55) G.newsFeed.length = 55;
+        if (G.newsFeed.length > 180) G.newsFeed.length = 180;
         renderAll();
       }
 
@@ -15807,16 +15832,74 @@
           `;
         }).join('');
 
-        const filteredNews = G.newsFeed.filter(n => activeNewsFilter === 'ALL' || n.cat === activeNewsFilter);
-        document.getElementById('liveFeedContainer').innerHTML = (filteredNews.length ? filteredNews : G.newsFeed).slice(0, 20).map(n => `
-          <div class="py-2.5 flex items-start justify-between gap-3">
-            <div>
-              <span class="text-[10px] font-bold uppercase ${n.cat === 'RISK' || n.cat === 'IPO' ? 'text-[#FF5000]' : 'text-[#00C805]'} mr-1.5">${n.tag}</span>
-              <span class="text-slate-200">${n.text}</span>
-            </div>
-            <span class="text-[10px] font-mono text-[#8A919E] shrink-0">Day ${n.day}</span>
-          </div>
-        `).join('');
+        // Normalize any legacy AI challenger headlines so their category is strictly 'AI'
+        for (const item of (G.newsFeed || [])) {
+          if (item && item.tag && (item.tag.includes('🤖') || item.tag.includes('AI RIVAL') || item.tag.includes('AI CHALLENGER'))) {
+            item.cat = 'AI';
+          }
+        }
+        let filteredNews = (G.newsFeed || []).filter(n => activeNewsFilter === 'ALL' || n.cat === activeNewsFilter);
+
+        // If 'AI' filter is selected and needs more items (e.g. from an existing save before AI news was tagged), pull live AI Rival logs & inspections!
+        if (activeNewsFilter === 'AI' && filteredNews.length < 10) {
+          const extraAiNews = [];
+          for (const insp of (G.aiInspectionsOfHuman || []).slice(0, 6)) {
+            extraAiNews.push({
+              day: insp.day || G.day,
+              cat: 'AI',
+              tag: `🤖 AI RIVAL #${insp.aiRank || 1} (${insp.aiName})`,
+              text: `${insp.aiName} (${insp.aiFund} • NW ${fmtMoney(insp.aiNetWorth || 10000)}): ${insp.findingTitle} — ${insp.actionTaken}`
+            });
+          }
+          for (const ai of (G.aiPlayers || []).slice(0, 12)) {
+            if (ai.logs && ai.logs.length > 0) {
+              const rawLog = ai.logs[0];
+              const dayMatch = rawLog.match(/^Day (\d+):\s*(.*)$/);
+              const dNum = dayMatch ? Number(dayMatch[1]) : G.day;
+              const lTxt = dayMatch ? dayMatch[2] : rawLog;
+              extraAiNews.push({
+                day: dNum,
+                cat: 'AI',
+                tag: `🤖 ${ai.name.toUpperCase()} (${ai.shortTag})`,
+                text: `${ai.name} (NW ${fmtMoney(ai.netWorth)}): ${lTxt}`
+              });
+            }
+          }
+          const seenTexts = new Set(filteredNews.map(x => x.text));
+          for (const ex of extraAiNews) {
+            if (!seenTexts.has(ex.text)) {
+              filteredNews.push(ex);
+              seenTexts.add(ex.text);
+            }
+          }
+          filteredNews.sort((a, b) => (b.day || 1) - (a.day || 1));
+        } else if (activeNewsFilter === 'IPO' && filteredNews.length === 0 && (G.ipoLogs || []).length > 0) {
+          filteredNews = G.ipoLogs.slice(0, 15).map(l => {
+            const m = l.match(/^Day (\d+):\s*(.*)$/);
+            return { day: m ? Number(m[1]) : G.day, cat: 'IPO', tag: '🚨 BANKRUPTCY & IPO WIRE', text: m ? m[2] : l };
+          });
+        }
+
+        const catLabels = {
+          COMPANY: '🏢 Companies News',
+          SECTOR: '🏭 Sectors News',
+          COUNTRY: '🇺🇸 Country News',
+          WORLD: '🌍 World News',
+          RISK: '⚠️ Risk & Crashes',
+          IPO: '🚨 Bankruptcies & IPOs',
+          AI: '🤖 AI Rivals News'
+        };
+        document.getElementById('liveFeedContainer').innerHTML = filteredNews.length
+          ? filteredNews.slice(0, 25).map(n => `
+              <div class="py-2.5 flex items-start justify-between gap-3">
+                <div>
+                  <span class="text-[10px] font-bold uppercase ${n.cat === 'RISK' || n.cat === 'IPO' ? 'text-[#FF5000]' : (n.cat === 'AI' ? 'text-sky-400' : 'text-[#00C805]')} mr-1.5">${n.tag}</span>
+                  <span class="text-slate-200">${n.text}</span>
+                </div>
+                <span class="text-[10px] font-mono text-[#8A919E] shrink-0">Day ${n.day}</span>
+              </div>
+            `).join('')
+          : `<div class="py-6 text-center text-xs text-[#8A919E]">No ${catLabels[activeNewsFilter] || activeNewsFilter} headlines recorded yet today — advance time (+1D) to see new ${catLabels[activeNewsFilter] || ''} updates!</div>`;
 
         if (currentTab === 'home') {
           drawHomePortfolioChart();
@@ -26798,6 +26881,7 @@
           ereitMarketTradesLog: state.ereitMarketTradesLog,
           vcStartups: state.vcStartups,
           forexPairs: state.forexPairs,
+          newsFeed: (state.newsFeed || []).slice(0, 120),
           forexNewsFeed: state.forexNewsFeed,
           reIncidentLogs: state.reIncidentLogs,
           aiInspectionsOfHuman: state.aiInspectionsOfHuman,
@@ -26887,6 +26971,7 @@
         }
 
         if (snap.forexPairs && snap.forexPairs.length >= 8) base.forexPairs = snap.forexPairs;
+        if (Array.isArray(snap.newsFeed) && snap.newsFeed.length > 0) base.newsFeed = snap.newsFeed;
         if (snap.forexNewsFeed) base.forexNewsFeed = snap.forexNewsFeed;
         base.etfClosuresReplacedCount = snap.etfClosuresReplacedCount || 0;
         if (snap.etfIpoLogs) base.etfIpoLogs = snap.etfIpoLogs;
