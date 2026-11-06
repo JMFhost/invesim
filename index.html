@@ -435,9 +435,6 @@
 
       <!-- Second Row: Wrapped Navigation Bar (Zero Horizontal Scroll Needed!) -->
       <nav class="flex flex-wrap items-center gap-x-1.5 gap-y-1 sm:gap-2.5 text-[11px] sm:text-xs font-semibold border-t border-[#1E2227] pt-1.5 pb-0.5" role="tablist">
-        <button type="button" data-tab="coaching" class="nav-tab text-[#8A919E] hover:text-white py-1.5 px-2 transition whitespace-nowrap">
-          🎓 Coaching <span id="navCoachingBadge" class="inline text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-[#00C805] text-black font-extrabold">ON</span>
-        </button>
         <button type="button" data-tab="home" class="nav-tab rh-nav-active py-1.5 px-2 transition whitespace-nowrap">
           Investing
         </button>
@@ -490,79 +487,6 @@
 
   <!-- ==================== MAIN CONTENT AREA ==================== -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-4 pt-4 pb-24 sm:py-6">
-
-    <!-- =================================================================== -->
-    <!-- LIVE CONTEXT-SENSITIVE COACHING & INTERACTIVE TUTORIAL BANNER       -->
-    <!-- =================================================================== -->
-    <div id="liveCoachBanner" class="mb-5 rh-card p-4 border-2 border-[#00C805]/50 bg-[#0D1512] flex flex-col gap-3"></div>
-
-    <!-- =================================================================== -->
-    <!-- TAB 0: COACHING ACADEMY, INTERACTIVE TUTORIALS & RESEARCH GUIDES    -->
-    <!-- =================================================================== -->
-    <section id="tab-coaching" class="tab-section hidden flex flex-col gap-5">
-      <div class="rh-card p-5 flex flex-col gap-4 border-2 border-[#00C805]/45 bg-[#0D1412]">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <div class="flex flex-wrap items-center gap-2">
-              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#00C805] text-black">🎓 INVESIM COACHING ACADEMY &amp; LIVE RESEARCH MENTOR</span>
-              <span id="coachModeStatusPill" class="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-[#1C2024] text-emerald-300 border border-emerald-500/30">Coaching: ON (Tutorials + Live Analysis)</span>
-            </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-white mt-1.5">🎓 Coaching, Interactive Tutorials &amp; How to Research Every Investment</h1>
-            <p class="text-xs text-[#8A919E] mt-1 leading-relaxed">
-              Welcome to the <strong class="text-white">InveSim Coaching Center</strong>. Here you can run the <strong class="text-white">12-Step Interactive Tutorial</strong>, choose to <strong class="text-emerald-300">Skip Tutorials while keeping Ongoing Live Coaching ON</strong>, or turn Coaching OFF anytime. When Coaching is ON, your coach follows you across every tab and teaches you <strong class="text-white">what to look for and how to research and analyze</strong> each <strong class="text-white">Stock, Option, Forex Pair, Commodity, Small Business, Real Estate Property, Private eREIT, Venture Capital Startup, ETF, Robot Trader, Manager, Save/Load slot, and 2D Casino game</strong>!
-            </p>
-          </div>
-          <div class="flex flex-wrap items-center gap-2 text-xs">
-            <button type="button" onclick="chooseCoachingMode('FULL_TUTORIAL')" class="px-3.5 py-2 rounded-xl bg-[#00C805] hover:bg-[#00E006] text-black font-extrabold transition">
-              🎓 Coaching + Tutorials ON
-            </button>
-            <button type="button" onclick="chooseCoachingMode('COACH_ONLY')" class="px-3.5 py-2 rounded-xl bg-sky-400 hover:bg-sky-300 text-black font-extrabold transition">
-              🧭 Skip Tutorials (Keep Coaching ON Only)
-            </button>
-            <button type="button" onclick="chooseCoachingMode('OFF')" class="px-3.5 py-2 rounded-xl bg-[#1C2024] hover:bg-[#262B31] text-white border border-[#2E343B] font-bold transition">
-              🔕 Turn Coaching OFF
-            </button>
-            <button type="button" onclick="openCoachingPromptModal()" class="px-3 py-2 rounded-xl bg-[#1C2024] hover:bg-[#262B31] text-amber-300 border border-amber-400/40 font-bold transition">
-              ⚙️ Coaching Popup
-            </button>
-          </div>
-        </div>
-
-        <!-- Interactive 12-Step Tutorial Deck -->
-        <div id="coachingTutorialDeck" class="p-4 rounded-2xl bg-[#090D0C] border border-[#1E2B24] flex flex-col gap-3 text-xs"></div>
-      </div>
-
-      <!-- Live Selected Asset Research & Fundamental Analyzer -->
-      <div class="rh-card p-5 flex flex-col gap-4">
-        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#24282D] pb-3">
-          <div>
-            <h2 class="text-base sm:text-lg font-extrabold text-white">🔬 Live Interactive Investment Research &amp; Deal Analyzer</h2>
-            <p class="text-xs text-[#8A919E]">Instant fundamental &amp; risk coaching on the exact Stock, ETF, Small Business, Property, eREIT, VC Startup, Option, Forex Pair, Commodity &amp; Robot Trader currently selected in your game.</p>
-          </div>
-          <span class="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-[#00C805]/15 text-[#00C805]">Real-Time Deal Evaluation</span>
-        </div>
-        <div id="coachingLiveAssetAnalyzerGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs"></div>
-      </div>
-
-      <!-- Complete 12-Module Master Playbook (Filterable by Topic) -->
-      <div class="rh-card p-5 flex flex-col gap-4">
-        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#24282D] pb-3">
-          <div>
-            <h2 class="text-base sm:text-lg font-extrabold text-white">📚 Complete InveSim Playbook: How to Play, Research &amp; Analyze Every Market</h2>
-            <p class="text-xs text-[#8A919E]">Filter by category below to study what metrics matter, how to do due diligence, and what pitfalls to avoid.</p>
-          </div>
-          <div class="flex flex-wrap items-center gap-1.5 text-xs" id="coachingTopicFilterBar">
-            <button type="button" onclick="setCoachingTopicFilter('ALL')" data-coach-topic="ALL" class="coach-topic-btn px-2.5 py-1 rounded-lg font-extrabold bg-[#00C805] text-black">All 12 Guides</button>
-            <button type="button" onclick="setCoachingTopicFilter('BASICS')" data-coach-topic="BASICS" class="coach-topic-btn px-2.5 py-1 rounded-lg font-bold bg-[#1C2024] text-white">🎮 Basics &amp; Save/Load</button>
-            <button type="button" onclick="setCoachingTopicFilter('STOCKS')" data-coach-topic="STOCKS" class="coach-topic-btn px-2.5 py-1 rounded-lg font-bold bg-[#1C2024] text-white">📈 Stocks &amp; ETFs</button>
-            <button type="button" onclick="setCoachingTopicFilter('DERIVATIVES')" data-coach-topic="DERIVATIVES" class="coach-topic-btn px-2.5 py-1 rounded-lg font-bold bg-[#1C2024] text-white">⚡ Options, FX &amp; Commodities</button>
-            <button type="button" onclick="setCoachingTopicFilter('REALASSETS')" data-coach-topic="REALASSETS" class="coach-topic-btn px-2.5 py-1 rounded-lg font-bold bg-[#1C2024] text-white">🏪 Small Biz, Real Estate, eREITs &amp; VC</button>
-            <button type="button" onclick="setCoachingTopicFilter('BOTS')" data-coach-topic="BOTS" class="coach-topic-btn px-2.5 py-1 rounded-lg font-bold bg-[#1C2024] text-white">🤖 Robot Traders, Managers &amp; Casino</button>
-          </div>
-        </div>
-        <div id="coachingPlaybookCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs"></div>
-      </div>
-    </section>
 
     <!-- =================================================================== -->
     <!-- TAB 1: INVESTING HOME (PORTFOLIO + RISK TELEMETRY + NEWS WIRE)      -->
@@ -2052,7 +1976,7 @@
               <span class="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-amber-500/20 text-amber-300">Direct Cash Bankroll</span>
             </div>
             <p class="text-xs text-[#8A919E] mt-1">
-              Wager your liquid cash on <strong class="text-white">2D Blackjack</strong>, <strong class="text-white">2D European Roulette</strong>, <strong class="text-white">2D Texas Hold&rsquo;em Poker</strong>, <strong class="text-white">4-Row Royal Vegas Slots</strong>, <strong class="text-amber-300">🎫 5×4 Scratch-Off Tickets</strong>, <strong class="text-emerald-300">🐎 2D Horse Racing</strong>, or <strong class="text-orange-300">🏎️ 2D NASCAR Stock Car Racing</strong>
+              Wager your liquid cash on <strong class="text-white">2D Blackjack (with Split)</strong>, <strong class="text-amber-300">🎴 2D Baccarat</strong>, <strong class="text-cyan-300">🚀 2D Rocket (97% RTP • 1,000x Max)</strong>, <strong class="text-white">2D European Roulette</strong>, <strong class="text-white">2D Texas Hold&rsquo;em Poker</strong>, <strong class="text-white">4-Row Royal Vegas Slots</strong>, <strong class="text-amber-300">🎫 5×4 Scratch-Off Tickets</strong>, <strong class="text-emerald-300">🐎 2D Horse Racing</strong>, or <strong class="text-orange-300">🏎️ 2D NASCAR Stock Car Racing</strong>
             </p>
           </div>
           <div class="flex flex-wrap items-center gap-4 font-mono text-right">
@@ -2070,10 +1994,16 @@
         <!-- 💼 CASINO EMPLOYMENT & CAREER DESK -->
         <div id="casinoJobDeskCard" class="p-3.5 rounded-2xl bg-[#0B0E13] border border-amber-500/40 flex flex-col gap-2 text-xs"></div>
 
-        <!-- 7 Casino, 2D Horse Racing, 2D NASCAR & Scratch-Offs Selector Buttons -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2 text-xs pt-1">
+        <!-- 9 Casino Games: Blackjack, Baccarat, 2D Rocket, Roulette, Texas Hold'em, Slots, Horse Racing, NASCAR & Scratch-Offs -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-9 gap-2 text-xs pt-1">
           <button type="button" onclick="selectCasinoGame('BLACKJACK')" data-casino-game="BLACKJACK" class="casino-game-btn py-2.5 px-2 rounded-xl font-extrabold bg-[#00C805] text-black transition flex items-center justify-center gap-1.5">
             <span>🃏</span> <span>2D Blackjack</span>
+          </button>
+          <button type="button" onclick="selectCasinoGame('BACCARAT')" data-casino-game="BACCARAT" class="casino-game-btn py-2.5 px-2 rounded-xl font-bold bg-[#1C2024] text-amber-300 hover:bg-[#262B31] transition flex items-center justify-center gap-1.5">
+            <span>🎴</span> <span>2D Baccarat</span>
+          </button>
+          <button type="button" onclick="selectCasinoGame('ROCKET')" data-casino-game="ROCKET" class="casino-game-btn py-2.5 px-2 rounded-xl font-bold bg-[#1C2024] text-cyan-300 hover:bg-[#262B31] transition flex items-center justify-center gap-1.5">
+            <span>🚀</span> <span>2D Rocket</span>
           </button>
           <button type="button" onclick="selectCasinoGame('ROULETTE')" data-casino-game="ROULETTE" class="casino-game-btn py-2.5 px-2 rounded-xl font-bold bg-[#1C2024] text-white hover:bg-[#262B31] transition flex items-center justify-center gap-1.5">
             <span>🎡</span> <span>2D Roulette</span>
@@ -2090,7 +2020,7 @@
           <button type="button" onclick="selectCasinoGame('NASCAR')" data-casino-game="NASCAR" class="casino-game-btn py-2.5 px-2 rounded-xl font-bold bg-[#1C2024] text-orange-300 hover:bg-[#262B31] transition flex items-center justify-center gap-1.5">
             <span>🏎️</span> <span>2D NASCAR</span>
           </button>
-          <button type="button" onclick="selectCasinoGame('SCRATCH')" data-casino-game="SCRATCH" class="col-span-2 sm:col-span-3 lg:col-span-1 casino-game-btn py-2.5 px-2 rounded-xl font-bold bg-[#1C2024] text-amber-300 hover:bg-[#262B31] transition flex items-center justify-center gap-1.5">
+          <button type="button" onclick="selectCasinoGame('SCRATCH')" data-casino-game="SCRATCH" class="col-span-2 sm:col-span-1 casino-game-btn py-2.5 px-2 rounded-xl font-bold bg-[#1C2024] text-amber-300 hover:bg-[#262B31] transition flex items-center justify-center gap-1.5">
             <span>🎫</span> <span>Scratch-Offs (5×4)</span>
           </button>
         </div>
@@ -2906,53 +2836,7 @@
     </div>
   </div>
 
-<!-- ==================== MODAL: NEW PLAYER COACHING PROMPT ==================== -->
-  <div id="modalCoachingPrompt" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="rh-card max-w-xl w-full p-6 shadow-2xl flex flex-col gap-4 border-2 border-[#00C805]/60">
-      <div class="flex items-start justify-between border-b border-[#24282D] pb-3 gap-2">
-        <div>
-          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#00C805] text-black">🎓 WELCOME TO INVESIM</span>
-          <h2 class="text-xl font-extrabold text-white mt-1">Would You Like Investment Coaching Turned ON or OFF?</h2>
-          <p class="text-xs text-[#8A919E] mt-1 leading-relaxed">
-            InveSim's built-in <strong class="text-white">Coaching Mentor</strong> teaches you how to play the game, how to save/load/delete saves, how to play the 2D Casino, and <strong class="text-white">what to look for when researching &amp; analyzing</strong> Stocks, Options, Forex, Commodities, Small Businesses (including 1% Fee Financial Reports), Real Estate, eREITs, Venture Capital, ETFs, and 5,200 Robot Traders.
-          </p>
-        </div>
-        <button type="button" onclick="closeCoachingPromptModal()" class="text-[#8A919E] hover:text-white text-lg font-bold px-2">✕</button>
-      </div>
 
-      <div class="flex flex-col gap-2.5 text-xs">
-        <button type="button" id="btnChooseCoachFull" onclick="chooseCoachingMode('FULL_TUTORIAL')" class="w-full p-3.5 rounded-xl bg-[#00C805] hover:bg-[#00E006] text-black text-left flex flex-col gap-1 transition shadow">
-          <div class="font-extrabold text-sm flex items-center justify-between">
-            <span>🎓 Turn ON Coaching + Interactive Tutorials (Recommended)</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-black/15">Step-by-Step + Live Coach</span>
-          </div>
-          <div class="text-[11px] font-medium opacity-90">
-            Starts with a guided 12-step tutorial on every feature in the game, then continues teaching you how to research and analyze every investment in real time.
-          </div>
-        </button>
-
-        <button type="button" id="btnChooseCoachOnly" onclick="chooseCoachingMode('COACH_ONLY')" class="w-full p-3.5 rounded-xl bg-sky-400 hover:bg-sky-300 text-black text-left flex flex-col gap-1 transition shadow">
-          <div class="font-extrabold text-sm flex items-center justify-between">
-            <span>🧭 Skip Tutorials — Keep Live Coaching ON Only</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-black/15">No Tutorial • Live Analysis Only</span>
-          </div>
-          <div class="text-[11px] font-medium opacity-90">
-            Skips the introductory tutorial walkthrough and keeps the Live Research Coach active across all tabs to help you analyze Stocks, Options, Forex, Commodities, Small Businesses, Real Estate, eREITs &amp; VC.
-          </div>
-        </button>
-
-        <button type="button" id="btnChooseCoachOff" onclick="chooseCoachingMode('OFF')" class="w-full p-3.5 rounded-xl bg-[#1C2024] hover:bg-[#262B31] text-white border border-[#2E343B] text-left flex flex-col gap-1 transition">
-          <div class="font-extrabold text-sm flex items-center justify-between">
-            <span>🔕 Turn OFF Coaching</span>
-            <span class="text-[11px] font-mono text-[#8A919E]">Self-Directed Mode</span>
-          </div>
-          <div class="text-[11px] text-[#8A919E]">
-            Hides the live coaching banner. You can turn Coaching or Tutorials back on anytime from the <strong class="text-white">🎓 Coaching</strong> tab to the left of Investing.
-          </div>
-        </button>
-      </div>
-    </div>
-  </div>
 
 <!-- ==================== MODAL: NEW GAME GENERATOR ==================== -->
   <div id="modalNewGame" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -11462,11 +11346,11 @@
             }
           }
 
-          // Accredited AI Venture Capital Investing ($1M+ Net Worth)
-          if (ai.netWorth >= 1000000 && ai.cash >= 25000 && state.vcStartups && ai.vcHoldings.length < 4 && rng.next() < 0.20) {
-            const vc = state.vcStartups.find(v => (v.pmfScore || 80) >= 75 && !ai.vcHoldings.some(h => h.vcId === v.id)) || state.vcStartups[rng.int(0, state.vcStartups.length - 1)];
+          // Smart AI Venture Capital Investing (Seed $10K+ up to Pre-IPO)
+          if (ai.cash >= 15000 && state.vcStartups && ai.vcHoldings.length < 4 && rng.next() < 0.22) {
+            const vc = state.vcStartups.find(v => (v.pmfScore || 80) >= 75 && ai.cash >= (v.minCheck || 10000) * 1.2 && !ai.vcHoldings.some(h => h.vcId === v.id)) || state.vcStartups[rng.int(0, state.vcStartups.length - 1)];
             if (vc) {
-              const vcAmt = Math.min(Math.round(ai.cash * 0.15), Math.max(vc.minCheck || 25000, 50000));
+              const vcAmt = Math.max(vc.minCheck || 10000, Math.min(Math.round(ai.cash * 0.18), 75000));
               if (ai.cash >= vcAmt && vcAmt >= (vc.minCheck || 10000)) {
                 ai.cash = Number((ai.cash - vcAmt).toFixed(2));
                 ai.vcHoldings.push({
@@ -11484,10 +11368,10 @@
           }
 
           // -------------------------------------------------------------------
-          // (E) AI CASINO GAMBLING ACROSS ALL 7 GAMES (BLACKJACK, ROULETTE, HOLD'EM, 4-ROW SLOTS, 5x4 SCRATCH-OFFS, 2D HORSE RACING & 2D NASCAR)
+          // (E) AI CASINO GAMBLING ACROSS ALL CASINO GAMES (2D BLACKJACK WITH SPLIT, 2D BACCARAT, 2D ROCKET 1000x, 2D ROULETTE, TEXAS HOLD'EM, 4-ROW SLOTS, SCRATCH-OFFS, 2D HORSE RACING, 2D NASCAR & SPORTSBOOK)
           // -------------------------------------------------------------------
-          if (ai.cash >= 20 && rng.next() < 0.18) {
-            const games = ['2D Blackjack', '2D Roulette', 'Texas Holdem', '4-Row Slots', 'Scratch-Off Lottery', '2D Horse Racing', '2D NASCAR Racing'];
+          if (ai.cash >= 20 && rng.next() < 0.20) {
+            const games = ['2D Blackjack', '2D Baccarat', '2D Rocket', '2D Roulette', 'Texas Holdem', '4-Row Slots', 'Scratch-Off Lottery', '2D Horse Racing', '2D NASCAR Racing', '2D Sportsbook'];
             const gPick = games[rng.int(0, games.length - 1)];
             if (gPick === 'Scratch-Off Lottery') {
               const availPrices = [5, 10, 20, 50, 100].filter(p => ai.cash >= p);
@@ -11554,12 +11438,45 @@
                 ai.casinoNetProfit = Number(((ai.casinoNetProfit || 0) + netProfit).toFixed(2));
                 ai.logs.unshift(`Day ${state.day}: 🏎️ Bet ${fmtMoney(wager)} on 2D NASCAR Racing (4.6x) → ${won ? 'WON +' + fmtMoney(netProfit) + '!' : 'Lost -' + fmtMoney(wager) + '.'}`);
               }
+            } else if (gPick === '2D Baccarat') {
+              const wager = Math.max(10, Math.min(Math.round(ai.cash * 0.22), 3000));
+              if (ai.cash >= wager) {
+                ai.cash = Number((ai.cash - wager).toFixed(2));
+                const side = rng.pick(['Player (1:1)', 'Banker (0.95:1)', 'Tie (8:1)']);
+                const r = rng.next();
+                let payout = 0;
+                if (side.startsWith('Tie')) {
+                  payout = r < 0.095 ? wager * 9 : 0;
+                } else if (side.startsWith('Banker')) {
+                  payout = r < 0.458 ? Number((wager * 1.95).toFixed(2)) : (r < 0.553 ? wager : 0);
+                } else {
+                  payout = r < 0.446 ? wager * 2 : (r < 0.541 ? wager : 0);
+                }
+                const netDelta = Number((payout - wager).toFixed(2));
+                ai.cash = Number((ai.cash + payout).toFixed(2));
+                ai.casinoNetProfit = Number(((ai.casinoNetProfit || 0) + netDelta).toFixed(2));
+                ai.logs.unshift(`Day ${state.day}: 🎴 Played 2D Baccarat on ${side} (${fmtMoney(wager)}) → ${netDelta > 0 ? 'Won +' + fmtMoney(netDelta) : (netDelta === 0 ? 'Tie Push ($0)' : 'Lost ' + fmtMoney(netDelta))}.`);
+              }
+            } else if (gPick === '2D Rocket') {
+              const wager = Math.max(10, Math.min(Math.round(ai.cash * 0.20), 2500));
+              if (ai.cash >= wager) {
+                ai.cash = Number((ai.cash - wager).toFixed(2));
+                const u = rng.next();
+                const crashM = u < 0.03 ? 1.00 : Math.min(1000.00, Math.max(1.01, Number((0.97 / Math.max(0.0001, 1 - ((u - 0.03) / 0.97))).toFixed(2))));
+                const targetM = Number((rng.next() < 0.15 ? rng.range(5.0, 25.0) : rng.range(1.25, 3.80)).toFixed(2));
+                const won = crashM >= targetM && crashM > 1.00;
+                const payout = won ? Number((wager * targetM).toFixed(2)) : 0;
+                const netDelta = Number((payout - wager).toFixed(2));
+                ai.cash = Number((ai.cash + payout).toFixed(2));
+                ai.casinoNetProfit = Number(((ai.casinoNetProfit || 0) + netDelta).toFixed(2));
+                ai.logs.unshift(`Day ${state.day}: 🚀 Bet ${fmtMoney(wager)} on 2D Rocket (Target ${targetM.toFixed(2)}x, Crashed @ ${crashM.toFixed(2)}x) → ${won ? 'Cashed Out +' + fmtMoney(netDelta) + '!' : 'Exploded (-' + fmtMoney(wager) + ')'}.`);
+              }
             } else {
-              // 2D Blackjack, 2D Roulette, or Texas Hold'em Poker
+              // 2D Blackjack (with Split/Double), 2D Roulette, Texas Hold'em Poker, or 2D Sportsbook
               const wager = Math.max(10, Math.min(Math.round(ai.cash * 0.25), 3000));
               if (ai.cash >= wager) {
                 ai.cash = Number((ai.cash - wager).toFixed(2));
-                const payout = rng.next() < 0.47 ? Math.round(wager * rng.range(2.0, 2.8)) : 0;
+                const payout = rng.next() < 0.48 ? Math.round(wager * rng.range(2.0, 2.8)) : 0;
                 const netDelta = payout - wager;
                 ai.cash = Number((ai.cash + payout).toFixed(2));
                 ai.casinoNetProfit = Number(((ai.casinoNetProfit || 0) + netDelta).toFixed(2));
@@ -18629,15 +18546,66 @@
           duration: 620
         },
         history: ['🎰 Welcome to InveSim 2D Grand Casino! Choose Blackjack, Roulette, Texas Hold\'em, 4-Row Slots, or $100 Scratch-Off Tickets.'],
-        // Blackjack State
+        // Blackjack State (Supports Split Hands up to 4 hands, Double After Split, Insurance & Late Surrender!)
         bj: {
           inProgress: false,
           deck: [],
           trueCount: 0,
           playerHand: [],
+          playerHands: [],
+          activeHandIdx: 0,
           dealerHand: [],
           currentBet: 100,
+          insuranceBet: 0,
+          insuranceTaken: false,
           outcome: null,
+          seatNotice: '',
+          aiPlayers: []
+        },
+        // 2D Punto Banco Baccarat State (You + 3 Casino AI Players • Player 1:1, Banker 0.95:1, Tie 8:1, Pairs 11:1)
+        baccarat: {
+          inProgress: false,
+          deck: [],
+          betSelection: 'PLAYER', // 'PLAYER' | 'BANKER' | 'TIE'
+          playerPairBet: false,
+          bankerPairBet: false,
+          playerHand: [],
+          bankerHand: [],
+          playerTotal: 0,
+          bankerTotal: 0,
+          isNatural: false,
+          winner: null, // 'PLAYER' | 'BANKER' | 'TIE'
+          playerPairHit: false,
+          bankerPairHit: false,
+          lastNetWin: 0,
+          outcomeBanner: 'Place your wager on Player (1:1), Banker (0.95:1), or Tie (8:1) + optional Pairs (11:1)!',
+          beadRoad: ['B', 'P', 'B', 'B', 'P', 'T', 'P', 'B'],
+          roundsPlayed: 0,
+          roundsWon: 0,
+          seatNotice: '',
+          aiPlayers: []
+        },
+        // 2D Rocket Crash Game State (97% RTP • 1,000x Max Multiplier • Exit Before Explosion!)
+        rocket: {
+          inFlight: false,
+          crashed: false,
+          cashedOut: false,
+          currentMult: 1.00,
+          crashMult: 2.45,
+          cashOutMult: null,
+          autoCashOutMult: 0, // 0 = Manual Only, or >= 1.10x auto exit
+          currentBet: 100,
+          lastPayout: 0,
+          lastProfit: 0,
+          flightStartMs: 0,
+          rafId: null,
+          trailPoints: [],
+          stars: [],
+          recentCrashes: [1.84, 3.42, 1.12, 14.60, 2.05, 1.00, 5.88, 42.10],
+          flightsPlayed: 0,
+          flightsWon: 0,
+          biggestMultWon: 0,
+          seatNotice: '',
           aiPlayers: []
         },
         // Roulette State
@@ -20530,11 +20498,14 @@
         });
       }
 
-      function buildFreshDeck() {
+      function buildFreshDeck(numDecks = 6) {
         const deck = [];
-        for (const s of CASINO_SUITS) {
-          for (let i = 0; i < CASINO_RANKS.length; i++) {
-            deck.push({ rank: CASINO_RANKS[i], suit: s, val: i + 2 });
+        const decksCount = Math.max(1, Number(numDecks) || 6);
+        for (let d = 0; d < decksCount; d++) {
+          for (const s of CASINO_SUITS) {
+            for (let i = 0; i < CASINO_RANKS.length; i++) {
+              deck.push({ rank: CASINO_RANKS[i], suit: s, val: i + 2 });
+            }
           }
         }
         for (let i = deck.length - 1; i > 0; i--) {
@@ -20544,67 +20515,126 @@
         return deck;
       }
 
-      function generateThreeAiGamblers(gameMode = 'POKER') {
-        const firsts = [
-          'Viktor', 'Sora', 'Dante', 'Elena', 'Marcus', 'Freya', 'Tariq', 'Chloe', 'Gideon', 'Nadia',
-          'Lorenzo', 'Kira', 'Aria', 'Julian', 'Kenji', 'Lucas', 'Maya', 'Noah', 'Zara', 'Devon',
-          'Caleb', 'Linnea', 'Owen', 'Leila', 'Sebastian', 'Mateo', 'Eva', 'Felix', 'Claire', 'Adrian',
-          'Naomi', 'Xavier', 'Iris', 'Miles', 'Roman', 'Camila', 'Leo', 'Tessa', 'Hugo', 'Vera'
-        ];
-        const lasts = [
-          'Thorne', 'Sterling', 'Montoya', 'Volkov', 'Vance', 'Takahashi', 'Mercer', 'LeBlanc', 'Kovacs', 'Reyes',
-          'Sinclair', 'Frost', 'Kapoor', 'Chen', 'Patel', 'Brooks', 'Rostova', 'Morales', 'Sato', 'Lindqvist',
-          'Moreau', 'Keller', 'Voss', 'Blackwood', 'Okafor', 'Harrington', 'Kim', 'Bauer', 'Shah', 'Gallagher',
-          'Castillo', 'Novak', 'Adebayo', 'Fischer', 'Mehta', 'Laurent', 'Bergstrom', 'Silva', 'Delgado', 'Cross'
-        ];
-        const avatars = ['🕶️', '🎩', '🦈', '👑', '⚡', '🎯', '💎', '🦊', '🦁', '🎲'];
-        const personas = [
-          { agg: 0.72, bluffRate: 0.18, foldThresh: 0.34 },
-          { agg: 0.84, bluffRate: 0.32, foldThresh: 0.22 },
-          { agg: 0.58, bluffRate: 0.14, foldThresh: 0.28 }
-        ];
-        const list = [];
-        const humanCash = Math.max(100, Number(G ? G.human.cash : 1000));
-        for (let i = 0; i < 3; i++) {
-          let nm = '';
-          let guard = 0;
-          do {
-            const f = firsts[Math.floor(Math.random() * firsts.length)];
-            const l = lasts[Math.floor(Math.random() * lasts.length)];
-            nm = `${f} ${l}`;
-            guard++;
-          } while (recentCasinoAiNames.includes(nm) && guard < 80);
-          recentCasinoAiNames.push(nm);
-          if (recentCasinoAiNames.length > 36) recentCasinoAiNames.shift();
+      const CASINO_PATRON_FIRST_NAMES = [
+        'Viktor', 'Sora', 'Dante', 'Elena', 'Marcus', 'Freya', 'Tariq', 'Chloe', 'Gideon', 'Nadia',
+        'Lorenzo', 'Kira', 'Aria', 'Julian', 'Kenji', 'Lucas', 'Maya', 'Noah', 'Zara', 'Devon',
+        'Caleb', 'Linnea', 'Owen', 'Leila', 'Sebastian', 'Mateo', 'Eva', 'Felix', 'Claire', 'Adrian',
+        'Naomi', 'Xavier', 'Iris', 'Miles', 'Roman', 'Camila', 'Leo', 'Tessa', 'Hugo', 'Vera',
+        'Enzo', 'Sienna', 'Rafael', 'Astrid', 'Damon', 'Bianca', 'Niko', 'Valeria', 'Cassian', 'Yuna',
+        'Malik', 'Celeste', 'Ronan', 'elodie', 'Zayn', 'Daphne', 'bastian', 'keira', 'Stellan', 'Amara',
+        'Lucian', 'Maeve', 'Thiago', 'Serena', 'Orion', 'Noemi', 'Gael', 'Lyra', 'Kieran', 'Sabrina'
+      ].map(s => s.charAt(0).toUpperCase() + s.slice(1));
 
-          const mult = 0.80 + Math.random() * 0.40;
-          const aiCash = Math.max(80, Math.round(humanCash * mult));
-          const defBet = Math.max(5, Math.min(aiCash, Math.round(humanCash * 0.05)));
-          const p = personas[i % personas.length];
+      const CASINO_PATRON_LAST_NAMES = [
+        'Thorne', 'Sterling', 'Montoya', 'Volkov', 'Vance', 'Takahashi', 'Mercer', 'LeBlanc', 'Kovacs', 'Reyes',
+        'Sinclair', 'Frost', 'Kapoor', 'Chen', 'Patel', 'Brooks', 'Rostova', 'Morales', 'Sato', 'Lindqvist',
+        'Moreau', 'Keller', 'Voss', 'Blackwood', 'Okafor', 'Harrington', 'Kim', 'Bauer', 'Shah', 'Gallagher',
+        'Castillo', 'Novak', 'Adebayo', 'Fischer', 'Mehta', 'Laurent', 'Bergstrom', 'Silva', 'Delgado', 'Cross',
+        'Alvarez', 'Bellamy', 'romano', 'Nakamura', 'Santoro', 'Lennox', 'Fontaine', 'Mercier', 'Kowalski', 'Vargas',
+        'hendricks', 'Solis', 'Callahan', 'Drummond', 'Ishikawa', 'Mendoza', 'faulkner', 'Sorensen', 'Navarro', 'Winslow'
+      ].map(s => s.charAt(0).toUpperCase() + s.slice(1));
 
-          list.push({
-            seat: i + 1,
-            name: nm,
-            agg: p.agg,
-            bluffRate: p.bluffRate,
-            foldThresh: p.foldThresh,
-            avatar: avatars[(i + Math.floor(Math.random() * avatars.length)) % avatars.length],
-            chips: aiCash,
-            cards: [],
-            hand: [],
-            folded: false,
-            bet: defBet,
-            betInRound: 0,
-            streetBet: 0,
-            rouletteBetType: i === 0 ? 'RED' : (i === 1 ? 'DOZ2' : 'BLACK'),
-            roulettePickLabel: i === 0 ? '🔴 Red (1:1)' : (i === 1 ? '🎯 2nd 12 (2:1)' : '⚫ Black (1:1)'),
-            lastAction: 'Seated at Table',
-            outcome: '',
-            handLabel: ''
-          });
-        }
-        return list;
+      const CASINO_PATRON_AVATARS = ['🕶️', '🎩', '🦈', '👑', '⚡', '🎯', '💎', '🦊', '🦁', '🎲', '🃏', '🔥', '🦅', '🐉', '🌟', '🍸'];
+
+      function generateSingleCasinoPatron(seatNum = 1, gameMode = 'BLACKJACK') {
+        let nm = '';
+        let guard = 0;
+        do {
+          const f = CASINO_PATRON_FIRST_NAMES[Math.floor(Math.random() * CASINO_PATRON_FIRST_NAMES.length)];
+          const l = CASINO_PATRON_LAST_NAMES[Math.floor(Math.random() * CASINO_PATRON_LAST_NAMES.length)];
+          nm = `${f} ${l}`;
+          guard++;
+        } while (recentCasinoAiNames.includes(nm) && guard < 120);
+        recentCasinoAiNames.push(nm);
+        if (recentCasinoAiNames.length > 60) recentCasinoAiNames.shift();
+
+        const humanCash = Math.max(150, Number(G ? G.human.cash : 1000));
+        const mult = 0.65 + Math.random() * 0.85;
+        const aiCash = Math.max(80, Math.round(humanCash * mult));
+        const defBet = Math.max(5, Math.min(aiCash, Math.round(humanCash * (0.04 + Math.random() * 0.04))));
+        const agg = Number((0.48 + Math.random() * 0.42).toFixed(2));
+        const bluffRate = Number((0.10 + Math.random() * 0.28).toFixed(2));
+        const foldThresh = Number((0.20 + Math.random() * 0.18).toFixed(2));
+        const avatar = CASINO_PATRON_AVATARS[Math.floor(Math.random() * CASINO_PATRON_AVATARS.length)];
+        const baccChoices = ['PLAYER', 'BANKER', 'PLAYER', 'BANKER', 'TIE'];
+        const bPick = baccChoices[Math.floor(Math.random() * baccChoices.length)];
+
+        return {
+          seat: seatNum,
+          name: nm,
+          agg,
+          bluffRate,
+          foldThresh,
+          avatar,
+          chips: aiCash,
+          initialChips: aiCash,
+          handsAtTable: 0,
+          maxHandsAtTable: 4 + Math.floor(Math.random() * 7), // Leaves after 4–10 hands (or earlier if busted / big win!)
+          cards: [],
+          hand: [],
+          splitHand: null,
+          folded: false,
+          bet: defBet,
+          betInRound: 0,
+          streetBet: 0,
+          rouletteBetType: seatNum === 1 ? 'RED' : (seatNum === 2 ? 'DOZ2' : 'BLACK'),
+          roulettePickLabel: seatNum === 1 ? '🔴 Red (1:1)' : (seatNum === 2 ? '🎯 2nd 12 (2:1)' : '⚫ Black (1:1)'),
+          baccaratBetType: bPick,
+          baccaratPairBet: Math.random() < 0.25 ? (Math.random() < 0.5 ? 'PLAYER_PAIR' : 'BANKER_PAIR') : null,
+          baccaratPickLabel: bPick === 'BANKER' ? '🔴 Banker (0.95:1)' : (bPick === 'TIE' ? '🟢 Tie (8:1)' : '🔵 Player (1:1)'),
+          rocketTargetMult: Number((1.25 + Math.random() * 4.50).toFixed(2)),
+          rocketCashedOut: false,
+          rocketCashOutMult: null,
+          lastAction: 'Just sat down at table',
+          outcome: '',
+          handLabel: ''
+        };
       }
+
+      function generateThreeAiGamblers(gameMode = 'POKER') {
+        return [
+          generateSingleCasinoPatron(1, gameMode),
+          generateSingleCasinoPatron(2, gameMode),
+          generateSingleCasinoPatron(3, gameMode)
+        ];
+      }
+
+      // Dynamic Come-and-Go Mechanic for Casino Table AI Patrons (Blackjack, Baccarat, Texas Hold'em Poker, Roulette & 2D Rocket)
+      function rotateCasinoTablePatronsIfNeeded(gameMode) {
+        let list = null;
+        let stateObj = null;
+        if (gameMode === 'BLACKJACK') { stateObj = casinoState.bj; list = stateObj.aiPlayers; }
+        else if (gameMode === 'BACCARAT') { stateObj = casinoState.baccarat; list = stateObj.aiPlayers; }
+        else if (gameMode === 'ROULETTE') { stateObj = casinoState.roulette; list = stateObj.aiPlayers; }
+        else if (gameMode === 'POKER') { stateObj = casinoState.poker; list = stateObj.aiGamblers; }
+        else if (gameMode === 'ROCKET') { stateObj = casinoState.rocket; list = stateObj.aiPlayers; }
+        if (!Array.isArray(list) || list.length !== 3) return;
+
+        const notices = [];
+        for (let i = 0; i < list.length; i++) {
+          const ai = list[i];
+          ai.handsAtTable = (ai.handsAtTable || 0) + 1;
+          const bustedOut = (ai.chips || 0) < 25;
+          const cashedOutBig = (ai.chips || 0) >= (ai.initialChips || 500) * 1.75 && Math.random() < 0.45;
+          const sessionDone = ai.handsAtTable >= (ai.maxHandsAtTable || 6);
+          const randomWalkAway = ai.handsAtTable >= 2 && Math.random() < 0.22;
+
+          if (bustedOut || cashedOutBig || sessionDone || randomWalkAway) {
+            const oldName = ai.name;
+            const leaveReason = bustedOut ? 'ran out of chips & left' : (cashedOutBig ? 'cashed out profits & left' : 'left the table');
+            const newcomer = generateSingleCasinoPatron(i + 1, gameMode);
+            newcomer.lastAction = `🪑 Just joined Seat #${i + 1}`;
+            list[i] = newcomer;
+            const msg = `🪑 Seat #${i + 1}: ${oldName} ${leaveReason} → ${newcomer.avatar} ${newcomer.name} (${fmtCompact(newcomer.chips)}) joined!`;
+            notices.push(msg);
+          }
+        }
+        if (notices.length > 0 && stateObj) {
+          stateObj.seatNotice = notices[0];
+          logCasinoEvent(notices[0]);
+        }
+      }
+      window.rotateCasinoTablePatronsIfNeeded = rotateCasinoTablePatronsIfNeeded;
 
       function refreshMonthlyCasinoAiPlayers(forceRefresh = false) {
         const curMonth = Math.floor(((G ? G.day : 1) - 1) / 21);
@@ -20612,10 +20642,12 @@
         const cashDrifted = casinoState.lastAiHumanCashRef <= 0 ||
           (Math.abs(humanCash - casinoState.lastAiHumanCashRef) / Math.max(1, casinoState.lastAiHumanCashRef) > 0.25);
 
-        if (forceRefresh || curMonth !== casinoState.lastAiGenMonth || (!casinoState.bj.inProgress && !casinoState.poker.inHand && cashDrifted)) {
+        if (forceRefresh || curMonth !== casinoState.lastAiGenMonth || (!casinoState.bj.inProgress && !casinoState.poker.inHand && !casinoState.rocket.inFlight && cashDrifted)) {
           casinoState.lastAiGenMonth = curMonth;
           casinoState.lastAiHumanCashRef = humanCash;
           if (!casinoState.bj.inProgress) casinoState.bj.aiPlayers = generateThreeAiGamblers('BLACKJACK');
+          if (!casinoState.baccarat.inProgress) casinoState.baccarat.aiPlayers = generateThreeAiGamblers('BACCARAT');
+          if (!casinoState.rocket.inFlight) casinoState.rocket.aiPlayers = generateThreeAiGamblers('ROCKET');
           casinoState.roulette.aiPlayers = generateThreeAiGamblers('ROULETTE');
           if (!casinoState.poker.inHand) casinoState.poker.aiGamblers = generateThreeAiGamblers('POKER');
         }
@@ -20623,31 +20655,58 @@
       window.refreshMonthlyCasinoAiPlayers = refreshMonthlyCasinoAiPlayers;
 
       function ensureAllCasinoAiTables() {
-        if (!casinoState.bj.aiPlayers || casinoState.bj.aiPlayers.length !== 3 ||
-            !casinoState.roulette.aiPlayers || casinoState.roulette.aiPlayers.length !== 3 ||
-            !casinoState.poker.aiGamblers || casinoState.poker.aiGamblers.length !== 3) {
-          refreshMonthlyCasinoAiPlayers(true);
-        } else {
-          refreshMonthlyCasinoAiPlayers(false);
+        if (!casinoState.bj.aiPlayers || casinoState.bj.aiPlayers.length !== 3) {
+          casinoState.bj.aiPlayers = generateThreeAiGamblers('BLACKJACK');
+        }
+        if (!casinoState.baccarat.aiPlayers || casinoState.baccarat.aiPlayers.length !== 3) {
+          casinoState.baccarat.aiPlayers = generateThreeAiGamblers('BACCARAT');
+        }
+        if (!casinoState.rocket.aiPlayers || casinoState.rocket.aiPlayers.length !== 3) {
+          casinoState.rocket.aiPlayers = generateThreeAiGamblers('ROCKET');
+        }
+        if (!casinoState.roulette.aiPlayers || casinoState.roulette.aiPlayers.length !== 3) {
+          casinoState.roulette.aiPlayers = generateThreeAiGamblers('ROULETTE');
+        }
+        if (!casinoState.poker.aiGamblers || casinoState.poker.aiGamblers.length !== 3) {
+          casinoState.poker.aiGamblers = generateThreeAiGamblers('POKER');
         }
       }
 
       window.rerollCasinoAiTable = function(modeOpt) {
         const mode = modeOpt || casinoState.activeGame;
         if (mode === 'POKER' && casinoState.poker.inHand) {
-          showToast('Finish Active Hand First', 'Complete or Fold your current Texas Hold\'em hand before switching AI tables!', false);
+          showToast("Finish Active Hand First", "Complete or Fold your current Texas Hold'em hand before switching AI tables!", false);
+          return;
+        }
+        if (mode === 'BLACKJACK' && casinoState.bj.inProgress) {
+          showToast('Finish Active Hand First', 'Complete your current Blackjack hand before switching AI tables!', false);
+          return;
+        }
+        if (mode === 'ROCKET' && casinoState.rocket.inFlight) {
+          showToast('Rocket in Flight', 'Wait for the current rocket flight to finish or cash out first!', false);
           return;
         }
         casinoState.lastAiHumanCashRef = Math.max(100, Number(G ? G.human.cash : 1000));
         if (mode === 'BLACKJACK') {
           casinoState.bj.aiPlayers = generateThreeAiGamblers('BLACKJACK');
-          casinoState.statusText = `🃏 New Blackjack AI Table: ${casinoState.bj.aiPlayers.map(a => a.name).join(', ')}!`;
+          casinoState.bj.seatNotice = `🎲 New Casino Patrons seated: ${casinoState.bj.aiPlayers.map(a => a.name).join(', ')}`;
+          casinoState.statusText = `🃏 New Blackjack Casino Patrons: ${casinoState.bj.aiPlayers.map(a => a.name).join(', ')}!`;
+        } else if (mode === 'BACCARAT') {
+          casinoState.baccarat.aiPlayers = generateThreeAiGamblers('BACCARAT');
+          casinoState.baccarat.seatNotice = `🎲 New Casino Patrons seated: ${casinoState.baccarat.aiPlayers.map(a => a.name).join(', ')}`;
+          casinoState.statusText = `🎴 New Baccarat Casino Patrons: ${casinoState.baccarat.aiPlayers.map(a => a.name).join(', ')}!`;
+        } else if (mode === 'ROCKET') {
+          casinoState.rocket.aiPlayers = generateThreeAiGamblers('ROCKET');
+          casinoState.rocket.seatNotice = `🎲 New Rocket Bettors joined: ${casinoState.rocket.aiPlayers.map(a => a.name).join(', ')}`;
+          casinoState.statusText = `🚀 New 2D Rocket Bettors: ${casinoState.rocket.aiPlayers.map(a => a.name).join(', ')}!`;
         } else if (mode === 'ROULETTE') {
           casinoState.roulette.aiPlayers = generateThreeAiGamblers('ROULETTE');
-          casinoState.statusText = `🎡 New Roulette AI Table: ${casinoState.roulette.aiPlayers.map(a => a.name).join(', ')}!`;
+          casinoState.roulette.seatNotice = `🎲 New Casino Patrons seated: ${casinoState.roulette.aiPlayers.map(a => a.name).join(', ')}`;
+          casinoState.statusText = `🎡 New Roulette Casino Patrons: ${casinoState.roulette.aiPlayers.map(a => a.name).join(', ')}!`;
         } else {
           casinoState.poker.aiGamblers = generateThreeAiGamblers('POKER');
-          casinoState.statusText = `🤠 New Hold'em AI Table: ${casinoState.poker.aiGamblers.map(a => a.name).join(', ')}!`;
+          casinoState.poker.seatNotice = `🎲 New Casino Patrons seated: ${casinoState.poker.aiGamblers.map(a => a.name).join(', ')}`;
+          casinoState.statusText = `🤠 New Hold'em Casino Patrons: ${casinoState.poker.aiGamblers.map(a => a.name).join(', ')}!`;
         }
         renderCasinoTab();
       };
@@ -20666,7 +20725,7 @@
       }
 
       window.selectCasinoGame = function(gameKey) {
-        const allowedGames = ['BLACKJACK', 'ROULETTE', 'POKER', 'SLOTS', 'SCRATCH', 'HORSES', 'NASCAR'];
+        const allowedGames = ['BLACKJACK', 'BACCARAT', 'ROCKET', 'ROULETTE', 'POKER', 'SLOTS', 'SCRATCH', 'HORSES', 'NASCAR'];
         const cleanKey = allowedGames.includes(gameKey) ? gameKey : 'BLACKJACK';
         casinoState.activeGame = cleanKey;
         ensureAllCasinoAiTables();
@@ -20692,11 +20751,15 @@
             ? `🏎️ NASCAR Race #${ns.raceNumber}: Picked Car #${picked.car} ${picked.name} (${picked.winChancePct}% Equal Contender • ${picked.shortRewardTag})! Tap Start 2D NASCAR Race!`
             : `🏎️ Select your stock car (#1–#6) and tap Start 2D NASCAR Race!`;
         } else if (cleanKey === 'BLACKJACK') {
-          casinoState.statusText = `🃏 2D Blackjack: Place your wager and tap Deal Hand!`;
+          casinoState.statusText = `🃏 2D Blackjack (3:2 BJ • Hit, Stand, Double, Split & Surrender): Place your wager and tap Deal Hand!`;
+        } else if (cleanKey === 'BACCARAT') {
+          casinoState.statusText = `🎴 2D Baccarat (Punto Banco • You + 3 Casino AI Players): Bet on Player (1:1), Banker (0.95:1), Tie (8:1), or Pairs (11:1)!`;
+        } else if (cleanKey === 'ROCKET') {
+          casinoState.statusText = `🚀 2D Rocket (97% RTP • 1,000x Max Multiplier): Place your bet, watch the multiplier climb, and Cash Out before the rocket explodes!`;
         } else if (cleanKey === 'ROULETTE') {
           casinoState.statusText = `🎡 2D European Roulette: Choose your bet type below and tap Spin Roulette Wheel!`;
         } else if (cleanKey === 'POKER') {
-          casinoState.statusText = `🤠 2D Texas Hold'em Poker: Tap Deal Hand to battle 3 AI Gamblers!`;
+          casinoState.statusText = `🤠 2D Texas Hold'em Poker: Tap Deal Hand to battle 3 Casino AI Patrons!`;
         } else if (cleanKey === 'SLOTS') {
           casinoState.statusText = `🎰 4-Row Royal Gold Slots (4×4 • 10 Paylines): Tap Spin 4-Row Slot Machine!`;
         }
@@ -20735,12 +20798,21 @@
       }
 
       // -----------------------------------------------------------------------
-      // GAME 1: REALISTIC 2D VEGAS BLACKJACK (DEAL, HIT, STAND, DOUBLE, SURRENDER)
+      // GAME 1: REALISTIC 2D VEGAS BLACKJACK (DEAL, HIT, STAND, DOUBLE, SPLIT, INSURANCE & SURRENDER)
       // -----------------------------------------------------------------------
+      function bjCardPipValue(card) {
+        if (!card) return 0;
+        if (card.rank === 'A') return 11;
+        if (['10', 'J', 'Q', 'K'].includes(card.rank)) return 10;
+        return Number(card.rank) || 0;
+      }
+
       function calcBlackjackScore(hand) {
+        if (!Array.isArray(hand)) return 0;
         let total = 0;
         let aces = 0;
         for (const c of hand) {
+          if (!c) continue;
           if (c.rank === 'A') { total += 11; aces++; }
           else if (['K', 'Q', 'J', '10'].includes(c.rank)) total += 10;
           else total += Number(c.rank);
@@ -20753,9 +20825,11 @@
       }
 
       function isSoftBlackjackHand(hand) {
+        if (!Array.isArray(hand)) return false;
         let total = 0;
         let aces = 0;
         for (const c of hand) {
+          if (!c) continue;
           if (c.rank === 'A') { total += 11; aces++; }
           else if (['K', 'Q', 'J', '10'].includes(c.rank)) total += 10;
           else total += Number(c.rank);
@@ -20775,8 +20849,8 @@
       }
 
       function drawShoeCardWithCount(bj) {
-        if (!bj.deck || bj.deck.length < 15) {
-          bj.deck = buildFreshDeck();
+        if (!bj.deck || bj.deck.length < 48) {
+          bj.deck = buildFreshDeck(6);
           bj.trueCount = 0;
         }
         const c = bj.deck.pop();
@@ -20785,7 +20859,52 @@
         return c;
       }
 
+      function canSplitBjHand(handObj, bj) {
+        if (!bj || !bj.inProgress || !handObj || !Array.isArray(handObj.cards) || handObj.cards.length !== 2) return false;
+        if ((bj.playerHands || []).length >= 4) return false;
+        const c0 = handObj.cards[0];
+        const c1 = handObj.cards[1];
+        const isPair = c0.rank === c1.rank || bjCardPipValue(c0) === bjCardPipValue(c1);
+        if (!isPair) return false;
+        return Boolean(G && G.human && G.human.cash >= (handObj.bet || bj.currentBet));
+      }
+      window.canSplitBjHand = canSplitBjHand;
+
+      function syncActiveBjHandRef(bj) {
+        if (!bj.playerHands || bj.playerHands.length === 0) return null;
+        const idx = Math.max(0, Math.min(bj.playerHands.length - 1, bj.activeHandIdx || 0));
+        bj.activeHandIdx = idx;
+        const active = bj.playerHands[idx];
+        bj.playerHand = active.cards;
+        bj.currentBet = active.bet;
+        return active;
+      }
+
       function playAiBlackjackSeat(ai, bj, dUpVal) {
+        ai.splitHand = null;
+        // Real Blackjack AI Pair Splitting (Always split Aces & 8s; split 2s/3s/6s/7s/9s against weak dealer upcards!)
+        if (ai.hand.length === 2 && bjCardPipValue(ai.hand[0]) === bjCardPipValue(ai.hand[1]) && ai.chips >= ai.bet) {
+          const r0 = ai.hand[0].rank;
+          const pVal = bjCardPipValue(ai.hand[0]);
+          const shouldSplit = (r0 === 'A' || r0 === '8') ||
+            ((pVal === 2 || pVal === 3 || pVal === 6 || pVal === 7) && dUpVal >= 2 && dUpVal <= 7) ||
+            (pVal === 9 && dUpVal >= 2 && dUpVal <= 9 && dUpVal !== 7);
+          if (shouldSplit) {
+            ai.chips -= ai.bet;
+            const c2 = ai.hand.pop();
+            ai.hand.push(drawShoeCardWithCount(bj));
+            ai.splitHand = [c2, drawShoeCardWithCount(bj)];
+            ai.splitBet = ai.bet;
+            if (r0 !== 'A') {
+              playSingleAiCardArray(ai.hand, bj, dUpVal);
+              playSingleAiCardArray(ai.splitHand, bj, dUpVal);
+            }
+            const s1 = calcBlackjackScore(ai.hand);
+            const s2 = calcBlackjackScore(ai.splitHand);
+            ai.lastAction = `✂️ Split (${s1} & ${s2})`;
+            return;
+          }
+        }
         while (true) {
           const score = calcBlackjackScore(ai.hand);
           const isSoft = isSoftBlackjackHand(ai.hand);
@@ -20806,7 +20925,7 @@
             ai.lastAction = `✋ Stands Soft ${score}`;
             break;
           } else {
-            const standThresh = (dUpVal >= 2 && dUpVal <= 6) ? (ai.trueCount >= 2 ? 12 : 12) : 17;
+            const standThresh = (dUpVal >= 2 && dUpVal <= 6) ? 12 : 17;
             if (score < standThresh) {
               ai.hand.push(drawShoeCardWithCount(bj));
               continue;
@@ -20819,26 +20938,181 @@
         if (finalSc > 21) ai.lastAction = `💥 Busted (${finalSc})`;
       }
 
-      function settleAiBlackjackHands(bj, dScore) {
-        for (const ai of (bj.aiPlayers || [])) {
-          const aScore = calcBlackjackScore(ai.hand);
-          const isNat = ai.hand.length === 2 && aScore === 21;
-          if (aScore > 21) {
-            ai.outcome = `Lost -${fmtCompact(ai.bet)} (Bust ${aScore})`;
-          } else if (isNat && dScore !== 21) {
-            const win = Math.round(ai.bet * 2.5);
-            ai.chips += win;
-            ai.outcome = `🏆 BJ +${fmtCompact(win - ai.bet)}!`;
-          } else if (dScore > 21 || aScore > dScore) {
-            ai.chips += ai.bet * 2;
-            ai.outcome = `✅ Won +${fmtCompact(ai.bet)} (${aScore})`;
-          } else if (aScore === dScore) {
-            ai.chips += ai.bet;
-            ai.outcome = `🤝 Push (${aScore})`;
+      function playSingleAiCardArray(cardsArr, bj, dUpVal) {
+        while (true) {
+          const sc = calcBlackjackScore(cardsArr);
+          const isSoft = isSoftBlackjackHand(cardsArr);
+          if (sc >= 21) break;
+          if (isSoft) {
+            if (sc <= 17 || (sc === 18 && dUpVal >= 9)) { cardsArr.push(drawShoeCardWithCount(bj)); continue; }
+            break;
           } else {
-            ai.outcome = `Lost -${fmtCompact(ai.bet)} (${aScore} vs ${dScore})`;
+            const standThresh = (dUpVal >= 2 && dUpVal <= 6) ? 12 : 17;
+            if (sc < standThresh) { cardsArr.push(drawShoeCardWithCount(bj)); continue; }
+            break;
           }
         }
+      }
+
+      function settleAiBlackjackHands(bj, dScore, dealerIsNat21 = false) {
+        for (const ai of (bj.aiPlayers || [])) {
+          const evalOne = (cards, betAmt, isSplit) => {
+            const aScore = calcBlackjackScore(cards);
+            const isNat = !isSplit && cards.length === 2 && aScore === 21;
+            if (aScore > 21) return -betAmt;
+            if (isNat && !dealerIsNat21) {
+              const win = Math.round(betAmt * 2.5);
+              ai.chips += win;
+              return win - betAmt;
+            }
+            if (dealerIsNat21 && !isNat) return -betAmt;
+            if (dScore > 21 || aScore > dScore) {
+              ai.chips += betAmt * 2;
+              return betAmt;
+            }
+            if (aScore === dScore) {
+              ai.chips += betAmt;
+              return 0;
+            }
+            return -betAmt;
+          };
+          let net = evalOne(ai.hand, ai.bet, Boolean(ai.splitHand));
+          if (ai.splitHand && ai.splitHand.length) {
+            net += evalOne(ai.splitHand, ai.splitBet || ai.bet, true);
+          }
+          const aScore = calcBlackjackScore(ai.hand);
+          if (ai.splitHand) {
+            const s2 = calcBlackjackScore(ai.splitHand);
+            ai.outcome = net > 0 ? `✅ Split Won +${fmtCompact(net)} (${aScore}/${s2})` : (net === 0 ? `🤝 Split Push (${aScore}/${s2})` : `Lost -${fmtCompact(Math.abs(net))} (${aScore}/${s2})`);
+          } else if (net > 0) {
+            ai.outcome = `✅ Won +${fmtCompact(net)} (${aScore})`;
+          } else if (net === 0) {
+            ai.outcome = `🤝 Push (${aScore})`;
+          } else {
+            ai.outcome = `Lost -${fmtCompact(Math.abs(net))} (${aScore > 21 ? 'Bust ' + aScore : aScore + ' vs ' + dScore})`;
+          }
+        }
+      }
+
+      function settleAllHumanBlackjackHands(bj) {
+        bj.prevDealerCardCount = 2;
+        const anyLiveHand = (bj.playerHands || []).some(h => !h.busted && !h.surrendered);
+        if (anyLiveHand) {
+          while (calcBlackjackScore(bj.dealerHand) < 17) {
+            bj.dealerHand.push(drawShoeCardWithCount(bj));
+          }
+        }
+        startCasinoAnimation('BJ_DEALER', 950);
+        bj.inProgress = false;
+        casinoState.rounds++;
+
+        const dScore = calcBlackjackScore(bj.dealerHand);
+        const dealerIsNat21 = bj.dealerHand.length === 2 && dScore === 21;
+        settleAiBlackjackHands(bj, dScore, dealerIsNat21);
+
+        let totalWagered = 0;
+        let totalReturned = 0;
+        const handSummaries = [];
+
+        // Settle Insurance bet if taken
+        if (bj.insuranceTaken && bj.insuranceBet > 0) {
+          totalWagered += bj.insuranceBet;
+          if (dealerIsNat21) {
+            const insReturn = bj.insuranceBet * 3; // 2:1 profit + stake
+            recordCasinoDelta(insReturn);
+            totalReturned += insReturn;
+            handSummaries.push(`🛡️ Insurance Won +${fmtMoney(bj.insuranceBet * 2)}`);
+          } else {
+            handSummaries.push(`🛡️ Insurance Lost -${fmtMoney(bj.insuranceBet)}`);
+          }
+        }
+
+        (bj.playerHands || []).forEach((h, idx) => {
+          const hLabel = bj.playerHands.length > 1 ? `H${idx + 1}` : 'Hand';
+          const pScore = calcBlackjackScore(h.cards);
+          const bet = h.bet;
+          totalWagered += bet;
+
+          if (h.surrendered) {
+            const refund = Number((bet * 0.5).toFixed(2));
+            totalReturned += refund;
+            h.outcomeText = `🏳️ Surrender (-${fmtMoney(bet - refund)})`;
+            handSummaries.push(`${hLabel}: Surrendered`);
+          } else if (pScore > 21) {
+            h.outcomeText = `💥 Bust (${pScore})`;
+            handSummaries.push(`${hLabel}: Bust ${pScore}`);
+          } else {
+            const isNat21 = !h.isFromSplit && h.cards.length === 2 && pScore === 21;
+            if (isNat21 && !dealerIsNat21) {
+              const payout = Number((bet * 2.5).toFixed(2));
+              recordCasinoDelta(payout);
+              totalReturned += payout;
+              h.outcomeText = `🏆 BJ 3:2 (+${fmtMoney(payout - bet)})`;
+              handSummaries.push(`${hLabel}: Blackjack 21 (+${fmtMoney(payout - bet)})`);
+            } else if (dealerIsNat21 && !isNat21) {
+              h.outcomeText = `❌ Dealer BJ (${pScore} vs 21)`;
+              handSummaries.push(`${hLabel}: Lost vs Dealer BJ`);
+            } else if (dScore > 21 || pScore > dScore) {
+              const payout = bet * 2;
+              recordCasinoDelta(payout);
+              totalReturned += payout;
+              h.outcomeText = `✅ Win ${pScore} (+${fmtMoney(bet)})`;
+              handSummaries.push(`${hLabel}: Won ${pScore} vs ${dScore > 21 ? 'Bust' : dScore}`);
+            } else if (pScore === dScore) {
+              recordCasinoDelta(bet);
+              totalReturned += bet;
+              h.outcomeText = `🤝 Push (${pScore})`;
+              handSummaries.push(`${hLabel}: Push ${pScore}`);
+            } else {
+              h.outcomeText = `❌ Lost (${pScore} vs ${dScore})`;
+              handSummaries.push(`${hLabel}: ${pScore} vs ${dScore}`);
+            }
+          }
+        });
+
+        const netProfit = Number((totalReturned - totalWagered).toFixed(2));
+        if (netProfit > 0) {
+          casinoState.wins++;
+          bj.outcome = `✅ WON +${fmtMoney(netProfit)} (${handSummaries.join(' • ')})`;
+          casinoState.statusText = `🎉 Blackjack Winner! Net +${fmtMoney(netProfit)} (${handSummaries.join(' • ')})!`;
+          logCasinoEvent(`🃏 Blackjack Win (${handSummaries.join(', ')}) — Net +${fmtMoney(netProfit)}!`);
+          showToast('🃏 Blackjack Winner!', `${handSummaries.join(' • ')} (+${fmtMoney(netProfit)})!`, true);
+        } else if (netProfit === 0) {
+          bj.outcome = `🤝 PUSH (${handSummaries.join(' • ')}) — Bets Returned`;
+          casinoState.statusText = `🤝 Blackjack Push (${handSummaries.join(' • ')})!`;
+          logCasinoEvent(`🃏 Blackjack Push (${handSummaries.join(', ')}).`);
+        } else {
+          bj.outcome = `❌ ${handSummaries.join(' • ')} (Net ${fmtMoney(netProfit)})`;
+          casinoState.statusText = `❌ Dealer (${dScore}) — ${handSummaries.join(' • ')} (${fmtMoney(netProfit)}).`;
+          logCasinoEvent(`🃏 Blackjack (${handSummaries.join(', ')}) — Net ${fmtMoney(netProfit)}.`);
+        }
+
+        // Dynamic Come-and-Go Casino AI Patrons after hand finishes!
+        rotateCasinoTablePatronsIfNeeded('BLACKJACK');
+        renderCasinoTab();
+      }
+
+      function advanceBlackjackHandOrSettle() {
+        const bj = casinoState.bj;
+        if (!bj.inProgress) return;
+        const hands = bj.playerHands || [];
+        for (let nextIdx = (bj.activeHandIdx || 0) + 1; nextIdx < hands.length; nextIdx++) {
+          const h = hands[nextIdx];
+          if (!h.stood && !h.busted && !h.surrendered) {
+            bj.activeHandIdx = nextIdx;
+            syncActiveBjHandRef(bj);
+            const sc = calcBlackjackScore(h.cards);
+            if (sc === 21) {
+              h.stood = true;
+              continue;
+            }
+            const softTag = isSoftBlackjackHand(h.cards) ? `Soft ${sc}` : `${sc}`;
+            casinoState.statusText = `🃏 Playing Split Hand #${nextIdx + 1} of ${hands.length} (Total: ${softTag} vs Dealer's ${bj.dealerHand[0].rank}): Choose Hit, Stand, Double${canSplitBjHand(h, bj) ? ', or Split' : ''}!`;
+            renderCasinoTab();
+            return;
+          }
+        }
+        settleAllHumanBlackjackHands(bj);
       }
 
       window.casinoBjDeal = function() {
@@ -20852,7 +21126,22 @@
         bj.currentBet = bet;
         bj.inProgress = true;
         bj.outcome = null;
-        bj.playerHand = [drawShoeCardWithCount(bj), drawShoeCardWithCount(bj)];
+        bj.insuranceBet = 0;
+        bj.insuranceTaken = false;
+        const initCards = [drawShoeCardWithCount(bj), drawShoeCardWithCount(bj)];
+        bj.playerHands = [{
+          cards: initCards,
+          bet,
+          doubled: false,
+          surrendered: false,
+          stood: false,
+          busted: false,
+          isFromSplit: false,
+          isSplitAces: false,
+          outcomeText: ''
+        }];
+        bj.activeHandIdx = 0;
+        bj.playerHand = initCards;
         bj.dealerHand = [drawShoeCardWithCount(bj), drawShoeCardWithCount(bj)];
 
         const dUpVal = dealerUpcardValue(bj.dealerHand[0]);
@@ -20862,6 +21151,7 @@
           ai.bet = wager;
           ai.chips = Math.max(0, ai.chips - wager);
           ai.hand = [drawShoeCardWithCount(bj), drawShoeCardWithCount(bj)];
+          ai.splitHand = null;
           ai.outcome = '';
           playAiBlackjackSeat(ai, bj, dUpVal);
         }
@@ -20873,30 +21163,19 @@
         const pScore = calcBlackjackScore(bj.playerHand);
         const dScore = calcBlackjackScore(bj.dealerHand);
         if (pScore === 21) {
-          while (calcBlackjackScore(bj.dealerHand) < 17) {
-            bj.dealerHand.push(drawShoeCardWithCount(bj));
-          }
-          const finalD = calcBlackjackScore(bj.dealerHand);
-          bj.inProgress = false;
-          casinoState.rounds++;
-          settleAiBlackjackHands(bj, finalD);
-          if (finalD === 21 && bj.dealerHand.length === 2) {
-            recordCasinoDelta(bet);
-            bj.outcome = 'PUSH (Both Natural 21)';
-            casinoState.statusText = `🤝 Push! Both you and Dealer hit 21 — ${fmtMoney(bet)} returned.`;
-            logCasinoEvent(`🃏 Blackjack Push (21 vs 21) — ${fmtMoney(bet)} returned.`);
-          } else {
-            const payout = Math.round(bet * 2.5);
-            recordCasinoDelta(payout);
-            casinoState.wins++;
-            bj.outcome = `🏆 NATURAL BLACKJACK! (+${fmtMoney(payout - bet)})`;
-            casinoState.statusText = `🎉 BLACKJACK 21! Paid 3:2 (+${fmtMoney(payout - bet)} net profit)!`;
-            logCasinoEvent(`🃏 Natural Blackjack 21! Won +${fmtMoney(payout - bet)} (3:2 payout).`);
-            showToast('🃏 Natural Blackjack 21!', `You won +${fmtMoney(payout - bet)} (3:2 payout)!`, true);
-          }
+          bj.playerHands[0].stood = true;
+          settleAllHumanBlackjackHands(bj);
+          return;
+        } else if (dScore === 21 && bj.dealerHand[0].rank !== 'A') {
+          // Dealer peeks on 10-value upcard and immediately reveals Natural 21!
+          bj.playerHands[0].stood = true;
+          settleAllHumanBlackjackHands(bj);
+          return;
         } else {
           const softTag = isSoftBlackjackHand(bj.playerHand) ? `Soft ${pScore}` : `${pScore}`;
-          casinoState.statusText = `🃏 Hand in progress: You have ${softTag} vs. Dealer's ${bj.dealerHand[0].rank}. Choose Hit, Stand, Double, or Surrender!`;
+          const splitNote = canSplitBjHand(bj.playerHands[0], bj) ? ', Split' : '';
+          const insNote = bj.dealerHand[0].rank === 'A' ? ', Insurance' : '';
+          casinoState.statusText = `🃏 Hand in progress: You have ${softTag} vs. Dealer's ${bj.dealerHand[0].rank}. Choose Hit, Stand, Double${splitNote}${insNote}, or Surrender!`;
         }
         renderCasinoTab();
       };
@@ -20904,27 +21183,29 @@
       window.casinoBjHit = function() {
         const bj = casinoState.bj;
         if (!bj.inProgress) return;
-        bj.prevPlayerCardCount = bj.playerHand.length;
+        const active = syncActiveBjHandRef(bj);
+        if (!active) return;
+
+        bj.prevPlayerCardCount = active.cards.length;
         bj.prevDealerCardCount = bj.dealerHand.length;
-        bj.playerHand.push(drawShoeCardWithCount(bj));
+        active.cards.push(drawShoeCardWithCount(bj));
         startCasinoAnimation('BJ_HIT', 720);
-        const pScore = calcBlackjackScore(bj.playerHand);
+        const pScore = calcBlackjackScore(active.cards);
+        const handPrefix = bj.playerHands.length > 1 ? `[Hand ${bj.activeHandIdx + 1}/${bj.playerHands.length}] ` : '';
+
         if (pScore > 21) {
-          while (calcBlackjackScore(bj.dealerHand) < 17) {
-            bj.dealerHand.push(drawShoeCardWithCount(bj));
-          }
-          settleAiBlackjackHands(bj, calcBlackjackScore(bj.dealerHand));
-          bj.inProgress = false;
-          casinoState.rounds++;
-          bj.outcome = `💥 BUST (${pScore}) — Lost ${fmtMoney(bj.currentBet)}`;
-          casinoState.statusText = `💥 Busted with ${pScore}! Dealer wins (-${fmtMoney(bj.currentBet)}).`;
-          logCasinoEvent(`🃏 Blackjack Bust (${pScore}) — Lost -${fmtMoney(bj.currentBet)}.`);
+          active.busted = true;
+          active.outcomeText = `💥 Bust (${pScore})`;
+          advanceBlackjackHandOrSettle();
+          return;
         } else if (pScore === 21) {
-          window.casinoBjStand();
+          active.stood = true;
+          advanceBlackjackHandOrSettle();
           return;
         } else {
-          const softTag = isSoftBlackjackHand(bj.playerHand) ? `Soft ${pScore}` : `${pScore}`;
-          casinoState.statusText = `🃏 You drew ${bj.playerHand[bj.playerHand.length - 1].rank}${bj.playerHand[bj.playerHand.length - 1].suit} (Total: ${softTag}). Hit or Stand?`;
+          const softTag = isSoftBlackjackHand(active.cards) ? `Soft ${pScore}` : `${pScore}`;
+          const lastC = active.cards[active.cards.length - 1];
+          casinoState.statusText = `🃏 ${handPrefix}You drew ${lastC.rank}${lastC.suit} (Total: ${softTag}). Hit or Stand?`;
         }
         renderCasinoTab();
       };
@@ -20932,87 +21213,514 @@
       window.casinoBjStand = function(fromDouble = false) {
         const bj = casinoState.bj;
         if (!bj.inProgress) return;
+        const active = syncActiveBjHandRef(bj);
+        if (!active) return;
         if (!fromDouble) {
-          bj.prevPlayerCardCount = bj.playerHand.length;
+          bj.prevPlayerCardCount = active.cards.length;
         }
-        bj.prevDealerCardCount = 2; // Dealer's first 2 cards are already on the table!
-        while (calcBlackjackScore(bj.dealerHand) < 17) {
-          bj.dealerHand.push(drawShoeCardWithCount(bj));
-        }
-        startCasinoAnimation('BJ_DEALER', 950);
-        bj.inProgress = false;
-        casinoState.rounds++;
-        const pScore = calcBlackjackScore(bj.playerHand);
-        const dScore = calcBlackjackScore(bj.dealerHand);
-        const bet = bj.currentBet;
-        settleAiBlackjackHands(bj, dScore);
-
-        if (dScore > 21 || pScore > dScore) {
-          recordCasinoDelta(bet * 2);
-          casinoState.wins++;
-          bj.outcome = `✅ YOU WIN! (${pScore} vs ${dScore > 21 ? 'Dealer Bust ' + dScore : dScore}) +${fmtMoney(bet)}`;
-          casinoState.statusText = `🎉 Winner! Your ${pScore} beat Dealer's ${dScore} (+${fmtMoney(bet)} profit)!`;
-          logCasinoEvent(`🃏 Blackjack Win (${pScore} vs ${dScore}) — Won +${fmtMoney(bet)}!`);
-          showToast('🃏 Blackjack Winner!', `Your ${pScore} beat Dealer's ${dScore} (+${fmtMoney(bet)})!`, true);
-        } else if (pScore === dScore) {
-          recordCasinoDelta(bet);
-          bj.outcome = `🤝 PUSH (${pScore} vs ${dScore}) — Bet Returned`;
-          casinoState.statusText = `🤝 Push at ${pScore}! Your ${fmtMoney(bet)} bet was returned.`;
-          logCasinoEvent(`🃏 Blackjack Push (${pScore} vs ${dScore}).`);
-        } else {
-          bj.outcome = `❌ DEALER WINS (${dScore} vs ${pScore}) — Lost ${fmtMoney(bet)}`;
-          casinoState.statusText = `❌ Dealer's ${dScore} beat your ${pScore} (-${fmtMoney(bet)}).`;
-          logCasinoEvent(`🃏 Blackjack Loss (${pScore} vs ${dScore}) — Lost -${fmtMoney(bet)}.`);
-        }
-        renderCasinoTab();
+        active.stood = true;
+        advanceBlackjackHandOrSettle();
       };
 
       window.casinoBjDouble = function() {
         const bj = casinoState.bj;
-        if (!bj.inProgress || bj.playerHand.length !== 2) return;
-        if (G.human.cash < bj.currentBet) {
-          showToast('Insufficient Cash to Double Down', `You need an extra ${fmtMoney(bj.currentBet)} cash to Double Down!`, false);
+        if (!bj.inProgress) return;
+        const active = syncActiveBjHandRef(bj);
+        if (!active || active.cards.length !== 2 || active.isSplitAces) return;
+        if (G.human.cash < active.bet) {
+          showToast('Insufficient Cash to Double Down', `You need an extra ${fmtMoney(active.bet)} cash to Double Down!`, false);
           return;
         }
-        recordCasinoDelta(-bj.currentBet);
-        bj.currentBet *= 2;
-        bj.prevPlayerCardCount = bj.playerHand.length;
+        recordCasinoDelta(-active.bet);
+        active.bet *= 2;
+        active.doubled = true;
+        bj.currentBet = active.bet;
+        bj.prevPlayerCardCount = active.cards.length;
         bj.prevDealerCardCount = 2;
-        bj.playerHand.push(drawShoeCardWithCount(bj));
-        const pScore = calcBlackjackScore(bj.playerHand);
+        active.cards.push(drawShoeCardWithCount(bj));
+        const pScore = calcBlackjackScore(active.cards);
         if (pScore > 21) {
-          while (calcBlackjackScore(bj.dealerHand) < 17) {
-            bj.dealerHand.push(drawShoeCardWithCount(bj));
-          }
-          settleAiBlackjackHands(bj, calcBlackjackScore(bj.dealerHand));
-          bj.inProgress = false;
-          casinoState.rounds++;
-          bj.outcome = `💥 DOUBLE DOWN BUST (${pScore}) — Lost ${fmtMoney(bj.currentBet)}`;
-          casinoState.statusText = `💥 Busted on Double Down (${pScore})! Lost -${fmtMoney(bj.currentBet)}.`;
-          logCasinoEvent(`🃏 Double Down Bust (${pScore}) — Lost -${fmtMoney(bj.currentBet)}.`);
-          startCasinoAnimation('BJ_HIT', 720);
-          renderCasinoTab();
+          active.busted = true;
+          active.outcomeText = `💥 Double Bust (${pScore})`;
         } else {
-          window.casinoBjStand(true);
+          active.stood = true;
         }
+        startCasinoAnimation('BJ_HIT', 720);
+        advanceBlackjackHandOrSettle();
+      };
+
+      window.casinoBjSplit = function() {
+        const bj = casinoState.bj;
+        if (!bj.inProgress) return;
+        const active = syncActiveBjHandRef(bj);
+        if (!canSplitBjHand(active, bj)) {
+          showToast('Cannot Split Hand', 'You can Split when your active 2-card hand is a pair (or two 10-value cards) and you have enough cash to match the bet (up to 4 hands)!', false);
+          return;
+        }
+        const splitBet = active.bet;
+        recordCasinoDelta(-splitBet);
+        const cardA = active.cards[0];
+        const cardB = active.cards[1];
+        const isAcePair = (cardA.rank === 'A' && cardB.rank === 'A');
+
+        const hand1 = {
+          cards: [cardA, drawShoeCardWithCount(bj)],
+          bet: splitBet,
+          doubled: false,
+          surrendered: false,
+          stood: isAcePair, // Real Vegas Blackjack rule: Split Aces receive 1 card each and stand!
+          busted: false,
+          isFromSplit: true,
+          isSplitAces: isAcePair,
+          outcomeText: ''
+        };
+        const hand2 = {
+          cards: [cardB, drawShoeCardWithCount(bj)],
+          bet: splitBet,
+          doubled: false,
+          surrendered: false,
+          stood: isAcePair,
+          busted: false,
+          isFromSplit: true,
+          isSplitAces: isAcePair,
+          outcomeText: ''
+        };
+
+        bj.playerHands.splice(bj.activeHandIdx, 1, hand1, hand2);
+        syncActiveBjHandRef(bj);
+        startCasinoAnimation('BJ_HIT', 750);
+
+        if (isAcePair) {
+          logCasinoEvent(`🃏 Split Aces (A-A) into 2 hands (${fmtMoney(splitBet)} each) — 1 card dealt to each Ace!`);
+          advanceBlackjackHandOrSettle();
+          return;
+        }
+        const sc1 = calcBlackjackScore(hand1.cards);
+        if (sc1 === 21) {
+          hand1.stood = true;
+          advanceBlackjackHandOrSettle();
+          return;
+        }
+        const softTag = isSoftBlackjackHand(hand1.cards) ? `Soft ${sc1}` : `${sc1}`;
+        casinoState.statusText = `✂️ Split into ${bj.playerHands.length} Hands! Playing Hand #${bj.activeHandIdx + 1} (Total: ${softTag} vs Dealer's ${bj.dealerHand[0].rank}). Hit, Stand, Double${canSplitBjHand(hand1, bj) ? ', or Split' : ''}!`;
+        renderCasinoTab();
+      };
+
+      window.casinoBjInsurance = function() {
+        const bj = casinoState.bj;
+        if (!bj.inProgress || bj.insuranceTaken || !bj.dealerHand[0] || bj.dealerHand[0].rank !== 'A') return;
+        const active = syncActiveBjHandRef(bj);
+        if (!active || bj.playerHands.length !== 1 || active.cards.length !== 2) return;
+        const insCost = Number((active.bet * 0.5).toFixed(2));
+        if (G.human.cash < insCost) {
+          showToast('Insufficient Cash for Insurance', `Insurance requires ${fmtMoney(insCost)} (half your wager).`, false);
+          return;
+        }
+        recordCasinoDelta(-insCost);
+        bj.insuranceBet = insCost;
+        bj.insuranceTaken = true;
+        // If dealer has Natural 21 under the Ace, resolve immediately!
+        if (calcBlackjackScore(bj.dealerHand) === 21) {
+          active.stood = true;
+          settleAllHumanBlackjackHands(bj);
+          return;
+        }
+        casinoState.statusText = `🛡️ Insurance (${fmtMoney(insCost)}) placed! Dealer does NOT have Blackjack — continue playing your hand!`;
+        renderCasinoTab();
       };
 
       window.casinoBjSurrender = function() {
         const bj = casinoState.bj;
-        if (!bj.inProgress || bj.playerHand.length !== 2) return;
-        while (calcBlackjackScore(bj.dealerHand) < 17) {
-          bj.dealerHand.push(drawShoeCardWithCount(bj));
-        }
-        settleAiBlackjackHands(bj, calcBlackjackScore(bj.dealerHand));
-        bj.inProgress = false;
-        casinoState.rounds++;
-        const refund = Number((bj.currentBet * 0.5).toFixed(2));
+        if (!bj.inProgress) return;
+        const active = syncActiveBjHandRef(bj);
+        if (!active || bj.playerHands.length !== 1 || active.isFromSplit || active.cards.length !== 2) return;
+        const refund = Number((active.bet * 0.5).toFixed(2));
         recordCasinoDelta(refund);
-        bj.outcome = `🏳️ SURRENDERED — Saved ${fmtMoney(refund)} (-${fmtMoney(bj.currentBet - refund)})`;
-        casinoState.statusText = `🏳️ Late Surrender: Half your bet (${fmtMoney(refund)}) was returned.`;
-        logCasinoEvent(`🃏 Blackjack Surrender — Recovered ${fmtMoney(refund)} (-${fmtMoney(bj.currentBet - refund)}).`);
+        active.surrendered = true;
+        settleAllHumanBlackjackHands(bj);
+      };
+
+      // -----------------------------------------------------------------------
+      // GAME 1B: REALISTIC 2D PUNTO BANCO BACCARAT (PLAYER 1:1, BANKER 0.95:1, TIE 8:1, PAIRS 11:1 & 3 CASINO AI)
+      // -----------------------------------------------------------------------
+      function baccaratCardValue(card) {
+        if (!card) return 0;
+        if (card.rank === 'A') return 1;
+        if (['10', 'J', 'Q', 'K'].includes(card.rank)) return 0;
+        return Number(card.rank) || 0;
+      }
+
+      function calcBaccaratHandTotal(hand) {
+        if (!Array.isArray(hand)) return 0;
+        let sum = 0;
+        for (const c of hand) sum += baccaratCardValue(c);
+        return sum % 10;
+      }
+
+      function drawBaccaratCard(bc) {
+        if (!bc.deck || bc.deck.length < 24) {
+          bc.deck = buildFreshDeck(8); // Authentic 8-Deck Macau/Vegas Baccarat Shoe!
+        }
+        return bc.deck.pop();
+      }
+
+      window.setBaccaratBetType = function(sel) {
+        const bc = casinoState.baccarat;
+        if (bc.inProgress) return;
+        if (sel === 'PLAYER_PAIR') {
+          bc.playerPairBet = !bc.playerPairBet;
+        } else if (sel === 'BANKER_PAIR') {
+          bc.bankerPairBet = !bc.bankerPairBet;
+        } else if (['PLAYER', 'BANKER', 'TIE'].includes(sel)) {
+          bc.betSelection = sel;
+        }
         renderCasinoTab();
       };
+
+      window.dealBaccaratHand = function() {
+        ensureAllCasinoAiTables();
+        const bc = casinoState.baccarat;
+        if (bc.inProgress) return;
+        const mainBet = getValidatedCasinoBet();
+        if (!mainBet) return;
+
+        const sideUnit = Math.max(5, Math.round(mainBet * 0.25));
+        const pPairCost = bc.playerPairBet ? sideUnit : 0;
+        const bPairCost = bc.bankerPairBet ? sideUnit : 0;
+        const totalWager = mainBet + pPairCost + bPairCost;
+
+        if (G.human.cash < totalWager) {
+          showToast('Insufficient Cash for Baccarat Bets', `Main bet (${fmtMoney(mainBet)}) + Pair side bets require ${fmtMoney(totalWager)} cash!`, false);
+          return;
+        }
+
+        recordCasinoDelta(-totalWager);
+        bc.playerHand = [drawBaccaratCard(bc), drawBaccaratCard(bc)];
+        bc.bankerHand = [drawBaccaratCard(bc), drawBaccaratCard(bc)];
+
+        const pPairHit = bc.playerHand[0].rank === bc.playerHand[1].rank;
+        const bPairHit = bc.bankerHand[0].rank === bc.bankerHand[1].rank;
+        bc.playerPairHit = pPairHit;
+        bc.bankerPairHit = bPairHit;
+
+        let pTot = calcBaccaratHandTotal(bc.playerHand);
+        let bTot = calcBaccaratHandTotal(bc.bankerHand);
+        bc.isNatural = (pTot >= 8 || bTot >= 8);
+
+        // Exact Real Punto Banco Third-Card Tableau Rules!
+        if (!bc.isNatural) {
+          let playerThirdCard = null;
+          if (pTot <= 5) {
+            playerThirdCard = drawBaccaratCard(bc);
+            bc.playerHand.push(playerThirdCard);
+            pTot = calcBaccaratHandTotal(bc.playerHand);
+          }
+
+          if (playerThirdCard === null) {
+            // Player stood on 6 or 7 -> Banker draws on 0–5 and stands on 6–7
+            if (bTot <= 5) {
+              bc.bankerHand.push(drawBaccaratCard(bc));
+              bTot = calcBaccaratHandTotal(bc.bankerHand);
+            }
+          } else {
+            // Player drew a 3rd card -> Banker acts according to Player's 3rd card value (p3 = 0..9)
+            const p3 = baccaratCardValue(playerThirdCard);
+            let bankerDraws = false;
+            if (bTot <= 2) bankerDraws = true;
+            else if (bTot === 3) bankerDraws = (p3 !== 8);
+            else if (bTot === 4) bankerDraws = (p3 >= 2 && p3 <= 7);
+            else if (bTot === 5) bankerDraws = (p3 >= 4 && p3 <= 7);
+            else if (bTot === 6) bankerDraws = (p3 === 6 || p3 === 7);
+            else bankerDraws = false; // Banker 7 always stands
+
+            if (bankerDraws) {
+              bc.bankerHand.push(drawBaccaratCard(bc));
+              bTot = calcBaccaratHandTotal(bc.bankerHand);
+            }
+          }
+        }
+
+        bc.playerTotal = pTot;
+        bc.bankerTotal = bTot;
+        bc.winner = pTot > bTot ? 'PLAYER' : (bTot > pTot ? 'BANKER' : 'TIE');
+        bc.beadRoad.unshift(bc.winner === 'PLAYER' ? 'P' : (bc.winner === 'BANKER' ? 'B' : 'T'));
+        if (bc.beadRoad.length > 14) bc.beadRoad.length = 14;
+
+        // Settle the 3 Casino AI Table Patrons at the Baccarat table
+        const bChoices = ['PLAYER', 'BANKER', 'PLAYER', 'BANKER', 'TIE'];
+        for (const ai of (bc.aiPlayers || [])) {
+          const aiWager = Math.max(10, Math.min(ai.chips, Math.round(mainBet * (0.70 + Math.random() * 0.60))));
+          ai.bet = aiWager;
+          ai.chips = Math.max(0, ai.chips - aiWager);
+          const pick = bChoices[Math.floor(Math.random() * bChoices.length)];
+          ai.baccaratBetType = pick;
+          ai.baccaratPickLabel = pick === 'BANKER' ? '🔴 Banker' : (pick === 'TIE' ? '🟢 Tie (8:1)' : '🔵 Player');
+          let aiRet = 0;
+          if (bc.winner === 'TIE') {
+            if (pick === 'TIE') aiRet = aiWager * 9; // 8:1 + stake
+            else aiRet = aiWager; // Player & Banker bets PUSH on Tie in real Baccarat!
+          } else if (pick === bc.winner) {
+            aiRet = pick === 'BANKER' ? Number((aiWager * 1.95).toFixed(2)) : (aiWager * 2);
+          }
+          ai.chips = Math.round(ai.chips + aiRet);
+          const aiNet = Number((aiRet - aiWager).toFixed(2));
+          ai.lastAction = `${ai.baccaratPickLabel} • ${aiNet > 0 ? 'Won +' + fmtCompact(aiNet) : (aiNet === 0 ? 'Push ($0)' : 'Lost -' + fmtCompact(aiWager))}`;
+          ai.outcome = ai.lastAction;
+        }
+
+        // Settle Human Player Baccarat Main Bet + Pair Side Bets
+        let totalPayout = 0;
+        const notes = [];
+        if (bc.winner === 'TIE') {
+          if (bc.betSelection === 'TIE') {
+            totalPayout += mainBet * 9; // 8:1 profit + stake
+            notes.push(`🟢 TIE 8:1 HIT (+${fmtMoney(mainBet * 8)})`);
+          } else {
+            totalPayout += mainBet; // Real Baccarat rule: Player & Banker bets PUSH on a Tie!
+            notes.push(`🤝 ${bc.betSelection} Bet Pushed on Tie (${fmtMoney(mainBet)} returned)`);
+          }
+        } else if (bc.betSelection === bc.winner) {
+          if (bc.winner === 'BANKER') {
+            const bPay = Number((mainBet * 1.95).toFixed(2)); // 0.95:1 (5% Banker commission)
+            totalPayout += bPay;
+            notes.push(`🔴 BANKER WIN 0.95:1 (+${fmtMoney(bPay - mainBet)})`);
+          } else {
+            const pPay = mainBet * 2; // 1:1 Even Money
+            totalPayout += pPay;
+            notes.push(`🔵 PLAYER WIN 1:1 (+${fmtMoney(mainBet)})`);
+          }
+        } else {
+          notes.push(`❌ ${bc.betSelection} Lost (-${fmtMoney(mainBet)})`);
+        }
+
+        if (pPairCost > 0) {
+          if (pPairHit) {
+            totalPayout += pPairCost * 12; // 11:1 + stake
+            notes.push(`💠 Player Pair 11:1 (+${fmtMoney(pPairCost * 11)})`);
+          } else {
+            notes.push(`Player Pair Missed (-${fmtMoney(pPairCost)})`);
+          }
+        }
+        if (bPairCost > 0) {
+          if (bPairHit) {
+            totalPayout += bPairCost * 12; // 11:1 + stake
+            notes.push(`🔶 Banker Pair 11:1 (+${fmtMoney(bPairCost * 11)})`);
+          } else {
+            notes.push(`Banker Pair Missed (-${fmtMoney(bPairCost)})`);
+          }
+        }
+
+        if (totalPayout > 0) recordCasinoDelta(totalPayout);
+        const netProfit = Number((totalPayout - totalWager).toFixed(2));
+        bc.lastNetWin = netProfit;
+        bc.roundsPlayed = (bc.roundsPlayed || 0) + 1;
+        casinoState.rounds++;
+        if (netProfit > 0) {
+          bc.roundsWon = (bc.roundsWon || 0) + 1;
+          casinoState.wins++;
+        }
+
+        const natTag = bc.isNatural ? ' (NATURAL!)' : '';
+        bc.outcomeBanner = `🎴 Player ${pTot} vs. Banker ${bTot}${natTag} → ${bc.winner} WINS! ${notes.join(' • ')}`;
+        casinoState.statusText = bc.outcomeBanner;
+        logCasinoEvent(`🎴 Baccarat (P:${pTot} vs B:${bTot}${natTag}) — ${netProfit >= 0 ? '+' : ''}${fmtMoney(netProfit)}.`);
+        if (netProfit > 0) {
+          showToast(`🎴 Baccarat Winner (${bc.winner} ${Math.max(pTot, bTot)})!`, `${notes.join(' • ')} (Net +${fmtMoney(netProfit)})!`, true);
+        }
+
+        startCasinoAnimation('BACCARAT_DEAL', 1150);
+        rotateCasinoTablePatronsIfNeeded('BACCARAT');
+        renderCasinoTab();
+      };
+
+      // -----------------------------------------------------------------------
+      // GAME 1C: 2D ROCKET CRASH GAME (97% RTP • 1,000x MAX MULTIPLIER • REAL-TIME EXIT)
+      // -----------------------------------------------------------------------
+      function rollRocketCrashMultiplier() {
+        // Exact 97% RTP crash distribution capped at 1,000.00x maximum multiplier!
+        const u = Math.random();
+        if (u < 0.03) return 1.00; // 3% instant launchpad explosion at 1.00x
+        const raw = 0.97 / Math.max(0.00001, 1.0 - ((u - 0.03) / 0.97));
+        return Math.min(1000.00, Math.max(1.01, Math.floor(raw * 100) / 100));
+      }
+      window.rollRocketCrashMultiplier = rollRocketCrashMultiplier;
+
+      window.setRocketAutoCashOut = function(val) {
+        const rk = casinoState.rocket;
+        const num = Number(val) || 0;
+        rk.autoCashOutMult = num <= 1.0 ? 0 : Math.min(1000, Number(num.toFixed(2)));
+        const inp = document.getElementById('rocketAutoCashInput');
+        if (inp && document.activeElement !== inp) {
+          inp.value = rk.autoCashOutMult > 0 ? String(rk.autoCashOutMult) : '';
+        }
+        renderCasinoTab();
+      };
+
+      window.launchCasinoRocket = function(instantForTest = false) {
+        ensureAllCasinoAiTables();
+        const rk = casinoState.rocket;
+        if (rk.inFlight) return false;
+        const bet = getValidatedCasinoBet();
+        if (!bet) return false;
+
+        recordCasinoDelta(-bet);
+        rk.currentBet = bet;
+        rk.inFlight = true;
+        rk.crashed = false;
+        rk.cashedOut = false;
+        rk.currentMult = 1.00;
+        rk.cashOutMult = null;
+        rk.lastPayout = 0;
+        rk.lastProfit = -bet;
+        rk.crashMult = rollRocketCrashMultiplier();
+        rk.flightStartMs = performance.now();
+        rk.trailPoints = [{ t: 0, m: 1.00 }];
+        if (!rk.stars || rk.stars.length === 0) {
+          rk.stars = Array.from({ length: 36 }, () => ({
+            x: Math.random(),
+            y: Math.random(),
+            r: 0.8 + Math.random() * 1.8,
+            twinkle: Math.random() * Math.PI * 2
+          }));
+        }
+
+        // Setup 3 Casino AI Rocket Bettors for this launch
+        for (const ai of (rk.aiPlayers || [])) {
+          const wager = Math.max(10, Math.min(ai.chips, Math.round(bet * (0.65 + Math.random() * 0.70))));
+          ai.bet = wager;
+          ai.chips = Math.max(0, ai.chips - wager);
+          // AI chooses a realistic target multiplier between 1.20x and 18.00x (occasionally aiming for 50x+)
+          const highAim = Math.random() < 0.15;
+          ai.rocketTargetMult = Number((highAim ? (8.0 + Math.random() * 45.0) : (1.22 + Math.random() * 3.80)).toFixed(2));
+          ai.rocketCashedOut = false;
+          ai.rocketCashOutMult = null;
+          ai.lastAction = `🚀 Bet ${fmtCompact(wager)} (Target ${ai.rocketTargetMult.toFixed(2)}x)`;
+          ai.outcome = ai.lastAction;
+        }
+
+        casinoState.statusText = `🚀 2D ROCKET LAUNCHED (${fmtMoney(bet)} Bet)! Multiplier climbing — tap 💰 CASH OUT NOW before it explodes!`;
+        renderCasinoTab();
+
+        if (instantForTest) {
+          if (rk.autoCashOutMult >= 1.01 && rk.autoCashOutMult <= rk.crashMult) {
+            window.cashOutCasinoRocket(rk.autoCashOutMult);
+          }
+          finishRocketFlightExplosion();
+          return true;
+        }
+
+        if (rk.rafId) cancelAnimationFrame(rk.rafId);
+        const stepFlight = (nowMs) => {
+          if (!rk.inFlight) return;
+          const elapsedSec = Math.max(0, (nowMs - rk.flightStartMs) / 1000);
+          // Smooth exponential climb: 1.00x -> ~2.0x in 3.2s -> ~10x in 9.5s -> up to 1,000x!
+          const nextMult = Number(Math.min(1000.00, Math.pow(Math.E, 0.22 * elapsedSec + 0.018 * elapsedSec * elapsedSec)).toFixed(2));
+
+          // Check if AI bettors bail out along the climb
+          for (const ai of (rk.aiPlayers || [])) {
+            if (!ai.rocketCashedOut && ai.rocketTargetMult <= Math.min(nextMult, rk.crashMult) && rk.crashMult > 1.00) {
+              ai.rocketCashedOut = true;
+              ai.rocketCashOutMult = ai.rocketTargetMult;
+              const winAmt = Math.round(ai.bet * ai.rocketTargetMult);
+              ai.chips += winAmt;
+              ai.lastAction = `🪂 Cashed @ ${ai.rocketTargetMult.toFixed(2)}x (+${fmtCompact(winAmt - ai.bet)})`;
+              ai.outcome = ai.lastAction;
+            }
+          }
+
+          // Check if Human Auto Cash-Out triggers before crash
+          if (!rk.cashedOut && rk.autoCashOutMult >= 1.01 && rk.autoCashOutMult <= rk.crashMult && nextMult >= rk.autoCashOutMult) {
+            rk.currentMult = rk.autoCashOutMult;
+            window.cashOutCasinoRocket(rk.autoCashOutMult);
+          }
+
+          // Check if rocket reached crash point or 1,000x Max Multiplier!
+          if (nextMult >= rk.crashMult || nextMult >= 1000.00) {
+            rk.currentMult = rk.crashMult;
+            if (!rk.cashedOut && rk.crashMult >= 1000.00) {
+              window.cashOutCasinoRocket(1000.00);
+            }
+            finishRocketFlightExplosion();
+            return;
+          }
+
+          rk.currentMult = nextMult;
+          rk.trailPoints.push({ t: elapsedSec, m: rk.currentMult });
+          if (rk.trailPoints.length > 90) rk.trailPoints.shift();
+
+          // Live update Cash Out button label without rebuilding full DOM
+          const cashBtn = document.getElementById('btnRocketCashOut');
+          if (cashBtn && !rk.cashedOut) {
+            const livePay = Number((rk.currentBet * rk.currentMult).toFixed(2));
+            cashBtn.textContent = `💰 CASH OUT NOW @ ${rk.currentMult.toFixed(2)}x (${fmtMoney(livePay)})`;
+          }
+          const statusEl = document.getElementById('casinoStatusBanner');
+          if (statusEl && !rk.cashedOut) {
+            statusEl.textContent = `🚀 Climbing: ${rk.currentMult.toFixed(2)}x (${fmtMoney(rk.currentBet * rk.currentMult)}) — Tap Cash Out before explosion!`;
+          }
+
+          drawCasinoCanvas();
+          rk.rafId = requestAnimationFrame(stepFlight);
+        };
+        rk.rafId = requestAnimationFrame(stepFlight);
+        return true;
+      };
+
+      window.cashOutCasinoRocket = function(forcedMult = null) {
+        const rk = casinoState.rocket;
+        if (!rk.inFlight || rk.cashedOut || rk.crashed) return false;
+        const exitMult = Number(Math.min(1000.00, Math.max(1.01, forcedMult || rk.currentMult)).toFixed(2));
+        rk.cashedOut = true;
+        rk.cashOutMult = exitMult;
+        const payout = Number((rk.currentBet * exitMult).toFixed(2));
+        const profit = Number((payout - rk.currentBet).toFixed(2));
+        rk.lastPayout = payout;
+        rk.lastProfit = profit;
+        rk.flightsWon = (rk.flightsWon || 0) + 1;
+        if (exitMult > (rk.biggestMultWon || 0)) rk.biggestMultWon = exitMult;
+
+        recordCasinoDelta(payout);
+        casinoState.wins++;
+        casinoState.statusText = `🪂 CASHED OUT SAFELY @ ${exitMult.toFixed(2)}x! Won ${fmtMoney(payout)} (+${fmtMoney(profit)} net profit)! Watching rocket continue...`;
+        logCasinoEvent(`🚀 2D Rocket Cashed Out @ ${exitMult.toFixed(2)}x — Won +${fmtMoney(profit)}!`);
+        showToast(`🪂 Cashed Out @ ${exitMult.toFixed(2)}x!`, `You locked in ${fmtMoney(payout)} (+${fmtMoney(profit)} profit)!`, true);
+        renderCasinoTab();
+        return true;
+      };
+
+      function finishRocketFlightExplosion() {
+        const rk = casinoState.rocket;
+        if (rk.rafId) {
+          cancelAnimationFrame(rk.rafId);
+          rk.rafId = null;
+        }
+        rk.inFlight = false;
+        rk.crashed = true;
+        rk.currentMult = rk.crashMult;
+        rk.flightsPlayed = (rk.flightsPlayed || 0) + 1;
+        casinoState.rounds++;
+        rk.recentCrashes.unshift(rk.crashMult);
+        if (rk.recentCrashes.length > 10) rk.recentCrashes.length = 10;
+
+        for (const ai of (rk.aiPlayers || [])) {
+          if (!ai.rocketCashedOut) {
+            ai.lastAction = `💥 Exploded @ ${rk.crashMult.toFixed(2)}x (-${fmtCompact(ai.bet)})`;
+            ai.outcome = ai.lastAction;
+          }
+        }
+
+        if (rk.cashedOut) {
+          casinoState.statusText = `💥 Rocket exploded @ ${rk.crashMult.toFixed(2)}x — You safely cashed out @ ${rk.cashOutMult.toFixed(2)}x (+${fmtMoney(rk.lastProfit)} profit)!`;
+        } else {
+          rk.lastPayout = 0;
+          rk.lastProfit = -rk.currentBet;
+          casinoState.statusText = `💥 KABOOM! Rocket exploded @ ${rk.crashMult.toFixed(2)}x before you cashed out (-${fmtMoney(rk.currentBet)})!`;
+          logCasinoEvent(`🚀 2D Rocket Exploded @ ${rk.crashMult.toFixed(2)}x — Lost -${fmtMoney(rk.currentBet)}.`);
+        }
+
+        rotateCasinoTablePatronsIfNeeded('ROCKET');
+        renderCasinoTab();
+      }
 
       // -----------------------------------------------------------------------
       // GAME 2: REALISTIC 2D EUROPEAN ROULETTE (INSIDE, DOZENS, COLUMNS & 3 AI)
@@ -21152,6 +21860,7 @@
             casinoState.statusText = `🎡 Ball landed on ${colorTag} — Missed ${bt} (-${fmtMoney(bet)}).`;
             logCasinoEvent(`🎡 Roulette landed ${colorTag} (Bet: ${bt}) — Lost -${fmtMoney(bet)}.`);
           }
+          rotateCasinoTablePatronsIfNeeded('ROULETTE');
           renderCasinoTab();
         });
       };
@@ -21296,6 +22005,7 @@
           casinoState.statusText = pk.winnerBanner;
           logCasinoEvent(`🤠 Texas Hold'em: All 3 AI folded! Won pot of ${fmtMoney(pk.pot)} (+${fmtMoney(netProfit)} net).`);
           showToast('🤠 Hold\'em Pot Won (All AI Folded)!', `You scooped ${fmtMoney(pk.pot)}!`, true);
+          rotateCasinoTablePatronsIfNeeded('POKER');
           return;
         }
 
@@ -21373,6 +22083,7 @@
             casinoState.statusText = pk.winnerBanner;
             logCasinoEvent(`🤠 Hold'em Showdown: ${winnerName} won ${fmtMoney(pk.pot)} with ${winnerHand}.`);
           }
+          rotateCasinoTablePatronsIfNeeded('POKER');
           return;
         }
 
@@ -21400,6 +22111,7 @@
           pk.winnerBanner = `🏳️ You folded — ${aiWinner.name} collected the ${fmtMoney(pk.pot)} pot.`;
           casinoState.statusText = pk.winnerBanner;
           logCasinoEvent(`🤠 Texas Hold'em: You folded (-${fmtMoney(pk.humanTotalCommitted)}).`);
+          rotateCasinoTablePatronsIfNeeded('POKER');
           renderCasinoTab();
           return;
         }
@@ -21844,30 +22556,361 @@
             });
           });
 
-          const pCards = bj.playerHand.length ? bj.playerHand : [{ rank: 'Q', suit: '♥' }, { rank: 'A', suit: '♠' }];
-          const pStartX = W / 2 - (pCards.length * 40) / 2;
-          pCards.forEach((c, idx) => {
-            // Player cards already on the table (< prevPCnt) stay stationary at 1.0; only the newly drawn card animates!
-            let itemAnim = 1.0;
-            let pOrder = 0;
-            if (isInitialDeal) {
-              itemAnim = animP;
-              pOrder = dealOrder++;
-            } else if ((isPlayerHit || isDealerTurn) && idx >= prevPCnt) {
-              itemAnim = animP;
-              pOrder = idx - prevPCnt;
-            }
-            drawPlayingCard2D(ctx, pStartX + idx * 40, H - 84, 36, 50, c, false, itemAnim, pOrder, shoeX, shoeY);
-          });
-          ctx.fillStyle = '#00C805';
-          ctx.font = 'bold 11px Inter, monospace';
-          const pScore = bj.playerHand.length ? calcBlackjackScore(bj.playerHand) : 21;
-          ctx.fillText(`YOU: ${pScore} (Bet ${fmtMoney(bj.inProgress ? bj.currentBet : casinoState.betAmount, 0)})`, W / 2, H - 22);
+          const handsList = (bj.playerHands && bj.playerHands.length > 0)
+            ? bj.playerHands
+            : [{ cards: (bj.playerHand && bj.playerHand.length ? bj.playerHand : [{ rank: 'Q', suit: '♥' }, { rank: 'A', suit: '♠' }]), bet: bj.inProgress ? bj.currentBet : casinoState.betAmount, outcomeText: '' }];
+
+          if (handsList.length === 1) {
+            const pCards = handsList[0].cards;
+            const pStartX = W / 2 - (pCards.length * 40) / 2;
+            pCards.forEach((c, idx) => {
+              let itemAnim = 1.0;
+              let pOrder = 0;
+              if (isInitialDeal) {
+                itemAnim = animP;
+                pOrder = dealOrder++;
+              } else if ((isPlayerHit || isDealerTurn) && idx >= prevPCnt) {
+                itemAnim = animP;
+                pOrder = idx - prevPCnt;
+              }
+              drawPlayingCard2D(ctx, pStartX + idx * 40, H - 84, 36, 50, c, false, itemAnim, pOrder, shoeX, shoeY);
+            });
+            ctx.fillStyle = '#00C805';
+            ctx.font = 'bold 11px Inter, monospace';
+            const pScore = pCards.length ? calcBlackjackScore(pCards) : 21;
+            ctx.fillText(`YOU: ${pScore} (Bet ${fmtMoney(handsList[0].bet || casinoState.betAmount, 0)})`, W / 2, H - 22);
+          } else {
+            // Render Split Hands side-by-side across bottom of table!
+            const slotW = (W - 24) / handsList.length;
+            handsList.forEach((hObj, hIdx) => {
+              const cx = 12 + slotW * (hIdx + 0.5);
+              const isActiveHand = bj.inProgress && bj.activeHandIdx === hIdx;
+              const cards = hObj.cards || [];
+              const cStep = Math.min(28, Math.max(18, Math.floor((slotW - 24) / Math.max(2, cards.length))));
+              const startX = cx - ((cards.length - 1) * cStep + 30) / 2;
+
+              if (isActiveHand) {
+                ctx.save();
+                ctx.strokeStyle = '#FACC15';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(cx - slotW * 0.46, H - 96, slotW * 0.92, 74, 8);
+                ctx.stroke();
+                ctx.restore();
+              }
+
+              cards.forEach((c, cIdx) => {
+                drawPlayingCard2D(ctx, startX + cIdx * cStep, H - 86, 30, 42, c, false, 1.0, 0, shoeX, shoeY);
+              });
+
+              const sc = calcBlackjackScore(cards);
+              ctx.fillStyle = isActiveHand ? '#FACC15' : '#4ADE80';
+              ctx.font = 'bold 9.5px Inter, monospace';
+              ctx.textAlign = 'center';
+              const ptr = isActiveHand ? '👉 ' : '';
+              ctx.fillText(`${ptr}H${hIdx + 1}: ${sc} (${fmtCompact(hObj.bet)})`, cx, H - 30);
+              if (hObj.outcomeText) {
+                ctx.fillStyle = '#E2E8F0';
+                ctx.font = 'bold 8px Inter, sans-serif';
+                ctx.fillText(hObj.outcomeText.slice(0, 20), cx, H - 19);
+              }
+            });
+          }
           if (bj.outcome) {
             ctx.fillStyle = '#FACC15';
-            ctx.font = 'bold 10px Inter, sans-serif';
-            ctx.fillText(bj.outcome, W / 2, H - 9);
+            ctx.font = 'bold 9.5px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(bj.outcome.slice(0, 72), W / 2, H - 7);
           }
+        } else if (mode === 'BACCARAT') {
+          const bc = casinoState.baccarat;
+          drawDealerShoe2D(ctx, shoeX, shoeY);
+
+          ctx.fillStyle = '#FDE047';
+          ctx.font = 'bold 11px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('🎴 2D PUNTO BANCO BACCARAT (PLAYER 1:1 • BANKER 0.95:1 • TIE 8:1 • PAIRS 11:1)', W / 2, 20);
+
+          // Bead Road History Strip at top
+          const road = bc.beadRoad || [];
+          const roadStartX = W / 2 - (road.length * 18) / 2;
+          road.forEach((rSym, rIdx) => {
+            const rx = roadStartX + rIdx * 18 + 8;
+            const ry = 35;
+            ctx.beginPath();
+            ctx.arc(rx, ry, 7, 0, Math.PI * 2);
+            ctx.fillStyle = rSym === 'P' ? '#2563EB' : (rSym === 'B' ? '#DC2626' : '#16A34A');
+            ctx.fill();
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 8px Inter, monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(rSym, rx, ry + 3);
+          });
+
+          // Player (Punto) Box on Left vs Banker (Banco) Box on Right
+          const boxW = Math.min(210, Math.floor((W - 44) / 2));
+          const boxH = 112;
+          const pBoxX = W / 2 - boxW - 10;
+          const bBoxX = W / 2 + 10;
+          const boxY = 52;
+
+          // Player Zone
+          ctx.save();
+          ctx.fillStyle = 'rgba(30, 58, 138, 0.40)';
+          ctx.strokeStyle = bc.winner === 'PLAYER' ? '#FACC15' : '#60A5FA';
+          ctx.lineWidth = bc.winner === 'PLAYER' ? 2.5 : 1.5;
+          ctx.beginPath();
+          ctx.roundRect(pBoxX, boxY, boxW, boxH, 10);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+
+          // Banker Zone
+          ctx.save();
+          ctx.fillStyle = 'rgba(127, 29, 29, 0.40)';
+          ctx.strokeStyle = bc.winner === 'BANKER' ? '#FACC15' : '#F87171';
+          ctx.lineWidth = bc.winner === 'BANKER' ? 2.5 : 1.5;
+          ctx.beginPath();
+          ctx.roundRect(bBoxX, boxY, boxW, boxH, 10);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+
+          const pCards = (bc.playerHand && bc.playerHand.length) ? bc.playerHand : [{ rank: '9', suit: '♠' }, { rank: 'K', suit: '♦' }];
+          const bCards = (bc.bankerHand && bc.bankerHand.length) ? bc.bankerHand : [{ rank: '8', suit: '♥' }, { rank: 'Q', suit: '♣' }];
+          const pTot = (bc.playerHand && bc.playerHand.length) ? bc.playerTotal : 9;
+          const bTot = (bc.bankerHand && bc.bankerHand.length) ? bc.bankerTotal : 8;
+
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#93C5FD';
+          ctx.font = 'bold 10.5px Inter, sans-serif';
+          ctx.fillText(`🔵 PLAYER (PUNTO): ${pTot}`, pBoxX + boxW / 2, boxY + 17);
+
+          ctx.fillStyle = '#FCA5A5';
+          ctx.fillText(`🔴 BANKER (BANCO): ${bTot}`, bBoxX + boxW / 2, boxY + 17);
+
+          const isBaccAnim = casinoState.anim.active && casinoState.anim.type === 'BACCARAT_DEAL';
+          let bOrder = 0;
+          const pStartX = pBoxX + boxW / 2 - (pCards.length * 36) / 2;
+          pCards.forEach((c, idx) => {
+            drawPlayingCard2D(ctx, pStartX + idx * 36, boxY + 26, 32, 46, c, false, isBaccAnim ? animP : 1.0, isBaccAnim ? bOrder++ : 0, shoeX, shoeY);
+          });
+
+          const bStartX = bBoxX + boxW / 2 - (bCards.length * 36) / 2;
+          bCards.forEach((c, idx) => {
+            drawPlayingCard2D(ctx, bStartX + idx * 36, boxY + 26, 32, 46, c, false, isBaccAnim ? animP : 1.0, isBaccAnim ? bOrder++ : 0, shoeX, shoeY);
+          });
+
+          ctx.font = 'bold 9.5px Inter, monospace';
+          ctx.fillStyle = '#E2E8F0';
+          ctx.fillText(bc.playerPairHit ? '💠 PLAYER PAIR (11:1)!' : 'Pays 1:1 Even Money', pBoxX + boxW / 2, boxY + 94);
+          ctx.fillText(bc.bankerPairHit ? '🔶 BANKER PAIR (11:1)!' : 'Pays 0.95:1 (5% Comm)', bBoxX + boxW / 2, boxY + 94);
+
+          // Render 3 Casino AI Patrons at Baccarat Table
+          const aiRowY = H - 108;
+          const cardW = Math.floor((W - 28) / 3);
+          (bc.aiPlayers || []).forEach((ai, idx) => {
+            const ax = 12 + idx * (cardW + 2);
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+            ctx.strokeStyle = '#38BDF8';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.roundRect(ax, aiRowY, cardW - 2, 54, 7);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 9px Inter, sans-serif';
+            ctx.fillText(`${ai.avatar} ${ai.name.slice(0, 15)}`, ax + (cardW - 2) / 2, aiRowY + 14);
+            ctx.fillStyle = '#4ADE80';
+            ctx.font = 'bold 8.5px Inter, monospace';
+            ctx.fillText(`${fmtCompact(ai.chips)} • Bet ${fmtCompact(ai.bet)}`, ax + (cardW - 2) / 2, aiRowY + 27);
+            ctx.fillStyle = '#FACC15';
+            ctx.font = '8px Inter, sans-serif';
+            ctx.fillText((ai.outcome || ai.baccaratPickLabel || '').slice(0, 22), ax + (cardW - 2) / 2, aiRowY + 41);
+          });
+
+          // Human Baccarat Bet & Result Banner at Bottom
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#00C805';
+          ctx.font = 'bold 11px Inter, monospace';
+          const sideTags = `${bc.playerPairBet ? ' + P.Pair' : ''}${bc.bankerPairBet ? ' + B.Pair' : ''}`;
+          ctx.fillText(`YOUR BET: ${bc.betSelection}${sideTags} (${fmtMoney(casinoState.betAmount, 0)})`, W / 2, H - 30);
+          ctx.fillStyle = '#FACC15';
+          ctx.font = 'bold 9.5px Inter, sans-serif';
+          ctx.fillText((bc.outcomeBanner || '').slice(0, 74), W / 2, H - 12);
+        } else if (mode === 'ROCKET') {
+          const rk = casinoState.rocket;
+          // Deep Space Background for 2D Rocket
+          const spaceGrad = ctx.createLinearGradient(0, 0, 0, H);
+          spaceGrad.addColorStop(0, '#040711');
+          spaceGrad.addColorStop(0.6, '#0B132B');
+          spaceGrad.addColorStop(1, '#1C2541');
+          ctx.fillStyle = spaceGrad;
+          ctx.fillRect(6, 6, W - 12, H - 12);
+
+          // Twinkling Stars
+          (rk.stars || []).forEach((st, sIdx) => {
+            ctx.fillStyle = sIdx % 3 === 0 ? 'rgba(147, 197, 253, 0.75)' : 'rgba(255, 255, 255, 0.65)';
+            ctx.beginPath();
+            ctx.arc(12 + st.x * (W - 24), 14 + st.y * (H - 95), st.r, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          // Top Recent Crash History Pills
+          ctx.textAlign = 'left';
+          ctx.fillStyle = '#94A3B8';
+          ctx.font = 'bold 9px Inter, monospace';
+          ctx.fillText('RECENT:', 14, 22);
+          let hx = 62;
+          (rk.recentCrashes || []).slice(0, 7).forEach(cm => {
+            const txt = `${cm.toFixed(2)}x`;
+            const pw = Math.max(38, txt.length * 6 + 10);
+            if (hx + pw < W - 12) {
+              ctx.fillStyle = cm >= 10 ? 'rgba(245, 158, 11, 0.28)' : (cm >= 2.0 ? 'rgba(0, 200, 5, 0.25)' : 'rgba(239, 68, 68, 0.25)');
+              ctx.strokeStyle = cm >= 10 ? '#FBBF24' : (cm >= 2.0 ? '#4ADE80' : '#F87171');
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.roundRect(hx, 11, pw, 16, 5);
+              ctx.fill();
+              ctx.stroke();
+              ctx.fillStyle = cm >= 10 ? '#FDE047' : (cm >= 2.0 ? '#4ADE80' : '#FCA5A5');
+              ctx.textAlign = 'center';
+              ctx.fillText(txt, hx + pw / 2, 22);
+              hx += pw + 5;
+            }
+          });
+
+          // Flight Area Coordinates
+          const padL = 36;
+          const padR = W - 36;
+          const padB = H - 78;
+          const padT = 46;
+          const plotW = Math.max(120, padR - padL);
+          const plotH = Math.max(100, padB - padT);
+
+          // Subtle Altitude Grid Lines
+          ctx.strokeStyle = 'rgba(148, 163, 184, 0.14)';
+          ctx.lineWidth = 1;
+          for (let g = 0; g <= 3; g++) {
+            const gy = padT + (g / 3) * plotH;
+            ctx.beginPath();
+            ctx.moveTo(padL, gy);
+            ctx.lineTo(padR, gy);
+            ctx.stroke();
+          }
+
+          // Compute normalized rocket position (0..1) from currentMult
+          const logProg = Math.min(1.0, Math.log(Math.max(1.0, rk.currentMult)) / Math.log(25.0));
+          const prog = rk.inFlight || rk.crashed ? Math.max(0.06, Math.min(0.95, logProg)) : 0.08;
+          const rx = padL + prog * plotW;
+          const ry = padB - Math.pow(prog, 1.25) * plotH;
+
+          // Draw Glowing Trajectory Curve from Launchpad (padL, padB) to (rx, ry)
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(padL, padB);
+          ctx.quadraticCurveTo(padL + (rx - padL) * 0.55, padB, rx, ry);
+          ctx.strokeStyle = rk.crashed ? '#EF4444' : '#38BDF8';
+          ctx.lineWidth = 3.5;
+          ctx.stroke();
+
+          ctx.lineTo(rx, padB);
+          ctx.lineTo(padL, padB);
+          ctx.closePath();
+          const curveGrad = ctx.createLinearGradient(0, padT, 0, padB);
+          curveGrad.addColorStop(0, rk.crashed ? 'rgba(239, 68, 68, 0.28)' : 'rgba(56, 189, 248, 0.30)');
+          curveGrad.addColorStop(1, 'rgba(15, 23, 42, 0.02)');
+          ctx.fillStyle = curveGrad;
+          ctx.fill();
+          ctx.restore();
+
+          // Draw Rocket or Explosion at (rx, ry)
+          ctx.save();
+          ctx.translate(rx, ry);
+          if (rk.crashed) {
+            ctx.beginPath();
+            ctx.arc(0, 0, 24, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.35)';
+            ctx.fill();
+            ctx.font = '26px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('💥', 0, 9);
+          } else {
+            ctx.rotate(-0.55);
+            if (rk.inFlight) {
+              // Animated exhaust flame
+              ctx.fillStyle = '#F59E0B';
+              ctx.beginPath();
+              ctx.moveTo(-14, 4);
+              ctx.lineTo(-28 - (Date.now() % 9), 0);
+              ctx.lineTo(-14, -4);
+              ctx.fill();
+            }
+            ctx.font = '24px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🚀', 0, 8);
+          }
+          ctx.restore();
+
+          // Center Giant Multiplier Readout
+          ctx.textAlign = 'center';
+          ctx.fillStyle = rk.crashed ? '#F87171' : (rk.cashedOut ? '#4ADE80' : '#FFFFFF');
+          ctx.font = 'bold 34px Inter, monospace';
+          ctx.fillText(`${rk.currentMult.toFixed(2)}x`, W / 2, H * 0.42);
+
+          ctx.font = 'bold 11px Inter, sans-serif';
+          if (rk.crashed) {
+            ctx.fillStyle = rk.cashedOut ? '#4ADE80' : '#FCA5A5';
+            ctx.fillText(
+              rk.cashedOut
+                ? `💥 EXPLODED @ ${rk.crashMult.toFixed(2)}x • 🪂 YOU CASHED OUT @ ${rk.cashOutMult.toFixed(2)}x (+${fmtMoney(rk.lastProfit)})!`
+                : `💥 ROCKET EXPLODED @ ${rk.crashMult.toFixed(2)}x (-${fmtMoney(rk.currentBet)})`,
+              W / 2,
+              H * 0.42 + 20
+            );
+          } else if (rk.inFlight) {
+            ctx.fillStyle = rk.cashedOut ? '#4ADE80' : '#38BDF8';
+            ctx.fillText(
+              rk.cashedOut
+                ? `🪂 CASHED OUT @ ${rk.cashOutMult.toFixed(2)}x (+${fmtMoney(rk.lastProfit)})! Rocket still climbing...`
+                : `🔥 LIVE PAYOUT: ${fmtMoney(rk.currentBet * rk.currentMult)} • MAX 1,000x (97% RTP)`,
+              W / 2,
+              H * 0.42 + 20
+            );
+          } else {
+            ctx.fillStyle = '#93C5FD';
+            ctx.fillText('🚀 2D ROCKET • 97% RTP • UP TO 1,000x MULTIPLIER', W / 2, H * 0.42 + 20);
+          }
+
+          // Bottom 3 Casino AI Rocket Bettors
+          const aiRowY = H - 64;
+          const cardW = Math.floor((W - 24) / 3);
+          (rk.aiPlayers || []).forEach((ai, idx) => {
+            const ax = 10 + idx * (cardW + 2);
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.90)';
+            ctx.strokeStyle = ai.rocketCashedOut ? '#4ADE80' : (rk.crashed ? '#EF4444' : '#38BDF8');
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.roundRect(ax, aiRowY, cardW - 2, 52, 6);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 8.5px Inter, sans-serif';
+            ctx.fillText(`${ai.avatar} ${ai.name.slice(0, 14)}`, ax + 5, aiRowY + 13);
+            ctx.fillStyle = '#4ADE80';
+            ctx.font = 'bold 8px Inter, monospace';
+            ctx.fillText(`${fmtCompact(ai.chips)} • Bet ${fmtCompact(ai.bet)}`, ax + 5, aiRowY + 26);
+            ctx.fillStyle = '#FACC15';
+            ctx.font = '8px Inter, sans-serif';
+            ctx.fillText((ai.outcome || ai.lastAction || '').slice(0, 21), ax + 5, aiRowY + 41);
+          });
         } else if (mode === 'ROULETTE') {
           const r = casinoState.roulette;
           const cx = Math.min(W * 0.32, 128);
@@ -23624,8 +24667,10 @@
         });
 
         const titles = {
-          BLACKJACK:  '🃏 2D Blackjack Table (You + 3 AI Players vs. Dealer • Pays 3:2 • Surrender 1/2)',
-          ROULETTE:   '🎡 2D European Roulette (You + 3 AI Players • Inside, Dozens & Columns)',
+          BLACKJACK:  '🃏 2D Blackjack Table (You + 3 Casino AI Players vs. Dealer • Pays 3:2 • Split, Double, Insurance & Surrender)',
+          BACCARAT:   '🎴 2D Baccarat Table (You + 3 Casino AI Players • Player 1:1, Banker 0.95:1, Tie 8:1 & Pairs 11:1)',
+          ROCKET:     '🚀 2D Rocket (97% RTP • 1,000x Max Multiplier • Cash Out Before the Rocket Explodes!)',
+          ROULETTE:   '🎡 2D European Roulette (You + 3 Casino AI Players • Inside, Dozens & Columns)',
           POKER:      '🤠 2D Texas Hold\'em Poker (You vs. 3 AI Players • Full Bet, Raise & Fold Action)',
           SLOTS:      '🎰 👑 4-Row Royal Gold Slot Machine (4×4 • 10 Paylines)',
           SCRATCH:    `🎫 ${getScratchSpec(casinoState.scratch.ticketPrice).name} (5×4 Grid • 1st Prize: ${fmtMoney(getScratchSpec(casinoState.scratch.ticketPrice).topPrize, 0)}!)`,
@@ -23652,23 +24697,102 @@
         if (ctrlPanel) {
           if (casinoState.activeGame === 'BLACKJACK') {
             const bj = casinoState.bj;
+            const activeH = (bj.playerHands && bj.playerHands[bj.activeHandIdx || 0]) || { cards: bj.playerHand || [], bet: bj.currentBet };
+            const canDoubleNow = bj.inProgress && activeH.cards && activeH.cards.length === 2 && !activeH.isSplitAces && G.human.cash >= (activeH.bet || bj.currentBet);
+            const canSplitNow = canSplitBjHand(activeH, bj);
+            const canSurrenderNow = bj.inProgress && (!bj.playerHands || bj.playerHands.length === 1) && !activeH.isFromSplit && activeH.cards && activeH.cards.length === 2;
+            const canInsureNow = bj.inProgress && !bj.insuranceTaken && bj.dealerHand && bj.dealerHand[0] && bj.dealerHand[0].rank === 'A' && (!bj.playerHands || bj.playerHands.length === 1) && activeH.cards && activeH.cards.length === 2;
+
             ctrlPanel.innerHTML = `
-              <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
-                <button type="button" id="btnBjDeal" onclick="casinoBjDeal()" ${bj.inProgress ? 'disabled' : ''} class="col-span-2 sm:col-span-1 py-2.5 px-3 rounded-xl bg-[#00C805] hover:bg-[#00E006] disabled:opacity-40 text-black font-extrabold transition">
+              <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 text-xs">
+                <button type="button" id="btnBjDeal" onclick="casinoBjDeal()" ${bj.inProgress ? 'disabled' : ''} class="col-span-2 sm:col-span-1 py-2.5 px-2.5 rounded-xl bg-[#00C805] hover:bg-[#00E006] disabled:opacity-40 text-black font-extrabold transition">
                   🃏 Deal (${fmtCompact(casinoState.betAmount)})
                 </button>
-                <button type="button" id="btnBjHit" onclick="casinoBjHit()" ${!bj.inProgress ? 'disabled' : ''} class="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-extrabold transition">
+                <button type="button" id="btnBjHit" onclick="casinoBjHit()" ${!bj.inProgress ? 'disabled' : ''} class="py-2.5 px-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-extrabold transition">
                   👆 Hit
                 </button>
-                <button type="button" id="btnBjStand" onclick="casinoBjStand()" ${!bj.inProgress ? 'disabled' : ''} class="py-2.5 px-3 rounded-xl bg-sky-500 hover:bg-sky-400 disabled:opacity-40 text-black font-extrabold transition">
+                <button type="button" id="btnBjStand" onclick="casinoBjStand()" ${!bj.inProgress ? 'disabled' : ''} class="py-2.5 px-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 disabled:opacity-40 text-black font-extrabold transition">
                   ✋ Stand
                 </button>
-                <button type="button" id="btnBjDouble" onclick="casinoBjDouble()" ${(!bj.inProgress || bj.playerHand.length !== 2) ? 'disabled' : ''} class="py-2.5 px-3 rounded-xl bg-indigo-500 hover:bg-indigo-400 disabled:opacity-40 text-white font-extrabold transition">
+                <button type="button" id="btnBjDouble" onclick="casinoBjDouble()" ${!canDoubleNow ? 'disabled' : ''} class="py-2.5 px-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 disabled:opacity-40 text-white font-extrabold transition">
                   ⚡ Double (2x)
                 </button>
-                <button type="button" id="btnBjSurrender" onclick="casinoBjSurrender()" ${(!bj.inProgress || bj.playerHand.length !== 2) ? 'disabled' : ''} class="col-span-2 sm:col-span-1 py-2.5 px-3 rounded-xl bg-[#262B31] hover:bg-[#323942] disabled:opacity-40 text-rose-300 font-bold transition">
+                <button type="button" id="btnBjSplit" onclick="casinoBjSplit()" ${!canSplitNow ? 'disabled' : ''} class="py-2.5 px-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 disabled:opacity-40 text-white font-extrabold transition" title="Split pair or two 10-value cards into 2 hands">
+                  ✂️ Split
+                </button>
+                <button type="button" id="btnBjSurrender" onclick="casinoBjSurrender()" ${!canSurrenderNow ? 'disabled' : ''} class="py-2.5 px-2.5 rounded-xl bg-[#262B31] hover:bg-[#323942] disabled:opacity-40 text-rose-300 font-bold transition">
                   🏳️ Surrender (1/2)
                 </button>
+              </div>
+              ${canInsureNow ? `
+                <div class="pt-1">
+                  <button type="button" id="btnBjInsurance" onclick="casinoBjInsurance()" class="w-full py-2 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400 text-amber-300 font-extrabold text-xs transition">
+                    🛡️ Dealer Shows Ace — Buy Insurance (${fmtMoney((activeH.bet || bj.currentBet) * 0.5)} • Pays 2:1 if Dealer Has Blackjack)
+                  </button>
+                </div>
+              ` : ''}
+            `;
+          } else if (casinoState.activeGame === 'BACCARAT') {
+            const bc = casinoState.baccarat;
+            const curBet = casinoState.betAmount || 100;
+            const sideAmt = Math.max(5, Math.round(curBet * 0.25));
+            const mainBtn = (key, label, sub, activeCls) => `
+              <button type="button" onclick="setBaccaratBetType('${key}')" class="p-2.5 rounded-xl text-left transition flex flex-col justify-between border-2 ${bc.betSelection === key ? activeCls : 'bg-[#161B22] border-[#262C36] text-white hover:bg-[#1E252E]'}">
+                <div class="font-extrabold text-xs">${label}</div>
+                <div class="text-[10px] font-mono opacity-90 mt-0.5">${sub}</div>
+              </button>
+            `;
+            ctrlPanel.innerHTML = `
+              <div class="grid grid-cols-3 gap-2 text-xs">
+                ${mainBtn('PLAYER', '🔵 PLAYER (Punto)', 'Pays 1:1 Even Money', 'bg-blue-600/30 border-blue-400 text-blue-200 ring-2 ring-blue-400')}
+                ${mainBtn('BANKER', '🔴 BANKER (Banco)', 'Pays 0.95:1 (5% Comm)', 'bg-red-600/30 border-red-400 text-red-200 ring-2 ring-red-400')}
+                ${mainBtn('TIE',    '🟢 TIE (Egalité)',  'Pays 8:1 (P/B Push)',   'bg-emerald-600/30 border-emerald-400 text-emerald-200 ring-2 ring-emerald-400')}
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-xs">
+                <button type="button" id="btnBaccaratDeal" onclick="dealBaccaratHand()" class=" py-2.5 px-4 rounded-xl bg-[#00C805] hover:bg-[#00E006] text-black font-extrabold transition shadow-lg">
+                  🎴 Deal Baccarat Hand (${fmtMoney(curBet)} on ${bc.betSelection})
+                </button>
+                <button type="button" onclick="setBaccaratBetType('PLAYER_PAIR')" class="py-2 px-3 rounded-xl font-bold border transition ${bc.playerPairBet ? 'bg-sky-500/25 border-sky-400 text-sky-200 ring-1 ring-sky-400' : 'bg-[#1C2024] border-[#2C323B] text-[#8A919E] hover:text-white'}">
+                  💠 Player Pair 11:1 (${bc.playerPairBet ? 'ON +$' + sideAmt : 'OFF'})
+                </button>
+                <button type="button" onclick="setBaccaratBetType('BANKER_PAIR')" class="py-2 px-3 rounded-xl font-bold border transition ${bc.bankerPairBet ? 'bg-rose-500/25 border-rose-400 text-rose-200 ring-1 ring-rose-400' : 'bg-[#1C2024] border-[#2C323B] text-[#8A919E] hover:text-white'}">
+                  🔶 Banker Pair 11:1 (${bc.bankerPairBet ? 'ON +$' + sideAmt : 'OFF'})
+                </button>
+              </div>
+            `;
+          } else if (casinoState.activeGame === 'ROCKET') {
+            const rk = casinoState.rocket;
+            const curBet = casinoState.betAmount || 100;
+            const livePay = Number(((rk.inFlight ? rk.currentBet : curBet) * (rk.inFlight ? rk.currentMult : 1.0)).toFixed(2));
+            const autoVal = rk.autoCashOutMult || 0;
+            const autoPill = (mVal, lbl) => `
+              <button type="button" onclick="setRocketAutoCashOut(${mVal})" class="px-2.5 py-1 rounded-lg font-mono text-[11px] font-bold transition ${autoVal === mVal ? 'bg-cyan-400 text-black font-extrabold ring-1 ring-white' : 'bg-[#1C2024] text-white hover:bg-[#262B31]'}">${lbl}</button>
+            `;
+            ctrlPanel.innerHTML = `
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <button type="button" id="btnRocketLaunch" onclick="launchCasinoRocket(false)" ${rk.inFlight ? 'disabled' : ''} class="py-3 px-4 rounded-xl bg-[#00C805] hover:bg-[#00E006] disabled:opacity-40 text-black font-extrabold transition shadow-lg">
+                  🚀 Launch 2D Rocket (${fmtMoney(curBet)} Bet • Max 1,000x)
+                </button>
+                <button type="button" id="btnRocketCashOut" onclick="cashOutCasinoRocket()" ${(!rk.inFlight || rk.cashedOut) ? 'disabled' : ''} class="py-3 px-4 rounded-xl bg-amber-400 hover:bg-amber-300 disabled:opacity-40 text-black font-extrabold transition shadow-lg">
+                  💰 ${rk.inFlight && !rk.cashedOut ? `CASH OUT NOW @ ${rk.currentMult.toFixed(2)}x (${fmtMoney(livePay)})` : (rk.cashedOut ? `✓ Cashed Out @ ${rk.cashOutMult.toFixed(2)}x` : 'Cash Out (Launch First)')}
+                </button>
+              </div>
+              <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">
+                <div class="flex flex-wrap items-center gap-1">
+                  <span class="text-[11px] font-bold text-[#8A919E] mr-1">🎯 Auto Cash-Out:</span>
+                  ${autoPill(0, 'Manual')}
+                  ${autoPill(1.5, '1.5x')}
+                  ${autoPill(2.0, '2x')}
+                  ${autoPill(5.0, '5x')}
+                  ${autoPill(10.0, '10x')}
+                  ${autoPill(25.0, '25x')}
+                  ${autoPill(100.0, '100x')}
+                  ${autoPill(1000.0, '1000x')}
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[11px] text-[#8A919E]">Custom Auto (x):</span>
+                  <input id="rocketAutoCashInput" type="number" min="1.1" max="1000" step="0.5" placeholder="Off" value="${autoVal > 0 ? autoVal : ''}" oninput="setRocketAutoCashOut(this.value)" class="w-20 bg-[#0C0E10] border border-[#2E343B] rounded-lg px-2 py-1 font-mono font-extrabold text-white text-xs" />
+                </div>
               </div>
             `;
           } else if (casinoState.activeGame === 'ROULETTE') {
@@ -24243,24 +25367,32 @@
               </div>
             `;
           } else {
-            const aiList = activeMode === 'BLACKJACK'
-              ? casinoState.bj.aiPlayers
-              : (activeMode === 'ROULETTE' ? casinoState.roulette.aiPlayers : casinoState.poker.aiGamblers);
-            const nextRotDay = (Math.floor(((G ? G.day : 1) - 1) / 21) + 1) * 21 + 1;
+            const modeStateObj = activeMode === 'BLACKJACK'
+              ? casinoState.bj
+              : (activeMode === 'BACCARAT'
+                ? casinoState.baccarat
+                : (activeMode === 'ROCKET'
+                  ? casinoState.rocket
+                  : (activeMode === 'ROULETTE' ? casinoState.roulette : casinoState.poker)));
+            const aiList = activeMode === 'POKER' ? casinoState.poker.aiGamblers : (modeStateObj.aiPlayers || []);
+            const seatNotice = modeStateObj.seatNotice || '🪑 Casino AI Patrons randomly come & go as seats open!';
             aiCard.innerHTML = `
               <div class="flex items-center justify-between text-xs">
                 <div>
-                  <div class="font-extrabold text-white">🎲 3 AI Players at Table</div>
-                  <div class="text-[10px] text-[#8A919E]">New AI table every month (Next: Day ${nextRotDay}) • Bankroll 80%–120% of yours</div>
+                  <div class="font-extrabold text-white">🎲 3 Random Casino AI Players</div>
+                  <div class="text-[10px] text-[#8A919E]">Purely random Casino Patrons • Come &amp; go dynamically between rounds!</div>
                 </div>
-                <button type="button" onclick="rerollCasinoAiTable('${activeMode}')" class="px-2.5 py-1 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-amber-400 font-bold text-[11px]">🎲 New AI Table</button>
+                <button type="button" onclick="rerollCasinoAiTable('${activeMode}')" class="px-2.5 py-1 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-amber-400 font-bold text-[11px]">🎲 New Table</button>
+              </div>
+              <div class="px-2.5 py-1.5 rounded-lg bg-[#141922] border border-sky-500/30 text-[10px] text-sky-300 font-mono">
+                ${seatNotice}
               </div>
               <div class="space-y-1.5 text-[11px] bg-[#0C0E10] p-2.5 rounded-xl border border-[#22262A]">
-                ${(aiList || []).map(ai => `
+                ${(aiList || []).map((ai, sIdx) => `
                   <div class="flex items-center justify-between border-b border-[#1E2227] last:border-0 pb-1.5 last:pb-0">
                     <div>
-                      <span class="font-bold text-white">${ai.avatar} ${ai.name}</span>
-                      <div class="text-[10px] text-amber-300 font-mono">${ai.outcome || ai.lastAction}</div>
+                      <span class="font-bold text-white">Seat #${sIdx + 1}: ${ai.avatar} ${ai.name}</span>
+                      <div class="text-[10px] text-amber-300 font-mono">${ai.outcome || ai.lastAction} • Hand ${(ai.handsAtTable || 0) + 1}</div>
                     </div>
                     <span class="font-mono font-bold text-[#00C805]">${fmtMoney(ai.chips, 0)}</span>
                   </div>
@@ -25697,7 +26829,7 @@
         base.minuteOfDay = typeof snap.minuteOfDay === 'number' ? snap.minuteOfDay : 570;
         if (snap.coaching) base.coaching = snap.coaching;
         if (snap.theme) applyAppTheme(snap.theme);
-        if (snap.currentTab) currentTab = snap.currentTab;
+        if (snap.currentTab && snap.currentTab !== 'coaching') currentTab = snap.currentTab;
         base.autoPlayRunning = snap.autoPlayRunning !== undefined ? Boolean(snap.autoPlayRunning) : true;
         if (snap.worldEconomy) base.worldEconomy = snap.worldEconomy;
         if (snap.lotteryYesterdayResult) base.lotteryYesterdayResult = snap.lotteryYesterdayResult;
@@ -26438,10 +27570,7 @@
         }
       }
 
-      window.openCoachingPromptModal = function() {
-        const m = document.getElementById('modalCoachingPrompt');
-        if (m) m.classList.remove('hidden');
-      };
+      window.openCoachingPromptModal = function() {};
 
       window.closeCoachingPromptModal = function() {
         const m = document.getElementById('modalCoachingPrompt');
@@ -26510,8 +27639,7 @@
             ? 'coach-topic-btn px-2.5 py-1 rounded-lg font-extrabold bg-[#00C805] text-black'
             : 'coach-topic-btn px-2.5 py-1 rounded-lg font-bold bg-[#1C2024] text-white';
         });
-        renderCoachingAndLiveBanner();
-      };
+              };
 
       function buildLiveContextCoachInsight() {
         if (!G) return { title: 'Live Investment Coach', lookFor: '', actionTip: '' };
@@ -26631,7 +27759,7 @@
       }
 
       function renderCoachingAndLiveBanner() {
-        if (!G) return;
+        return;
         ensureCoachingState(G);
         const c = G.coaching;
 
@@ -27338,8 +28466,7 @@
           lastClockTickWallMs = Date.now();
           saveLiveAutoSession(true);
           document.getElementById('modalNewGame').classList.add('hidden');
-          openCoachingPromptModal();
-          showToast('New InveSim Game Launched!', `Seed #${seed}: Freshly generated ${G.stocks.length.toLocaleString()} stocks, ${(G.smallBusinesses || []).length.toLocaleString()} small businesses, ${G.properties.length.toLocaleString()} properties, 24 eREITs & ${G.aiPlayers.length.toLocaleString()} AI rivals!`, true);
+                    showToast('New InveSim Game Launched!', `Seed #${seed}: Freshly generated ${G.stocks.length.toLocaleString()} stocks, ${(G.smallBusinesses || []).length.toLocaleString()} small businesses, ${G.properties.length.toLocaleString()} properties, 24 eREITs & ${G.aiPlayers.length.toLocaleString()} AI rivals!`, true);
           renderAll();
         });
 
@@ -27379,7 +28506,7 @@
                   const fast = JSON.parse(rawFast);
                   if (fast && fast.seed === G.seed) {
                     if (fast.theme) applyAppTheme(fast.theme);
-                    if (fast.currentTab) currentTab = fast.currentTab;
+                    if (fast.currentTab && fast.currentTab !== 'coaching') currentTab = fast.currentTab;
                     if (fast.coaching) G.coaching = fast.coaching;
                     if (fast.autoPlayRunning !== undefined) G.autoPlayRunning = Boolean(fast.autoPlayRunning);
                     if (fast.day === G.day && typeof fast.minuteOfDay === 'number' && fast.minuteOfDay > G.minuteOfDay) {
