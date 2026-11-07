@@ -1254,12 +1254,15 @@
               <button type="button" data-opt-type="CALL" class="opt-type-btn px-3.5 py-1.5 rounded-full bg-[#00C805] text-black">Calls</button>
               <button type="button" data-opt-type="PUT" class="opt-type-btn px-3.5 py-1.5 rounded-full text-[#8A919E]">Puts</button>
             </div>
-            <select id="optExpirySelect" aria-label="Expiration Date" class="bg-[#1C2024] border border-[#2E343B] rounded-full px-3.5 py-1.5 text-xs font-semibold text-white">
+            <select id="optExpirySelect" aria-label="Expiration Date" onchange="renderOptionsTab()" class="bg-[#1C2024] border border-[#2E343B] rounded-full px-3.5 py-1.5 text-xs font-semibold text-white">
               <option value="7">Exp: 7 Days</option>
               <option value="14">Exp: 14 Days</option>
               <option value="30" selected>Exp: 30 Days</option>
               <option value="60">Exp: 60 Days</option>
               <option value="90">Exp: 90 Days</option>
+              <option value="180">Exp: 180 Days (6 Mos)</option>
+              <option value="360">Exp: 360 Days (1 Yr)</option>
+              <option value="720">Exp: 720 Days (2 Yrs)</option>
             </select>
           </div>
         </div>
@@ -1976,7 +1979,7 @@
               <span class="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-amber-500/20 text-amber-300">Direct Cash Bankroll</span>
             </div>
             <p class="text-xs text-[#8A919E] mt-1">
-              Wager your liquid cash on <strong class="text-white">2D Blackjack (with Split)</strong>, <strong class="text-amber-300">🎴 2D Baccarat</strong>, <strong class="text-cyan-300">🚀 2D Rocket (97% RTP • 1,000x Max)</strong>, <strong class="text-white">2D European Roulette</strong>, <strong class="text-white">2D Texas Hold&rsquo;em Poker</strong>, <strong class="text-white">4-Row Royal Vegas Slots</strong>, <strong class="text-amber-300">🎫 5×4 Scratch-Off Tickets</strong>, <strong class="text-emerald-300">🐎 2D Horse Racing</strong>, or <strong class="text-orange-300">🏎️ 2D NASCAR Stock Car Racing</strong>
+              Wager your liquid cash on <strong class="text-white">2D Blackjack (with Split)</strong>, <strong class="text-amber-300">🎴 2D Baccarat</strong>, <strong class="text-cyan-300">🚀 2D Rocket (97% RTP • 1,000x Max)</strong>, <strong class="text-purple-300">♟️ 2D Chess (7 AI Levels • 1.5x to 7x)</strong>, <strong class="text-white">2D European Roulette</strong>, <strong class="text-white">2D Texas Hold&rsquo;em Poker</strong>, <strong class="text-white">4-Row Royal Vegas Slots</strong>, <strong class="text-amber-300">🎫 5×4 Scratch-Off Tickets</strong>, <strong class="text-emerald-300">🐎 2D Horse Racing</strong>, or <strong class="text-orange-300">🏎️ 2D NASCAR Stock Car Racing</strong>
             </p>
           </div>
           <div class="flex flex-wrap items-center gap-4 font-mono text-right">
@@ -1994,8 +1997,8 @@
         <!-- 💼 CASINO EMPLOYMENT & CAREER DESK -->
         <div id="casinoJobDeskCard" class="p-3.5 rounded-2xl bg-[#0B0E13] border border-amber-500/40 flex flex-col gap-2 text-xs"></div>
 
-        <!-- 9 Casino Games: Blackjack, Baccarat, 2D Rocket, Roulette, Texas Hold'em, Slots, Horse Racing, NASCAR & Scratch-Offs -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-9 gap-2 text-xs pt-1">
+        <!-- 10 Casino Games: Blackjack, Baccarat, 2D Rocket, 2D Chess, Roulette, Texas Hold'em, Slots, Horse Racing, NASCAR & Scratch-Offs -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2 text-xs pt-1">
           <button type="button" onclick="selectCasinoGame('BLACKJACK')" data-casino-game="BLACKJACK" class="casino-game-btn py-2.5 px-2 rounded-xl font-extrabold bg-[#00C805] text-black transition flex items-center justify-center gap-1.5">
             <span>🃏</span> <span>2D Blackjack</span>
           </button>
@@ -2004,6 +2007,9 @@
           </button>
           <button type="button" onclick="selectCasinoGame('ROCKET')" data-casino-game="ROCKET" class="casino-game-btn py-2.5 px-2 rounded-xl font-bold bg-[#1C2024] text-cyan-300 hover:bg-[#262B31] transition flex items-center justify-center gap-1.5">
             <span>🚀</span> <span>2D Rocket</span>
+          </button>
+          <button type="button" onclick="selectCasinoGame('CHESS')" data-casino-game="CHESS" class="casino-game-btn py-2.5 px-2 rounded-xl font-bold bg-[#1C2024] text-purple-300 hover:bg-[#262B31] transition flex items-center justify-center gap-1.5">
+            <span>♟️</span> <span>2D Chess</span>
           </button>
           <button type="button" onclick="selectCasinoGame('ROULETTE')" data-casino-game="ROULETTE" class="casino-game-btn py-2.5 px-2 rounded-xl font-bold bg-[#1C2024] text-white hover:bg-[#262B31] transition flex items-center justify-center gap-1.5">
             <span>🎡</span> <span>2D Roulette</span>
@@ -2036,7 +2042,7 @@
           </div>
 
           <!-- 2D Casino Table Canvas (Taller 360px-420px for 5x4 Scratch-Offs & Full 2D Stadiums) -->
-          <div class="relative w-full h-[360px] sm:h-[420px] rounded-2xl overflow-hidden bg-[#072A16] border border-[#1E3F2B]">
+          <div class="relative w-full h-[380px] sm:h-[440px] rounded-2xl overflow-hidden bg-[#072A16] border border-[#1E3F2B]">
             <canvas id="casinoMainCanvas" class="w-full h-full block"></canvas>
           </div>
 
@@ -2924,24 +2930,60 @@
         return 0.5 * (1.0 + sign * y);
       }
 
+      window.computeBlackScholes = computeBlackScholes;
       function computeBlackScholes(S, K, T_days, r, sigma, divYield = 0) {
-        const T = Math.max(T_days / 365.0, 1 / 3650.0);
-        const vol = Math.max(sigma, 0.08);
-        const q = divYield / 100;
+        const dteClean = Math.max(0.25, Number(T_days) || 30);
+        const T = Math.max(dteClean / 365.0, 1 / 3650.0);
         const sqrtT = Math.sqrt(T);
-        const d1 = (Math.log(S / K) + (r - q + 0.5 * vol * vol) * T) / (vol * sqrtT);
-        const d2 = d1 - vol * sqrtT;
-        const expQT = Math.exp(-q * T);
-        const expRT = Math.exp(-r * T);
 
-        const callPrice = Math.max(0.03, S * expQT * normCDF(d1) - K * expRT * normCDF(d2));
-        const putPrice  = Math.max(0.03, K * expRT * normCDF(-d2) - S * expQT * normCDF(-d1));
-        const callDelta = expQT * normCDF(d1);
-        const putDelta  = expQT * (normCDF(d1) - 1);
-        const gamma     = (expQT * normPDF(d1)) / (S * vol * sqrtT);
-        const vega      = (S * expQT * normPDF(d1) * sqrtT) / 100;
-        const callTheta = ((-S * vol * expQT * normPDF(d1)) / (2 * sqrtT) - r * K * expRT * normCDF(d2)) / 365;
-        const putTheta  = ((-S * vol * expQT * normPDF(d1)) / (2 * sqrtT) + r * K * expRT * normCDF(-d2)) / 365;
+        // Volatility smile + term structure so OTM/ITM strikes stay distinct and longer dates (up to 720d LEAPS) carry higher implied vol
+        const baseVol = Math.max(Number(sigma) || 0.28, 0.24);
+        const logM = Math.log(Math.max(0.01, S) / Math.max(0.01, K));
+        const absLogM = Math.abs(logM);
+        const smileBoost = 1 + 0.35 * Math.min(0.6, absLogM);
+        const termBoost  = 1 + 0.22 * Math.pow(T, 0.45);
+        const effVol = baseVol * smileBoost * termBoost;
+        const vSqrtT = effVol * sqrtT;
+
+        // American-style intrinsic floors so dividend yield or rate discounts never make longer-dated options cheaper
+        const callIntrinsic = Math.max(0, S - K);
+        const putIntrinsic  = Math.max(0, K - S);
+
+        // Undiscounted BSM core so extrinsic value strictly increases with expiration T
+        const d1 = (logM + 0.5 * effVol * effVol * T) / vSqrtT;
+        const d2 = d1 - vSqrtT;
+        const bsCall = S * normCDF(d1) - K * normCDF(d2);
+        const bsPut  = K * normCDF(-d2) - S * normCDF(-d1);
+
+        const rawCallExtrinsic = Math.max(0, bsCall - callIntrinsic);
+        const rawPutExtrinsic  = Math.max(0, bsPut  - putIntrinsic);
+
+        // Directional moneyness & duration time-value component ensuring 7d < 14d < 30d < 60d < 90d < 180d < 360d < 720d
+        // and distinct prices across every strike in the chain
+        const callOtmDist = Math.max(0, (K - S) / Math.max(1, S));
+        const putOtmDist  = Math.max(0, (S - K) / Math.max(1, S));
+        const callItmDist = Math.max(0, (S - K) / Math.max(1, S));
+        const putItmDist  = Math.max(0, (K - S) / Math.max(1, S));
+
+        const timeScale = 0.16 * sqrtT + 0.42 * Math.pow(T, 0.85);
+        const callMoneynessWeight = Math.exp(-3.0 * callOtmDist / (0.35 + 0.65 * Math.pow(T, 0.35))) * Math.exp(-1.0 * callItmDist);
+        const putMoneynessWeight  = Math.exp(-3.0 * putOtmDist  / (0.35 + 0.65 * Math.pow(T, 0.35))) * Math.exp(-1.0 * putItmDist);
+
+        const minCallFloor = (0.06 + 0.55 * Math.pow(T, 0.72)) * Math.exp(-1.25 * callOtmDist - 0.35 * callItmDist);
+        const minPutFloor  = (0.06 + 0.55 * Math.pow(T, 0.72)) * Math.exp(-1.25 * putOtmDist  - 0.35 * putItmDist);
+
+        const callDurationAdd = S * baseVol * timeScale * callMoneynessWeight + (S * 0.038 * Math.pow(T, 0.78) * Math.exp(-1.8 * callOtmDist)) + minCallFloor;
+        const putDurationAdd  = K * baseVol * timeScale * putMoneynessWeight  + (K * 0.038 * Math.pow(T, 0.78) * Math.exp(-1.8 * putOtmDist))  + minPutFloor;
+
+        const callPrice = Number(Math.max(0.05, callIntrinsic + rawCallExtrinsic + callDurationAdd).toFixed(2));
+        const putPrice  = Number(Math.max(0.05, putIntrinsic  + rawPutExtrinsic  + putDurationAdd).toFixed(2));
+
+        const callDelta = Math.min(0.99, Math.max(0.01, normCDF(d1)));
+        const putDelta  = Math.max(-0.99, Math.min(-0.01, normCDF(d1) - 1));
+        const gamma     = normPDF(d1) / Math.max(0.01, S * vSqrtT);
+        const vega      = (S * normPDF(d1) * sqrtT) / 100;
+        const callTheta = -((callPrice - callIntrinsic) / Math.max(1, dteClean * 1.35));
+        const putTheta  = -((putPrice  - putIntrinsic)  / Math.max(1, dteClean * 1.35));
 
         return { callPrice, putPrice, callDelta, putDelta, gamma, vega, callTheta, putTheta };
       }
@@ -11375,7 +11417,7 @@
           // (E) AI CASINO GAMBLING ACROSS ALL CASINO GAMES (2D BLACKJACK WITH SPLIT, 2D BACCARAT, 2D ROCKET 1000x, 2D ROULETTE, TEXAS HOLD'EM, 4-ROW SLOTS, SCRATCH-OFFS, 2D HORSE RACING, 2D NASCAR & SPORTSBOOK)
           // -------------------------------------------------------------------
           if (ai.cash >= 20 && rng.next() < 0.20) {
-            const games = ['2D Blackjack', '2D Baccarat', '2D Rocket', '2D Roulette', 'Texas Holdem', '4-Row Slots', 'Scratch-Off Lottery', '2D Horse Racing', '2D NASCAR Racing', '2D Sportsbook'];
+            const games = ['2D Blackjack', '2D Baccarat', '2D Rocket', '2D Chess', '2D Roulette', 'Texas Holdem', '4-Row Slots', 'Scratch-Off Lottery', '2D Horse Racing', '2D NASCAR Racing', '2D Sportsbook'];
             const gPick = games[rng.int(0, games.length - 1)];
             if (gPick === 'Scratch-Off Lottery') {
               const availPrices = [5, 10, 20, 50, 100].filter(p => ai.cash >= p);
@@ -11460,6 +11502,20 @@
                 ai.cash = Number((ai.cash + payout).toFixed(2));
                 ai.casinoNetProfit = Number(((ai.casinoNetProfit || 0) + netDelta).toFixed(2));
                 ai.logs.unshift(`Day ${state.day}: 🎴 Played 2D Baccarat on ${side} (${fmtMoney(wager)}) → ${netDelta > 0 ? 'Won +' + fmtMoney(netDelta) : (netDelta === 0 ? 'Tie Push ($0)' : 'Lost ' + fmtMoney(netDelta))}.`);
+              }
+            } else if (gPick === '2D Chess') {
+              const wager = Math.max(10, Math.min(Math.round(ai.cash * 0.20), 10000)); // Max bet $10,000
+              if (ai.cash >= wager) {
+                ai.cash = Number((ai.cash - wager).toFixed(2));
+                const gmElo = 2300 + rng.int(0, 200);
+                const gmNames = ['GM Viktor Orlov', 'GM Anatoly Vance', 'GM Mikhail Kovacs', 'GM Boris Stern', 'GM Tigran Bauer', 'GM Vasily Novak', 'GM Efim Volkov'];
+                const gmName = gmNames[rng.int(0, gmNames.length - 1)];
+                const won = rng.next() < 0.19; // 5x payout against 2300-2500 ELO Old Grandmaster
+                const payout = won ? Number((wager * 5.0).toFixed(2)) : 0;
+                const netDelta = Number((payout - wager).toFixed(2));
+                ai.cash = Number((ai.cash + payout).toFixed(2));
+                ai.casinoNetProfit = Number(((ai.casinoNetProfit || 0) + netDelta).toFixed(2));
+                ai.logs.unshift(`Day ${state.day}: ♟️ Played 2D Chess vs. Old Grandmaster ${gmName} (${gmElo} ELO • 5x Prize • Max Bet $10K) → ${won ? 'Won +' + fmtMoney(netDelta) + '!' : 'Lost -' + fmtMoney(wager) + '.'}`);
               }
             } else if (gPick === '2D Rocket') {
               const wager = Math.max(10, Math.min(Math.round(ai.cash * 0.20), 2500));
@@ -15450,6 +15506,7 @@
       };
 
       function renderTopBarAndHome() {
+        if (typeof updateNewGameButtonLockUI === 'function') updateNewGameButtonLockUI();
         document.getElementById('seedBadge').textContent = `Seed #${G.seed}`;
         const totalStocksStr = G.stocks.length.toLocaleString();
         document.getElementById('stockCountBadge').textContent = totalStocksStr;
@@ -18691,6 +18748,34 @@
           seatNotice: '',
           aiPlayers: []
         },
+        // 2D Chess State (Against Randomized Old Grandmaster AI • 2300–2500 ELO • 5x Prize • Max Bet $10,000)
+        chess: {
+          inMatch: false,
+          maxBet: 10000,
+          prizeMult: 5.0,
+          gm: null,
+          activeElo: 2410,
+          currentBet: 100,
+          turn: 'w', // 'w' (Human) | 'b' (Old Grandmaster AI)
+          board: [],
+          castling: { wK: true, wQ: true, bK: true, bQ: true },
+          enPassant: null,
+          halfMoveClock: 0,
+          fullMoveNumber: 1,
+          selectedSq: null,
+          legalMoves: [],
+          lastMove: null,
+          moveHistory: [],
+          capturedByWhite: [],
+          capturedByBlack: [],
+          outcomeBanner: 'Challenge a randomized Old Grandmaster AI (2300–2500 ELO) for a 5x Prize (Max Bet $10,000)!',
+          seatNotice: '',
+          winner: null,
+          matchesPlayed: 0,
+          matchesWon: 0,
+          biggestWin: 0,
+          boardHitBox: null
+        },
         // Roulette State
         roulette: {
           betType: 'RED', // 'RED','BLACK','EVEN','ODD','LOW','HIGH','DOZ1','DOZ2','DOZ3','COL1','COL2','COL3','ZERO','EXACT'
@@ -20546,6 +20631,10 @@
         canvas.dataset.scratchBound = '1';
 
         canvas.addEventListener('mousedown', (e) => {
+          if (casinoState.activeGame === 'CHESS') {
+            handleChessCanvasTap(e.clientX, e.clientY);
+            return;
+          }
           if (casinoState.activeGame !== 'SCRATCH') return;
           casinoState.scratch.isPointerDown = true;
           handleScratchCanvasPointer(e.clientX, e.clientY, true);
@@ -20562,6 +20651,11 @@
           handleScratchCanvasPointer(e.clientX, e.clientY, false);
         });
         canvas.addEventListener('touchstart', (e) => {
+          if (casinoState.activeGame === 'CHESS') {
+            const t = e.touches[0];
+            if (t) handleChessCanvasTap(t.clientX, t.clientY);
+            return;
+          }
           if (casinoState.activeGame !== 'SCRATCH') return;
           const t = e.touches[0];
           if (!t) return;
@@ -20755,6 +20849,164 @@
         }
       }
 
+      function getActiveCasinoBetGameInfo() {
+        if (!window.casinoState) return null;
+        const cs = window.casinoState;
+        if (cs.chess && cs.chess.inMatch) {
+          return { gameKey: 'CHESS', name: '2D Chess', bet: cs.chess.currentBet || cs.betAmount || 100 };
+        }
+        if (cs.bj && cs.bj.inProgress) {
+          return { gameKey: 'BLACKJACK', name: '2D Blackjack', bet: cs.bj.currentBet || cs.betAmount || 100 };
+        }
+        if (cs.poker && cs.poker.inHand) {
+          return { gameKey: 'POKER', name: "2D Texas Hold'em Poker", bet: cs.poker.humanTotalCommitted || cs.betAmount || 100 };
+        }
+        if (cs.rocket && cs.rocket.inFlight) {
+          return { gameKey: 'ROCKET', name: '2D Rocket', bet: cs.rocket.currentBet || cs.betAmount || 100 };
+        }
+        if (cs.baccarat && cs.baccarat.inProgress) {
+          return { gameKey: 'BACCARAT', name: '2D Baccarat', bet: cs.betAmount || 100 };
+        }
+        if (cs.scratch && cs.scratch.hasActiveTicket && !cs.scratch.payoutClaimed) {
+          return { gameKey: 'SCRATCH', name: 'Scratch-Off Ticket', bet: cs.scratch.ticketPrice || cs.betAmount || 100 };
+        }
+        if (cs.horses && cs.horses.inRace) {
+          return { gameKey: 'HORSES', name: '2D Horse Racing', bet: cs.betAmount || 100 };
+        }
+        if (cs.nascar && cs.nascar.inRace) {
+          return { gameKey: 'NASCAR', name: '2D NASCAR Racing', bet: cs.betAmount || 100 };
+        }
+        if (cs.football && cs.football.inGame) {
+          return { gameKey: 'FOOTBALL', name: '2D Football', bet: cs.betAmount || 100 };
+        }
+        if (cs.sports) {
+          for (const k of ['BASKETBALL', 'MMA', 'SOCCER', 'TENNIS']) {
+            if (cs.sports[k] && cs.sports[k].inGame) {
+              return { gameKey: k, name: '2D ' + k, bet: cs.betAmount || 100 };
+            }
+          }
+        }
+        return null;
+      }
+      window.getActiveCasinoBetGameInfo = getActiveCasinoBetGameInfo;
+
+      function updateNewGameButtonLockUI() {
+        const btn = document.getElementById('btnNewGame');
+        if (!btn) return;
+        const activeBet = getActiveCasinoBetGameInfo();
+        if (activeBet) {
+          btn.innerHTML = '🔒 New';
+          btn.title = `Active ${activeBet.name} bet (${fmtMoney(activeBet.bet)}) — Resign from the casino game first before starting a New Game!`;
+        } else {
+          btn.innerHTML = '🎲 New';
+          btn.title = 'Start a Fresh Procedural Game';
+        }
+      }
+      window.updateNewGameButtonLockUI = updateNewGameButtonLockUI;
+
+      function resetCasinoStateForNewGame() {
+        if (!window.casinoState) return;
+        const cs = window.casinoState;
+        if (cs.rocket && cs.rocket.rafId) {
+          cancelAnimationFrame(cs.rocket.rafId);
+          cs.rocket.rafId = null;
+        }
+        cs.betAmount = 100;
+        cs.wins = 0;
+        cs.rounds = 0;
+        cs.lastAiGenMonth = -1;
+        cs.lastAiHumanCashRef = -1;
+        cs.statusText = 'Place your wager and tap Deal below!';
+        cs.history = ['🎰 Welcome to InveSim 2D Grand Casino! Choose Blackjack, Baccarat, 2D Rocket, 2D Chess, Roulette, Texas Hold\'em, or Slots.'];
+
+        // Reset Blackjack
+        cs.bj.inProgress = false;
+        cs.bj.playerHand = [];
+        cs.bj.playerHands = [];
+        cs.bj.activeHandIdx = 0;
+        cs.bj.dealerHand = [];
+        cs.bj.currentBet = 100;
+        cs.bj.insuranceBet = 0;
+        cs.bj.insuranceTaken = false;
+        cs.bj.outcome = null;
+        cs.bj.aiPlayers = generateThreeAiGamblers('BLACKJACK');
+
+        // Reset Baccarat
+        cs.baccarat.inProgress = false;
+        cs.baccarat.playerHand = [];
+        cs.baccarat.bankerHand = [];
+        cs.baccarat.playerTotal = 0;
+        cs.baccarat.bankerTotal = 0;
+        cs.baccarat.winner = null;
+        cs.baccarat.lastNetWin = 0;
+        cs.baccarat.roundsPlayed = 0;
+        cs.baccarat.roundsWon = 0;
+        cs.baccarat.aiPlayers = generateThreeAiGamblers('BACCARAT');
+
+        // Reset 2D Rocket
+        cs.rocket.inFlight = false;
+        cs.rocket.crashed = false;
+        cs.rocket.cashedOut = false;
+        cs.rocket.currentMult = 1.00;
+        cs.rocket.cashOutMult = null;
+        cs.rocket.currentBet = 100;
+        cs.rocket.lastPayout = 0;
+        cs.rocket.lastProfit = 0;
+        cs.rocket.flightsPlayed = 0;
+        cs.rocket.flightsWon = 0;
+        cs.rocket.biggestMultWon = 0;
+        cs.rocket.aiPlayers = generateThreeAiGamblers('ROCKET');
+
+        // Reset 2D Chess
+        const freshGm = generateRandomOldGrandmaster();
+        cs.chess.inMatch = false;
+        cs.chess.gm = freshGm;
+        cs.chess.activeElo = freshGm.elo;
+        cs.chess.currentBet = 100;
+        cs.chess.turn = 'w';
+        cs.chess.board = createStartingChessBoard();
+        cs.chess.castling = { wK: true, wQ: true, bK: true, bQ: true };
+        cs.chess.enPassant = null;
+        cs.chess.halfMoveClock = 0;
+        cs.chess.fullMoveNumber = 1;
+        cs.chess.selectedSq = null;
+        cs.chess.legalMoves = [];
+        cs.chess.lastMove = null;
+        cs.chess.moveHistory = [];
+        cs.chess.capturedByWhite = [];
+        cs.chess.capturedByBlack = [];
+        cs.chess.winner = null;
+        cs.chess.matchesPlayed = 0;
+        cs.chess.matchesWon = 0;
+        cs.chess.biggestWin = 0;
+        cs.chess.outcomeBanner = `Challenge ${freshGm.avatar} ${freshGm.name} (Age ${freshGm.age} • ${freshGm.elo} ELO [2300–2500]) for a 5x Prize (Max Bet $10,000)!`;
+
+        // Reset Poker & Roulette & Scratch & Races
+        cs.poker.inHand = false;
+        cs.poker.stage = 'IDLE';
+        cs.poker.pot = 0;
+        cs.poker.humanTotalCommitted = 0;
+        cs.poker.winnerBanner = '';
+        cs.poker.aiGamblers = generateThreeAiGamblers('POKER');
+        cs.roulette.aiPlayers = generateThreeAiGamblers('ROULETTE');
+        cs.scratch.hasActiveTicket = false;
+        cs.scratch.isFullyRevealed = false;
+        cs.scratch.payoutClaimed = false;
+        cs.horses.inRace = false;
+        cs.nascar.inRace = false;
+        cs.football.inGame = false;
+        if (cs.sports) {
+          for (const k of ['BASKETBALL', 'MMA', 'SOCCER', 'TENNIS']) {
+            if (cs.sports[k]) cs.sports[k].inGame = false;
+          }
+        }
+
+        const inp = document.getElementById('casinoBetInput');
+        if (inp) inp.value = '100';
+        updateNewGameButtonLockUI();
+      }
+      window.resetCasinoStateForNewGame = resetCasinoStateForNewGame;
+
       window.rerollCasinoAiTable = function(modeOpt) {
         const mode = modeOpt || casinoState.activeGame;
         if (mode === 'POKER' && casinoState.poker.inHand) {
@@ -20767,6 +21019,10 @@
         }
         if (mode === 'ROCKET' && casinoState.rocket.inFlight) {
           showToast('Rocket in Flight', 'Wait for the current rocket flight to finish or cash out first!', false);
+          return;
+        }
+        if (mode === 'CHESS' && casinoState.chess.inMatch) {
+          showToast('Chess Match in Progress', 'Complete or Resign your current 2D Chess match before inviting a new Old Grandmaster!', false);
           return;
         }
         casinoState.lastAiHumanCashRef = Math.max(100, Number(G ? G.human.cash : 1000));
@@ -20782,6 +21038,13 @@
           casinoState.rocket.aiPlayers = generateThreeAiGamblers('ROCKET');
           casinoState.rocket.seatNotice = `🎲 New Rocket Bettors joined: ${casinoState.rocket.aiPlayers.map(a => a.name).join(', ')}`;
           casinoState.statusText = `🚀 New 2D Rocket Bettors: ${casinoState.rocket.aiPlayers.map(a => a.name).join(', ')}!`;
+        } else if (mode === 'CHESS') {
+          const newGm = generateRandomOldGrandmaster();
+          casinoState.chess.gm = newGm;
+          casinoState.chess.activeElo = newGm.elo;
+          casinoState.chess.seatNotice = `🎲 New Old Grandmaster seated: ${newGm.avatar} ${newGm.name} (Age ${newGm.age} • ${newGm.elo} ELO • ${newGm.style})`;
+          casinoState.chess.outcomeBanner = `♟️ Seated vs. ${newGm.avatar} ${newGm.name} (Age ${newGm.age} • ${newGm.elo} ELO [2300–2500] • 5x Prize • Max Bet $10,000)!`;
+          casinoState.statusText = casinoState.chess.outcomeBanner;
         } else if (mode === 'ROULETTE') {
           casinoState.roulette.aiPlayers = generateThreeAiGamblers('ROULETTE');
           casinoState.roulette.seatNotice = `🎲 New Casino Patrons seated: ${casinoState.roulette.aiPlayers.map(a => a.name).join(', ')}`;
@@ -20805,18 +21068,30 @@
         G.human.cash = Math.max(0, Number((G.human.cash + delta).toFixed(2)));
         G.human.casinoNetProfit = Number(((G.human.casinoNetProfit || 0) + delta).toFixed(2));
         recalculateAllNetWorths(G);
+        if (typeof saveLiveAutoSession === 'function') saveLiveAutoSession(true);
       }
 
       window.selectCasinoGame = function(gameKey) {
-        const allowedGames = ['BLACKJACK', 'BACCARAT', 'ROCKET', 'ROULETTE', 'POKER', 'SLOTS', 'SCRATCH', 'HORSES', 'NASCAR'];
+        const allowedGames = ['BLACKJACK', 'BACCARAT', 'ROCKET', 'CHESS', 'ROULETTE', 'POKER', 'SLOTS', 'SCRATCH', 'HORSES', 'NASCAR'];
         const cleanKey = allowedGames.includes(gameKey) ? gameKey : 'BLACKJACK';
+        const activeBet = getActiveCasinoBetGameInfo();
+        if (activeBet && activeBet.gameKey !== cleanKey) {
+          showToast('⚠️ Active Casino Bet in Progress!', `You have ${fmtMoney(activeBet.bet)} betted in ${activeBet.name}. Please Resign or finish your active game before switching tables!`, false);
+          casinoState.activeGame = activeBet.gameKey;
+          renderCasinoTab();
+          return;
+        }
         casinoState.activeGame = cleanKey;
         ensureAllCasinoAiTables();
+        const inp = document.getElementById('casinoBetInput');
+        if (inp) {
+          if (cleanKey === 'CHESS') inp.max = '10000';
+          else inp.removeAttribute('max');
+        }
         if (cleanKey === 'SCRATCH') {
           const tPrice = casinoState.scratch.ticketPrice || 100;
           const spec = getScratchSpec(tPrice);
           casinoState.betAmount = tPrice;
-          const inp = document.getElementById('casinoBetInput');
           if (inp) inp.value = String(tPrice);
           if (!casinoState.scratch.hasActiveTicket) {
             casinoState.statusText = `🎫 ${spec.name} ($${tPrice}/ticket • 5×4 Grid • 1st Prize: ${fmtMoney(spec.topPrize, 0)})! Choose $5, $10, $20, $50, or $100 below!`;
@@ -20839,6 +21114,14 @@
           casinoState.statusText = `🎴 2D Baccarat (Punto Banco • You + 3 Casino AI Players): Bet on Player (1:1), Banker (0.95:1), Tie (8:1), or Pairs (11:1)!`;
         } else if (cleanKey === 'ROCKET') {
           casinoState.statusText = `🚀 2D Rocket (97% RTP • 1,000x Max Multiplier): Place your bet, watch the multiplier climb, and Cash Out before the rocket explodes!`;
+        } else if (cleanKey === 'CHESS') {
+          initChessBoardIfNeeded();
+          if (casinoState.betAmount > 10000) {
+            casinoState.betAmount = 10000;
+            if (inp) inp.value = '10000';
+          }
+          const gm = casinoState.chess.gm;
+          casinoState.statusText = `♟️ 2D Chess vs. ${gm.avatar} ${gm.name} (Age ${gm.age} • ${gm.elo} ELO [2300–2500] • 5x Prize • Max Bet $10,000): Tap Start 2D Chess Match or click any White piece!`;
         } else if (cleanKey === 'ROULETTE') {
           casinoState.statusText = `🎡 2D European Roulette: Choose your bet type below and tap Spin Roulette Wheel!`;
         } else if (cleanKey === 'POKER') {
@@ -20851,19 +21134,37 @@
       };
 
       window.syncCasinoBetInput = function(val) {
-        const num = Math.max(5, Math.round(Number(val) || 25));
+        const activeBet = getActiveCasinoBetGameInfo();
+        if (activeBet) {
+          const inp = document.getElementById('casinoBetInput');
+          if (inp) inp.value = String(activeBet.bet);
+          return;
+        }
+        let num = Math.max(5, Math.round(Number(val) || 25));
+        if (casinoState.activeGame === 'CHESS' && num > 10000) {
+          num = 10000;
+          const inp = document.getElementById('casinoBetInput');
+          if (inp) inp.value = '10000';
+        }
         casinoState.betAmount = num;
       };
 
       window.setCasinoQuickBet = function(modeOrAmt) {
         if (!G) return;
+        const activeBet = getActiveCasinoBetGameInfo();
+        if (activeBet) {
+          showToast('Bet Locked in Active Game', `Your ${fmtMoney(activeBet.bet)} bet is locked in ${activeBet.name}. Finish or 🏳️ Resign the game first!`, false);
+          return;
+        }
         const maxCash = Math.max(5, Math.floor(G.human.cash));
+        const maxAllowed = casinoState.activeGame === 'CHESS' ? Math.min(maxCash, 10000) : maxCash;
         const inp = document.getElementById('casinoBetInput');
         let cur = Number(inp ? inp.value : casinoState.betAmount) || 100;
         if (modeOrAmt === 'HALF') cur = Math.max(5, Math.floor(cur / 2));
-        else if (modeOrAmt === 'DOUBLE') cur = Math.min(maxCash, cur * 2);
-        else if (modeOrAmt === 'MAX') cur = maxCash;
-        else cur = Math.min(maxCash, Number(modeOrAmt) || 100);
+        else if (modeOrAmt === 'DOUBLE') cur = Math.min(maxAllowed, cur * 2);
+        else if (modeOrAmt === 'MAX') cur = maxAllowed;
+        else cur = Math.min(maxAllowed, Number(modeOrAmt) || 100);
+        if (casinoState.activeGame === 'CHESS' && cur > 10000) cur = 10000;
         casinoState.betAmount = Math.max(5, cur);
         if (inp) inp.value = String(casinoState.betAmount);
         renderCasinoTab();
@@ -20871,7 +21172,12 @@
 
       function getValidatedCasinoBet() {
         const inp = document.getElementById('casinoBetInput');
-        const raw = Math.max(5, Math.round(Number(inp ? inp.value : casinoState.betAmount) || 25));
+        let raw = Math.max(5, Math.round(Number(inp ? inp.value : casinoState.betAmount) || 25));
+        if (casinoState.activeGame === 'CHESS' && raw > 10000) {
+          raw = 10000;
+          if (inp) inp.value = '10000';
+          showToast('♟️ $10,000 Max Bet Applied', '2D Chess vs. Old Grandmaster (2300–2500 ELO • 5x Prize) has a maximum bet of $10,000.', true);
+        }
         casinoState.betAmount = raw;
         if (!G || G.human.cash < raw) {
           showToast('Insufficient Cash for Bet', `You need ${fmtMoney(raw)} in liquid cash (Available Cash: ${fmtMoney(G ? G.human.cash : 0)}). Lower your bet or sell assets/borrow cash!`, false);
@@ -20880,7 +21186,6 @@
         return raw;
       }
 
-      // -----------------------------------------------------------------------
       // GAME 1: REALISTIC 2D VEGAS BLACKJACK (DEAL, HIT, STAND, DOUBLE, SPLIT, INSURANCE & SURRENDER)
       // -----------------------------------------------------------------------
       function bjCardPipValue(card) {
@@ -21803,6 +22108,661 @@
 
         rotateCasinoTablePatronsIfNeeded('ROCKET');
         renderCasinoTab();
+      }
+
+      // -----------------------------------------------------------------------
+      // GAME 1D: 2D CHESS VS RANDOMIZED OLD GRANDMASTER AI (2300–2500 ELO • 5x PRIZE • MAX BET $10,000)
+      // -----------------------------------------------------------------------
+      const MAX_CHESS_BET = 10000;
+      const CHESS_PRIZE_MULT = 5.0;
+      window.MAX_CHESS_BET = MAX_CHESS_BET;
+      window.CHESS_PRIZE_MULT = CHESS_PRIZE_MULT;
+
+      const OLD_GM_FIRST_NAMES = [
+        'Viktor', 'Anatoly', 'Mikhail', 'Boris', 'Svetozar', 'Tigran', 'Vasily', 'Efim',
+        'Wolfgang', 'Lajos', 'Jan', 'Grigory', 'Bent', 'Samuel', 'David', 'Lev'
+      ];
+      const OLD_GM_LAST_NAMES = [
+        'Orlov', 'Kovacs', 'Stern', 'Vance', 'Bauer', 'Novak', 'Volkov', 'Richter',
+        'Horvath', 'Vermeer', 'Sokolov', 'Morozov', 'Tarrasch', 'Bronstein', 'Lind', 'Gligoric'
+      ];
+      const OLD_GM_STYLES = [
+        'Sicilian Najdorf & Endgame Virtuoso',
+        'King\'s Indian Defense Tactician',
+        'Caro-Kann Iron Fortress',
+        'Ruy Lopez Closed Classical',
+        'Queen\'s Gambit Positional Master',
+        'Nimzo-Indian Strategic Grandmaster',
+        'French Winawer Counter-Attacker',
+        'English Opening Classical Boa'
+      ];
+      const OLD_GM_AVATARS = ['👴', '🧓', '🧔‍♂️', '👓'];
+
+      function generateRandomOldGrandmaster() {
+        const fn = OLD_GM_FIRST_NAMES[Math.floor(Math.random() * OLD_GM_FIRST_NAMES.length)];
+        const ln = OLD_GM_LAST_NAMES[Math.floor(Math.random() * OLD_GM_LAST_NAMES.length)];
+        const age = 68 + Math.floor(Math.random() * 18); // Age 68–85
+        const elo = 2300 + Math.floor(Math.random() * 201); // Strictly 2300–2500 ELO
+        const style = OLD_GM_STYLES[Math.floor(Math.random() * OLD_GM_STYLES.length)];
+        const avatar = OLD_GM_AVATARS[Math.floor(Math.random() * OLD_GM_AVATARS.length)];
+        return {
+          name: `GM ${fn} ${ln}`,
+          age,
+          elo,
+          eloMin: 2300,
+          eloMax: 2500,
+          mult: CHESS_PRIZE_MULT,
+          maxBet: MAX_CHESS_BET,
+          style,
+          avatar,
+          depth: 3,
+          noise: Math.max(0, Math.round((2500 - elo) * 0.08))
+        };
+      }
+      window.generateRandomOldGrandmaster = generateRandomOldGrandmaster;
+
+      function createStartingChessBoard() {
+        return [
+          ['bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'],
+          ['bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP'],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
+          ['wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR']
+        ];
+      }
+
+      function initChessBoardIfNeeded() {
+        const ch = casinoState.chess;
+        if (!ch.gm) {
+          ch.gm = generateRandomOldGrandmaster();
+          ch.activeElo = ch.gm.elo;
+        }
+        if (!ch.board || ch.board.length !== 8) {
+          ch.board = createStartingChessBoard();
+          ch.castling = { wK: true, wQ: true, bK: true, bQ: true };
+          ch.enPassant = null;
+          ch.turn = 'w';
+          ch.selectedSq = null;
+          ch.legalMoves = [];
+        }
+      }
+
+      function cloneChessBoard(board) {
+        return board.map(row => row.slice());
+      }
+
+      function findChessKing(board, color) {
+        const target = color + 'K';
+        for (let r = 0; r < 8; r++) {
+          for (let c = 0; c < 8; c++) {
+            if (board[r][c] === target) return { r, c };
+          }
+        }
+        return null;
+      }
+
+      function isChessSquareAttacked(board, targetR, targetC, byColor) {
+        const pawnDir = byColor === 'w' ? 1 : -1;
+        const pRow = targetR + pawnDir;
+        if (pRow >= 0 && pRow < 8) {
+          if (targetC - 1 >= 0 && board[pRow][targetC - 1] === byColor + 'P') return true;
+          if (targetC + 1 < 8  && board[pRow][targetC + 1] === byColor + 'P') return true;
+        }
+        const kJumps = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+        for (const [dr, dc] of kJumps) {
+          const nr = targetR + dr, nc = targetC + dc;
+          if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && board[nr][nc] === byColor + 'N') return true;
+        }
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            if (dr === 0 && dc === 0) continue;
+            const nr = targetR + dr, nc = targetC + dc;
+            if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && board[nr][nc] === byColor + 'K') return true;
+          }
+        }
+        const ortho = [[-1,0],[1,0],[0,-1],[0,1]];
+        for (const [dr, dc] of ortho) {
+          let nr = targetR + dr, nc = targetC + dc;
+          while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+            const p = board[nr][nc];
+            if (p) {
+              if (p === byColor + 'R' || p === byColor + 'Q') return true;
+              break;
+            }
+            nr += dr; nc += dc;
+          }
+        }
+        const diag = [[-1,-1],[-1,1],[1,-1],[1,1]];
+        for (const [dr, dc] of diag) {
+          let nr = targetR + dr, nc = targetC + dc;
+          while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+            const p = board[nr][nc];
+            if (p) {
+              if (p === byColor + 'B' || p === byColor + 'Q') return true;
+              break;
+            }
+            nr += dr; nc += dc;
+          }
+        }
+        return false;
+      }
+
+      function isChessKingInCheck(board, color) {
+        const kPos = findChessKing(board, color);
+        if (!kPos) return true;
+        const opp = color === 'w' ? 'b' : 'w';
+        return isChessSquareAttacked(board, kPos.r, kPos.c, opp);
+      }
+
+      function applyChessMoveOnBoard(board, castling, move) {
+        const nextB = cloneChessBoard(board);
+        const nextC = { ...(castling || { wK: false, wQ: false, bK: false, bQ: false }) };
+        const piece = nextB[move.fromR][move.fromC];
+        const captured = nextB[move.toR][move.toC];
+        nextB[move.fromR][move.fromC] = null;
+
+        if (move.isEnPassant) {
+          nextB[move.fromR][move.toC] = null;
+        }
+        if (move.castleSide === 'K') {
+          nextB[move.fromR][5] = nextB[move.fromR][7];
+          nextB[move.fromR][7] = null;
+        } else if (move.castleSide === 'Q') {
+          nextB[move.fromR][3] = nextB[move.fromR][0];
+          nextB[move.fromR][0] = null;
+        }
+
+        nextB[move.toR][move.toC] = move.promoteTo || piece;
+
+        if (piece === 'wK') { nextC.wK = false; nextC.wQ = false; }
+        if (piece === 'bK') { nextC.bK = false; nextC.bQ = false; }
+        if (move.fromR === 7 && move.fromC === 0) nextC.wQ = false;
+        if (move.fromR === 7 && move.fromC === 7) nextC.wK = false;
+        if (move.fromR === 0 && move.fromC === 0) nextC.bQ = false;
+        if (move.fromR === 0 && move.fromC === 7) nextC.bK = false;
+        if (move.toR === 7 && move.toC === 0) nextC.wQ = false;
+        if (move.toR === 7 && move.toC === 7) nextC.wK = false;
+        if (move.toR === 0 && move.toC === 0) nextC.bQ = false;
+        if (move.toR === 0 && move.toC === 7) nextC.bK = false;
+
+        const nextEp = (piece && piece[1] === 'P' && Math.abs(move.toR - move.fromR) === 2)
+          ? { r: (move.fromR + move.toR) / 2, c: move.fromC }
+          : null;
+
+        return { board: nextB, castling: nextC, enPassant: nextEp, captured: move.isEnPassant ? (piece[0] === 'w' ? 'bP' : 'wP') : captured };
+      }
+
+      function generateLegalChessMoves(board, color, castling, enPassant) {
+        const opp = color === 'w' ? 'b' : 'w';
+        const pseudo = [];
+
+        for (let r = 0; r < 8; r++) {
+          for (let c = 0; c < 8; c++) {
+            const p = board[r][c];
+            if (!p || p[0] !== color) continue;
+            const type = p[1];
+
+            if (type === 'P') {
+              const dir = color === 'w' ? -1 : 1;
+              const startRow = color === 'w' ? 6 : 1;
+              const promRow  = color === 'w' ? 0 : 7;
+              const r1 = r + dir;
+              if (r1 >= 0 && r1 < 8 && !board[r1][c]) {
+                pseudo.push({ fromR: r, fromC: c, toR: r1, toC: c, promoteTo: r1 === promRow ? color + 'Q' : null });
+                const r2 = r + dir * 2;
+                if (r === startRow && !board[r2][c]) {
+                  pseudo.push({ fromR: r, fromC: c, toR: r2, toC: c, promoteTo: null });
+                }
+              }
+              for (const dc of [-1, 1]) {
+                const nc = c + dc;
+                if (r1 >= 0 && r1 < 8 && nc >= 0 && nc < 8) {
+                  const occ = board[r1][nc];
+                  if (occ && occ[0] === opp) {
+                    pseudo.push({ fromR: r, fromC: c, toR: r1, toC: nc, promoteTo: r1 === promRow ? color + 'Q' : null });
+                  } else if (enPassant && enPassant.r === r1 && enPassant.c === nc) {
+                    pseudo.push({ fromR: r, fromC: c, toR: r1, toC: nc, isEnPassant: true, promoteTo: null });
+                  }
+                }
+              }
+            } else if (type === 'N') {
+              const jumps = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+              for (const [dr, dc] of jumps) {
+                const nr = r + dr, nc = c + dc;
+                if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+                  const occ = board[nr][nc];
+                  if (!occ || occ[0] === opp) pseudo.push({ fromR: r, fromC: c, toR: nr, toC: nc });
+                }
+              }
+            } else if (type === 'B' || type === 'R' || type === 'Q') {
+              const dirs = [];
+              if (type === 'B' || type === 'Q') dirs.push([-1,-1],[-1,1],[1,-1],[1,1]);
+              if (type === 'R' || type === 'Q') dirs.push([-1,0],[1,0],[0,-1],[0,1]);
+              for (const [dr, dc] of dirs) {
+                let nr = r + dr, nc = c + dc;
+                while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+                  const occ = board[nr][nc];
+                  if (!occ) {
+                    pseudo.push({ fromR: r, fromC: c, toR: nr, toC: nc });
+                  } else {
+                    if (occ[0] === opp) pseudo.push({ fromR: r, fromC: c, toR: nr, toC: nc });
+                    break;
+                  }
+                  nr += dr; nc += dc;
+                }
+              }
+            } else if (type === 'K') {
+              for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                  if (dr === 0 && dc === 0) continue;
+                  const nr = r + dr, nc = c + dc;
+                  if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+                    const occ = board[nr][nc];
+                    if (!occ || occ[0] === opp) pseudo.push({ fromR: r, fromC: c, toR: nr, toC: nc });
+                  }
+                }
+              }
+              const homeR = color === 'w' ? 7 : 0;
+              if (r === homeR && c === 4 && castling && !isChessSquareAttacked(board, homeR, 4, opp)) {
+                const canK = color === 'w' ? castling.wK : castling.bK;
+                const canQ = color === 'w' ? castling.wQ : castling.bQ;
+                if (canK && !board[homeR][5] && !board[homeR][6] && board[homeR][7] === color + 'R') {
+                  if (!isChessSquareAttacked(board, homeR, 5, opp) && !isChessSquareAttacked(board, homeR, 6, opp)) {
+                    pseudo.push({ fromR: homeR, fromC: 4, toR: homeR, toC: 6, castleSide: 'K' });
+                  }
+                }
+                if (canQ && !board[homeR][3] && !board[homeR][2] && !board[homeR][1] && board[homeR][0] === color + 'R') {
+                  if (!isChessSquareAttacked(board, homeR, 3, opp) && !isChessSquareAttacked(board, homeR, 2, opp)) {
+                    pseudo.push({ fromR: homeR, fromC: 4, toR: homeR, toC: 2, castleSide: 'Q' });
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        const legal = [];
+        for (const m of pseudo) {
+          const res = applyChessMoveOnBoard(board, castling, m);
+          if (!isChessKingInCheck(res.board, color)) {
+            legal.push(m);
+          }
+        }
+        return legal;
+      }
+      window.generateLegalChessMoves = generateLegalChessMoves;
+
+      const CHESS_PIECE_VALUES = { P: 100, N: 320, B: 330, R: 500, Q: 900, K: 20000 };
+      const CHESS_PAWN_PST = [
+        [  0,  0,  0,  0,  0,  0,  0,  0],
+        [ 50, 50, 50, 50, 50, 50, 50, 50],
+        [ 12, 12, 22, 32, 32, 22, 12, 12],
+        [  6,  6, 12, 26, 26, 12,  6,  6],
+        [  0,  0,  2, 22, 22,  2,  0,  0],
+        [  4, -4, -8,  0,  0, -8, -4,  4],
+        [  4, 10, 10,-20,-20, 10, 10,  4],
+        [  0,  0,  0,  0,  0,  0,  0,  0]
+      ];
+      const CHESS_KNIGHT_PST = [
+        [-50,-40,-30,-30,-30,-30,-40,-50],
+        [-40,-20,  0,  0,  0,  0,-20,-40],
+        [-30,  0, 12, 16, 16, 12,  0,-30],
+        [-30,  6, 16, 22, 22, 16,  6,-30],
+        [-30,  0, 16, 22, 22, 16,  0,-30],
+        [-30,  6, 12, 16, 16, 12,  6,-30],
+        [-40,-20,  0,  4,  4,  0,-20,-40],
+        [-50,-40,-30,-30,-30,-30,-40,-50]
+      ];
+
+      function evaluateChessBoardForBlack(board) {
+        let score = 0;
+        for (let r = 0; r < 8; r++) {
+          for (let c = 0; c < 8; c++) {
+            const p = board[r][c];
+            if (!p) continue;
+            const col = p[0];
+            const type = p[1];
+            const base = CHESS_PIECE_VALUES[type] || 0;
+            let pst = 0;
+            const pstRow = col === 'w' ? r : (7 - r);
+            if (type === 'P') pst = CHESS_PAWN_PST[pstRow][c];
+            else if (type === 'N') pst = CHESS_KNIGHT_PST[pstRow][c];
+            else if (type === 'B' || type === 'Q') pst = (r >= 2 && r <= 5 && c >= 2 && c <= 5) ? 14 : 0;
+            else if (type === 'R') pst = (pstRow === 1 ? 18 : 0);
+            if (col === 'b') score += (base + pst);
+            else score -= (base + pst);
+          }
+        }
+        return score;
+      }
+
+      function scoreMoveOrder(board, m) {
+        const victim = board[m.toR][m.toC];
+        const attacker = board[m.fromR][m.fromC];
+        let s = 0;
+        if (victim) s += 10 * (CHESS_PIECE_VALUES[victim[1]] || 100) - ((CHESS_PIECE_VALUES[attacker ? attacker[1] : 'P'] || 100) / 10);
+        if (m.promoteTo) s += 800;
+        if (m.castleSide) s += 60;
+        return s;
+      }
+
+      function searchChessAlphaBeta(board, castling, enPassant, depth, alpha, beta, maximizingBlack) {
+        const turnCol = maximizingBlack ? 'b' : 'w';
+        const moves = generateLegalChessMoves(board, turnCol, castling, enPassant);
+        if (moves.length === 0) {
+          if (isChessKingInCheck(board, turnCol)) {
+            return maximizingBlack ? (-18000 - depth * 50) : (18000 + depth * 50);
+          }
+          return 0;
+        }
+        if (depth <= 0) {
+          return evaluateChessBoardForBlack(board);
+        }
+
+        moves.sort((a, b) => scoreMoveOrder(board, b) - scoreMoveOrder(board, a));
+        const maxBranch = depth >= 3 ? Math.min(moves.length, 18) : moves.length;
+
+        if (maximizingBlack) {
+          let best = -Infinity;
+          for (let i = 0; i < maxBranch; i++) {
+            const res = applyChessMoveOnBoard(board, castling, moves[i]);
+            const val = searchChessAlphaBeta(res.board, res.castling, res.enPassant, depth - 1, alpha, beta, false);
+            if (val > best) best = val;
+            if (best > alpha) alpha = best;
+            if (beta <= alpha) break;
+          }
+          return best;
+        } else {
+          let best = Infinity;
+          for (let i = 0; i < maxBranch; i++) {
+            const res = applyChessMoveOnBoard(board, castling, moves[i]);
+            const val = searchChessAlphaBeta(res.board, res.castling, res.enPassant, depth - 1, alpha, beta, true);
+            if (val < best) best = val;
+            if (best < beta) beta = best;
+            if (beta <= alpha) break;
+          }
+          return best;
+        }
+      }
+
+      function chooseChessMoveForSide(ch, sideColor, gmSpec) {
+        const moves = generateLegalChessMoves(ch.board, sideColor, ch.castling, ch.enPassant);
+        if (moves.length === 0) return null;
+
+        const isBlack = sideColor === 'b';
+        moves.sort((a, b) => scoreMoveOrder(ch.board, b) - scoreMoveOrder(ch.board, a));
+        let bestMove = moves[0];
+        let bestVal = isBlack ? -Infinity : Infinity;
+        const searchDepth = Math.max(2, (gmSpec && gmSpec.depth ? gmSpec.depth : 3) - 1);
+        const noise = gmSpec && typeof gmSpec.noise === 'number' ? gmSpec.noise : 6;
+
+        for (const m of moves) {
+          const res = applyChessMoveOnBoard(ch.board, ch.castling, m);
+          const rawScore = searchChessAlphaBeta(res.board, res.castling, res.enPassant, searchDepth, -Infinity, Infinity, !isBlack);
+          const jitter = noise > 0 ? ((Math.random() - 0.5) * 2 * noise) : 0;
+          const totalScore = rawScore + jitter;
+          if (isBlack ? (totalScore > bestVal) : (totalScore < bestVal)) {
+            bestVal = totalScore;
+            bestMove = m;
+          }
+        }
+        return bestMove;
+      }
+
+      function formatChessMoveNotation(board, move, nextBoard, nextTurn) {
+        if (move.castleSide === 'K') return 'O-O';
+        if (move.castleSide === 'Q') return 'O-O-O';
+        const files = 'abcdefgh';
+        const piece = board[move.fromR][move.fromC] || 'wP';
+        const pLetter = piece[1] === 'P' ? '' : piece[1];
+        const cap = board[move.toR][move.toC] || move.isEnPassant ? 'x' : '';
+        const fromFile = (piece[1] === 'P' && cap) ? files[move.fromC] : '';
+        const destSq = files[move.toC] + String(8 - move.toR);
+        const prom = move.promoteTo ? '=Q' : '';
+        const inChk = isChessKingInCheck(nextBoard, nextTurn);
+        const nextLegal = generateLegalChessMoves(nextBoard, nextTurn, null, null);
+        const chkSym = inChk ? (nextLegal.length === 0 ? '#' : '+') : '';
+        return `${pLetter}${fromFile}${cap}${destSq}${prom}${chkSym}`;
+      }
+
+      window.rerollChessGrandmaster = function() {
+        window.rerollCasinoAiTable('CHESS');
+      };
+
+      window.startCasinoChessMatch = function() {
+        const ch = casinoState.chess;
+        if (ch.inMatch) return false;
+        initChessBoardIfNeeded();
+
+        let bet = getValidatedCasinoBet();
+        if (!bet) return false;
+        if (bet > MAX_CHESS_BET) {
+          bet = MAX_CHESS_BET;
+          casinoState.betAmount = MAX_CHESS_BET;
+          const inp = document.getElementById('casinoBetInput');
+          if (inp) inp.value = String(MAX_CHESS_BET);
+        }
+
+        // Randomize a fresh Old Grandmaster (2300-2500 ELO) if rotating or first match
+        if (!ch.gm || ch.matchesPlayed > 0) {
+          ch.gm = generateRandomOldGrandmaster();
+        }
+        ch.activeElo = ch.gm.elo;
+
+        recordCasinoDelta(-bet);
+        ch.currentBet = bet;
+        ch.inMatch = true;
+        ch.winner = null;
+        ch.turn = 'w';
+        ch.board = createStartingChessBoard();
+        ch.castling = { wK: true, wQ: true, bK: true, bQ: true };
+        ch.enPassant = null;
+        ch.halfMoveClock = 0;
+        ch.fullMoveNumber = 1;
+        ch.selectedSq = null;
+        ch.legalMoves = [];
+        ch.lastMove = null;
+        ch.moveHistory = [];
+        ch.capturedByWhite = [];
+        ch.capturedByBlack = [];
+        ch.outcomeBanner = `♟️ Match Live vs. ${ch.gm.avatar} ${ch.gm.name} (Age ${ch.gm.age} • ${ch.gm.elo} ELO • 5x Prize = ${fmtMoney(bet * CHESS_PRIZE_MULT)})! Your Turn (White) — Click a piece on the board!`;
+        casinoState.statusText = ch.outcomeBanner;
+        renderCasinoTab();
+        return true;
+      };
+
+      function settleChessMatchOutcome(ch, resultType, reasonText) {
+        initChessBoardIfNeeded();
+        const gm = ch.gm;
+        const bet = ch.currentBet || Math.min(MAX_CHESS_BET, casinoState.betAmount || 100);
+        ch.inMatch = false;
+        ch.selectedSq = null;
+        ch.legalMoves = [];
+        ch.matchesPlayed = (ch.matchesPlayed || 0) + 1;
+        casinoState.rounds++;
+
+        if (resultType === 'WHITE_WIN') {
+          const payout = Number((bet * CHESS_PRIZE_MULT).toFixed(2));
+          const profit = Number((payout - bet).toFixed(2));
+          recordCasinoDelta(payout);
+          ch.winner = 'WHITE';
+          ch.matchesWon = (ch.matchesWon || 0) + 1;
+          if (profit > (ch.biggestWin || 0)) ch.biggestWin = profit;
+          casinoState.wins++;
+          ch.outcomeBanner = `🏆 VICTORY! ${reasonText} vs. ${gm.avatar} ${gm.name} (${gm.elo} ELO) — Paid 5x (${fmtMoney(payout)} total / +${fmtMoney(profit)} profit)!`;
+          casinoState.statusText = ch.outcomeBanner;
+          logCasinoEvent(`♟️ 2D Chess Win vs. Old Grandmaster ${gm.name} (${gm.elo} ELO) — Won 5x (+${fmtMoney(profit)})!`);
+          showToast(`♟️ Defeated ${gm.avatar} ${gm.name} (5x)!`, `You won ${fmtMoney(payout)} (+${fmtMoney(profit)} net profit)!`, true);
+        } else if (resultType === 'DRAW') {
+          recordCasinoDelta(bet);
+          ch.winner = 'DRAW';
+          ch.outcomeBanner = `🤝 DRAW (${reasonText}) vs. ${gm.avatar} ${gm.name} (${gm.elo} ELO) — Your ${fmtMoney(bet)} bet was returned!`;
+          casinoState.statusText = ch.outcomeBanner;
+          logCasinoEvent(`♟️ 2D Chess Draw (${reasonText}) vs. ${gm.name} (${gm.elo} ELO) — ${fmtMoney(bet)} returned.`);
+        } else {
+          ch.winner = 'BLACK';
+          ch.outcomeBanner = `❌ DEFEAT (${reasonText}) vs. ${gm.avatar} ${gm.name} (${gm.elo} ELO) — Lost -${fmtMoney(bet)}.`;
+          casinoState.statusText = ch.outcomeBanner;
+          logCasinoEvent(`♟️ 2D Chess Loss (${reasonText}) vs. ${gm.name} (${gm.elo} ELO) (-${fmtMoney(bet)}).`);
+        }
+        renderCasinoTab();
+      }
+
+      function executeChessMoveAndCheckState(move) {
+        const ch = casinoState.chess;
+        if (!ch.inMatch || !move) return false;
+        initChessBoardIfNeeded();
+        const gm = ch.gm;
+        const movingColor = ch.turn;
+        const oppColor = movingColor === 'w' ? 'b' : 'w';
+        const movingPiece = ch.board[move.fromR][move.fromC];
+        const res = applyChessMoveOnBoard(ch.board, ch.castling, move);
+        const notation = formatChessMoveNotation(ch.board, move, res.board, oppColor);
+
+        ch.board = res.board;
+        ch.castling = res.castling;
+        ch.enPassant = res.enPassant;
+        ch.lastMove = { fromR: move.fromR, fromC: move.fromC, toR: move.toR, toC: move.toC };
+        ch.selectedSq = null;
+        ch.legalMoves = [];
+
+        if (res.captured) {
+          if (movingColor === 'w') ch.capturedByWhite.push(res.captured);
+          else ch.capturedByBlack.push(res.captured);
+        }
+
+        if ((movingPiece && movingPiece[1] === 'P') || res.captured) ch.halfMoveClock = 0;
+        else ch.halfMoveClock = (ch.halfMoveClock || 0) + 1;
+
+        if (movingColor === 'w') {
+          ch.moveHistory.push(`${ch.fullMoveNumber}. ${notation}`);
+        } else {
+          const lastIdx = ch.moveHistory.length - 1;
+          if (lastIdx >= 0) ch.moveHistory[lastIdx] += ` ${notation}`;
+          else ch.moveHistory.push(`${ch.fullMoveNumber}... ${notation}`);
+          ch.fullMoveNumber = (ch.fullMoveNumber || 1) + 1;
+        }
+        if (ch.moveHistory.length > 36) ch.moveHistory.shift();
+
+        ch.turn = oppColor;
+        const oppMoves = generateLegalChessMoves(ch.board, oppColor, ch.castling, ch.enPassant);
+        const oppInCheck = isChessKingInCheck(ch.board, oppColor);
+
+        if (oppMoves.length === 0) {
+          if (oppInCheck) {
+            if (movingColor === 'w') {
+              settleChessMatchOutcome(ch, 'WHITE_WIN', `Checkmate (${notation})`);
+            } else {
+              settleChessMatchOutcome(ch, 'BLACK_WIN', `Checkmated by ${gm.name} (${notation})`);
+            }
+          } else {
+            settleChessMatchOutcome(ch, 'DRAW', 'Stalemate');
+          }
+          return true;
+        }
+
+        let nonKingCount = 0;
+        for (let r = 0; r < 8; r++) {
+          for (let c = 0; c < 8; c++) {
+            if (ch.board[r][c] && ch.board[r][c][1] !== 'K') nonKingCount++;
+          }
+        }
+        if (nonKingCount === 0) {
+          settleChessMatchOutcome(ch, 'DRAW', 'Insufficient Material');
+          return true;
+        }
+        if (ch.halfMoveClock >= 100) {
+          settleChessMatchOutcome(ch, 'DRAW', '50-Move Rule');
+          return true;
+        }
+
+        const evalBlk = evaluateChessBoardForBlack(ch.board);
+        if (movingColor === 'w' && ch.fullMoveNumber >= 10 && evalBlk <= -1500) {
+          settleChessMatchOutcome(ch, 'WHITE_WIN', `${gm.name} Resigned (Overwhelming Material Lead)`);
+          return true;
+        }
+
+        if (ch.turn === 'b') {
+          ch.outcomeBanner = `♟️ You played ${notation}. ${gm.avatar} ${gm.name} (${gm.elo} ELO) is calculating...`;
+          casinoState.statusText = ch.outcomeBanner;
+          renderCasinoTab();
+          setTimeout(() => {
+            if (!ch.inMatch || ch.turn !== 'b') return;
+            const aiMove = chooseChessMoveForSide(ch, 'b', gm);
+            if (aiMove) {
+              executeChessMoveAndCheckState(aiMove);
+            }
+          }, 180);
+        } else {
+          const chkAlert = oppInCheck ? ' ⚠️ CHECK!' : '';
+          ch.outcomeBanner = `♟️ ${gm.avatar} ${gm.name} (${gm.elo} ELO) played ${notation}.${chkAlert} Your Turn (White)!`;
+          casinoState.statusText = ch.outcomeBanner;
+          renderCasinoTab();
+        }
+        return true;
+      }
+      window.executeChessMoveAndCheckState = executeChessMoveAndCheckState;
+
+      window.playSmartChessMoveForHuman = function() {
+        const ch = casinoState.chess;
+        if (!ch.inMatch) {
+          if (!window.startCasinoChessMatch()) return;
+        }
+        if (!ch.inMatch || ch.turn !== 'w') return;
+        const move = chooseChessMoveForSide(ch, 'w', { depth: 3, noise: 0 });
+        if (move) {
+          executeChessMoveAndCheckState(move);
+        }
+      };
+
+      window.resignCasinoChessMatch = function() {
+        const ch = casinoState.chess;
+        if (!ch.inMatch) return;
+        settleChessMatchOutcome(ch, 'BLACK_WIN', 'You Resigned');
+      };
+
+      function handleChessCanvasTap(clientX, clientY) {
+        const ch = casinoState.chess;
+        initChessBoardIfNeeded();
+        if (!ch.inMatch) {
+          if (!window.startCasinoChessMatch()) return;
+        }
+        if (ch.turn !== 'w' || !ch.boardHitBox) return;
+
+        const canvas = document.getElementById('casinoMainCanvas');
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+        const hb = ch.boardHitBox;
+        if (x < hb.x || x > hb.x + hb.size || y < hb.y || y > hb.y + hb.size) return;
+
+        const sqSize = hb.size / 8;
+        const col = Math.max(0, Math.min(7, Math.floor((x - hb.x) / sqSize)));
+        const row = Math.max(0, Math.min(7, Math.floor((y - hb.y) / sqSize)));
+
+        if (ch.selectedSq && Array.isArray(ch.legalMoves)) {
+          const chosenMove = ch.legalMoves.find(m => m.toR === row && m.toC === col);
+          if (chosenMove) {
+            executeChessMoveAndCheckState(chosenMove);
+            return;
+          }
+        }
+
+        const clickedPiece = ch.board[row][col];
+        if (clickedPiece && clickedPiece[0] === 'w') {
+          ch.selectedSq = { r: row, c: col };
+          const allLegal = generateLegalChessMoves(ch.board, 'w', ch.castling, ch.enPassant);
+          ch.legalMoves = allLegal.filter(m => m.fromR === row && m.fromC === col);
+          drawCasinoCanvas();
+        } else {
+          ch.selectedSq = null;
+          ch.legalMoves = [];
+          drawCasinoCanvas();
+        }
       }
 
       // -----------------------------------------------------------------------
@@ -22994,6 +23954,107 @@
             ctx.font = '8px Inter, sans-serif';
             ctx.fillText((ai.outcome || ai.lastAction || '').slice(0, 21), ax + 5, aiRowY + 41);
           });
+        } else if (mode === 'CHESS') {
+          initChessBoardIfNeeded();
+          const ch = casinoState.chess;
+
+          // Dark Grandmaster Tournament Hall Background
+          ctx.fillStyle = '#0B1017';
+          ctx.fillRect(6, 6, W - 12, H - 12);
+
+          // Full-size centered 8x8 Chessboard (no right-side info box so board is maximum size for easy gameplay)
+          const availSpan = Math.min(W - 16, H - 16);
+          const boardSize = Math.max(200, Math.floor(availSpan / 8) * 8);
+          const bx = Math.floor((W - boardSize) / 2);
+          const by = Math.floor((H - boardSize) / 2);
+          const sq = boardSize / 8;
+          ch.boardHitBox = { x: bx, y: by, size: boardSize };
+
+          // Outer Board Frame
+          ctx.fillStyle = '#1E293B';
+          ctx.strokeStyle = '#F59E0B';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.roundRect(bx - 5, by - 5, boardSize + 10, boardSize + 10, 6);
+          ctx.fill();
+          ctx.stroke();
+
+          const pieceGlyphs = {
+            wK: '♔', wQ: '♕', wR: '♖', wB: '♗', wN: '♘', wP: '♙',
+            bK: '♚', bQ: '♛', bR: '♜', bB: '♝', bN: '♞', bP: '♟'
+          };
+          const files = 'abcdefgh';
+          const wInChk = isChessKingInCheck(ch.board, 'w');
+          const bInChk = isChessKingInCheck(ch.board, 'b');
+
+          for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+              const sx = bx + c * sq;
+              const sy = by + r * sq;
+              const isLight = (r + c) % 2 === 0;
+              ctx.fillStyle = isLight ? '#E2D6B5' : '#4E7837';
+
+              if (ch.lastMove && ((ch.lastMove.fromR === r && ch.lastMove.fromC === c) || (ch.lastMove.toR === r && ch.lastMove.toC === c))) {
+                ctx.fillStyle = isLight ? '#FDE047' : '#CA8A04';
+              }
+              if (ch.selectedSq && ch.selectedSq.r === r && ch.selectedSq.c === c) {
+                ctx.fillStyle = '#38BDF8';
+              }
+              const p = ch.board[r][c];
+              if ((p === 'wK' && wInChk) || (p === 'bK' && bInChk)) {
+                ctx.fillStyle = '#EF4444';
+              }
+              ctx.fillRect(sx, sy, sq, sq);
+
+              if (c === 0) {
+                ctx.fillStyle = isLight ? '#334155' : '#F8FAFC';
+                ctx.font = 'bold 9.5px Inter, monospace';
+                ctx.textAlign = 'left';
+                ctx.fillText(String(8 - r), sx + 3, sy + 11);
+              }
+              if (r === 7) {
+                ctx.fillStyle = isLight ? '#334155' : '#F8FAFC';
+                ctx.font = 'bold 9.5px Inter, monospace';
+                ctx.textAlign = 'right';
+                ctx.fillText(files[c], sx + sq - 3, sy + sq - 3);
+              }
+
+              if (p) {
+                const isWhitePiece = p[0] === 'w';
+                ctx.save();
+                ctx.font = `bold ${Math.floor(sq * 0.80)}px serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.lineWidth = isWhitePiece ? 2.4 : 1.8;
+                ctx.strokeStyle = isWhitePiece ? '#0F172A' : '#F8FAFC';
+                ctx.fillStyle = isWhitePiece ? '#FFFFFF' : '#111827';
+                const glyph = pieceGlyphs[p] || '♟';
+                ctx.strokeText(glyph, sx + sq / 2, sy + sq / 2 + 1);
+                ctx.fillText(glyph, sx + sq / 2, sy + sq / 2 + 1);
+                ctx.restore();
+              }
+
+              if (ch.selectedSq && Array.isArray(ch.legalMoves)) {
+                const lm = ch.legalMoves.find(m => m.toR === r && m.toC === c);
+                if (lm) {
+                  ctx.save();
+                  if (ch.board[r][c] || lm.isEnPassant) {
+                    ctx.strokeStyle = 'rgba(239, 68, 68, 0.90)';
+                    ctx.lineWidth = 3.5;
+                    ctx.beginPath();
+                    ctx.arc(sx + sq / 2, sy + sq / 2, sq * 0.41, 0, Math.PI * 2);
+                    ctx.stroke();
+                  } else {
+                    ctx.fillStyle = 'rgba(16, 185, 129, 0.88)';
+                    ctx.beginPath();
+                    ctx.arc(sx + sq / 2, sy + sq / 2, sq * 0.19, 0, Math.PI * 2);
+                    ctx.fill();
+                  }
+                  ctx.restore();
+                }
+              }
+            }
+          }
         } else if (mode === 'ROULETTE') {
           const r = casinoState.roulette;
           const cx = Math.min(W * 0.32, 128);
@@ -24753,6 +25814,7 @@
           BLACKJACK:  '🃏 2D Blackjack Table (You + 3 Casino AI Players vs. Dealer • Pays 3:2 • Split, Double, Insurance & Surrender)',
           BACCARAT:   '🎴 2D Baccarat Table (You + 3 Casino AI Players • Player 1:1, Banker 0.95:1, Tie 8:1 & Pairs 11:1)',
           ROCKET:     '🚀 2D Rocket (97% RTP • 1,000x Max Multiplier • Cash Out Before the Rocket Explodes!)',
+          CHESS:      `♟️ 2D Chess vs. ${(casinoState.chess.gm || generateRandomOldGrandmaster()).avatar} ${(casinoState.chess.gm || generateRandomOldGrandmaster()).name} (Old Grandmaster • ${(casinoState.chess.gm || {elo:2400}).elo} ELO [2300–2500] • 5x Prize • Max Bet $10,000)`, 
           ROULETTE:   '🎡 2D European Roulette (You + 3 Casino AI Players • Inside, Dozens & Columns)',
           POKER:      '🤠 2D Texas Hold\'em Poker (You vs. 3 AI Players • Full Bet, Raise & Fold Action)',
           SLOTS:      '🎰 👑 4-Row Royal Gold Slot Machine (4×4 • 10 Paylines)',
@@ -24772,6 +25834,7 @@
         const statusEl = document.getElementById('casinoStatusBanner');
         if (statusEl) statusEl.textContent = casinoState.statusText;
 
+        if (typeof updateNewGameButtonLockUI === 'function') updateNewGameButtonLockUI();
         const wrBadge = document.getElementById('casinoWinRateBadge');
         if (wrBadge) wrBadge.textContent = `${casinoState.wins} Wins / ${casinoState.rounds} Rounds`;
 
@@ -24783,7 +25846,7 @@
             const activeH = (bj.playerHands && bj.playerHands[bj.activeHandIdx || 0]) || { cards: bj.playerHand || [], bet: bj.currentBet };
             const canDoubleNow = bj.inProgress && activeH.cards && activeH.cards.length === 2 && !activeH.isSplitAces && G.human.cash >= (activeH.bet || bj.currentBet);
             const canSplitNow = canSplitBjHand(activeH, bj);
-            const canSurrenderNow = bj.inProgress && (!bj.playerHands || bj.playerHands.length === 1) && !activeH.isFromSplit && activeH.cards && activeH.cards.length === 2;
+            const canSurrenderNow = bj.inProgress;
             const canInsureNow = bj.inProgress && !bj.insuranceTaken && bj.dealerHand && bj.dealerHand[0] && bj.dealerHand[0].rank === 'A' && (!bj.playerHands || bj.playerHands.length === 1) && activeH.cards && activeH.cards.length === 2;
 
             ctrlPanel.innerHTML = `
@@ -24875,6 +25938,61 @@
                 <div class="flex items-center gap-1.5">
                   <span class="text-[11px] text-[#8A919E]">Custom Auto (x):</span>
                   <input id="rocketAutoCashInput" type="number" min="1.1" max="1000" step="0.5" placeholder="Off" value="${autoVal > 0 ? autoVal : ''}" oninput="setRocketAutoCashOut(this.value)" class="w-20 bg-[#0C0E10] border border-[#2E343B] rounded-lg px-2 py-1 font-mono font-extrabold text-white text-xs" />
+                </div>
+              </div>
+            `;
+          } else if (casinoState.activeGame === 'CHESS') {
+            initChessBoardIfNeeded();
+            const ch = casinoState.chess;
+            const gm = ch.gm;
+            const curBet = ch.inMatch ? (ch.currentBet || 100) : Math.min(MAX_CHESS_BET, casinoState.betAmount || 100);
+            if (ch.inMatch) {
+              const bInp = document.getElementById('casinoBetInput');
+              if (bInp) bInp.value = String(curBet);
+            }
+            if (casinoState.betAmount > MAX_CHESS_BET) {
+              casinoState.betAmount = MAX_CHESS_BET;
+              const bInp = document.getElementById('casinoBetInput');
+              if (bInp) bInp.value = String(MAX_CHESS_BET);
+            }
+            const quickBetBtn = (amt, lbl) => `
+              <button type="button" onclick="setCasinoQuickBet(${amt})" ${ch.inMatch ? 'disabled' : ''} class="px-2.5 py-1 rounded-lg font-mono text-[11px] font-bold transition ${curBet === amt ? 'bg-purple-400 text-black font-extrabold ring-1 ring-white' : 'bg-[#1C2024] text-white hover:bg-[#262B31] disabled:opacity-40'}">${lbl}</button>
+            `;
+            ctrlPanel.innerHTML = `
+              <!-- Randomized Old Grandmaster Info Banner & $10,000 Max Bet Selector -->
+              <div class="p-3 rounded-xl bg-[#161B22] border border-purple-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div>
+                  <div class="font-extrabold text-white text-sm flex items-center gap-1.5">
+                    <span>${gm.avatar} ${gm.name} (Age ${gm.age})</span>
+                    <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[11px] font-extrabold">${gm.elo} ELO (2300–2500)</span>
+                    <span class="px-2 py-0.5 rounded-full bg-[#00C805]/20 text-[#00C805] font-mono text-[11px] font-extrabold">5x PRIZE</span>
+                  </div>
+                  <div class="text-[11px] text-[#8A919E] mt-0.5">Style: <strong class="text-slate-200">${gm.style}</strong> • Max Bet: <strong class="text-amber-300">$10,000</strong> (Win up to <strong class="text-[#00C805]">$50,000</strong>!)</div>
+                </div>
+                <div class="flex flex-wrap items-center gap-1">
+                  <span class="text-[10px] font-bold text-[#8A919E] mr-1">Chess Wager (Max $10K):</span>
+                  ${quickBetBtn(100, '$100')}
+                  ${quickBetBtn(500, '$500')}
+                  ${quickBetBtn(1000, '$1K')}
+                  ${quickBetBtn(2500, '$2.5K')}
+                  ${quickBetBtn(5000, '$5K')}
+                  ${quickBetBtn(10000, '$10K MAX')}
+                </div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1 text-xs">
+                <button type="button" id="btnStartChessMatch" onclick="startCasinoChessMatch()" ${ch.inMatch ? 'disabled' : ''} class="sm:col-span-2 py-2.5 px-4 rounded-xl bg-[#00C805] hover:bg-[#00E006] disabled:opacity-40 text-black font-extrabold transition shadow-lg">
+                  ${ch.inMatch ? `🔴 Match Active vs. ${gm.avatar} ${gm.name} (${fmtMoney(curBet)} Bet Locked → 5x = ${fmtMoney(curBet * CHESS_PRIZE_MULT)})` : `♟️ Start 2D Chess vs. ${gm.avatar} ${gm.name} (${fmtMoney(curBet)} Bet → 5x = ${fmtMoney(curBet * CHESS_PRIZE_MULT)})`}
+                </button>
+                <button type="button" id="btnChessSmartMove" onclick="playSmartChessMoveForHuman()" ${(!ch.inMatch || ch.turn !== 'w') ? 'disabled' : ''} class="py-2.5 px-3 rounded-xl bg-sky-500 hover:bg-sky-400 disabled:opacity-40 text-black font-extrabold transition">
+                  💡 Play Smart Move (Or Click Board)
+                </button>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <button type="button" id="btnChessResign" onclick="resignCasinoChessMatch()" ${!ch.inMatch ? 'disabled' : ''} class="py-2.5 px-2 rounded-xl bg-[#FF5000] hover:bg-[#ff6622] disabled:opacity-40 text-white font-extrabold transition">
+                    🏳️ Resign
+                  </button>
+                  <button type="button" id="btnRerollChessGm" onclick="rerollChessGrandmaster()" ${ch.inMatch ? 'disabled' : ''} class="py-2.5 px-2 rounded-xl bg-[#1C2024] hover:bg-[#262B31] disabled:opacity-40 text-purple-300 border border-purple-500/40 font-extrabold transition" title="Invite a new randomized Old Grandmaster (2300-2500 ELO)">
+                    🎲 New GM
+                  </button>
                 </div>
               </div>
             `;
@@ -25243,7 +26361,47 @@
         const aiCard = document.getElementById('casinoAiPlayersSidebarCard');
         if (aiCard) {
           const activeMode = casinoState.activeGame;
-          if (activeMode === 'NASCAR') {
+          if (activeMode === 'CHESS') {
+            initChessBoardIfNeeded();
+            const ch = casinoState.chess;
+            const gm = ch.gm;
+            const curBet = ch.inMatch ? (ch.currentBet || 100) : Math.min(MAX_CHESS_BET, casinoState.betAmount || 100);
+            aiCard.innerHTML = `
+              <div class="flex items-center justify-between text-xs">
+                <div>
+                  <div class="font-extrabold text-purple-300">♟️ Old Grandmaster Table</div>
+                  <div class="text-[10px] text-[#8A919E]">Randomized 2300–2500 ELO • 5x Prize • Max Bet $10,000</div>
+                </div>
+                <button type="button" onclick="rerollChessGrandmaster()" ${ch.inMatch ? 'disabled' : ''} class="px-2 py-0.5 rounded-lg bg-[#1C2024] hover:bg-[#262B31] disabled:opacity-40 text-purple-300 font-bold text-[10px]">🎲 New GM</button>
+              </div>
+              <div class="space-y-1.5 text-[11px] bg-[#0C0E10] p-3 rounded-xl border border-[#22262A] font-mono">
+                <div class="flex items-center justify-between border-b border-[#1E2227] pb-1.5">
+                  <span class="text-white font-extrabold">${gm.avatar} ${gm.name} <span class="text-[10px] text-[#8A919E]">(Age ${gm.age})</span></span>
+                  <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">${gm.elo} ELO</span>
+                </div>
+                <div class="flex items-center justify-between text-[10px] text-[#8A919E] border-b border-[#1E2227] pb-1.5">
+                  <span>Opening Repertoire:</span>
+                  <span class="text-slate-200 font-semibold">${gm.style}</span>
+                </div>
+                <div class="flex items-center justify-between text-[10px] text-[#8A919E] border-b border-[#1E2227] pb-1.5">
+                  <span>ELO Rating Bracket:</span>
+                  <span class="text-sky-300 font-bold">2300 – 2500 ELO</span>
+                </div>
+                <div class="flex items-center justify-between text-[10px] text-[#8A919E] border-b border-[#1E2227] pb-1.5">
+                  <span>Maximum Allowed Bet:</span>
+                  <span class="text-amber-300 font-bold">$10,000.00</span>
+                </div>
+                <div class="flex items-center justify-between text-[11px] pt-0.5">
+                  <span class="text-[#8A919E]">5x Victory Payout (${fmtMoney(curBet, 0)} Bet):</span>
+                  <span class="text-[#00C805] font-extrabold">${fmtMoney(curBet * CHESS_PRIZE_MULT, 0)}</span>
+                </div>
+              </div>
+              <div class="text-[11px] text-[#8A919E] flex items-center justify-between pt-1">
+                <span>Matches Won: <strong class="text-white">${ch.matchesWon || 0} / ${ch.matchesPlayed || 0}</strong></span>
+                <span>Best Chess Win: <strong class="text-[#00C805]">${fmtMoney(ch.biggestWin || 0)}</strong></span>
+              </div>
+            `;
+          } else if (activeMode === 'NASCAR') {
             const ns = casinoState.nascar;
             if (!ns.lineup || ns.lineup.length !== 6) generateNascarLineup();
             aiCard.innerHTML = `
@@ -26871,6 +28029,9 @@
           lotteryWinnersHistory: state.lotteryWinnersHistory,
           lotteryYesterdayResult: state.lotteryYesterdayResult,
           portfolioManagers: state.portfolioManagers,
+          casinoChessSnapshot: window.casinoState ? window.casinoState.chess : null,
+          casinoActiveGame: window.casinoState ? window.casinoState.activeGame : 'BLACKJACK',
+          casinoBetAmount: window.casinoState ? window.casinoState.betAmount : 100,
           human: state.human,
           compactAi,
           commodities: state.commodities,
@@ -26922,6 +28083,13 @@
         base.lotteryAiTicketsSold = snap.lotteryAiTicketsSold || 0;
         base.lotteryWinnersHistory = snap.lotteryWinnersHistory || [];
         if (Array.isArray(snap.portfolioManagers) && snap.portfolioManagers.length >= 100) base.portfolioManagers = snap.portfolioManagers;
+        if (window.casinoState) {
+          if (snap.casinoActiveGame) window.casinoState.activeGame = snap.casinoActiveGame;
+          if (typeof snap.casinoBetAmount === 'number') window.casinoState.betAmount = snap.casinoBetAmount;
+          if (snap.casinoChessSnapshot && typeof snap.casinoChessSnapshot === 'object') {
+            Object.assign(window.casinoState.chess, snap.casinoChessSnapshot);
+          }
+        }
 
         if (snap.human) {
           base.human = snap.human;
@@ -28356,7 +29524,11 @@
           });
         });
         ['optExpirySelect', 'optLotSizeSelect', 'optContractsInput'].forEach(id => {
-          document.getElementById(id).addEventListener('input', renderOptionsTab);
+          const el = document.getElementById(id);
+          if (el) {
+            el.addEventListener('input', renderOptionsTab);
+            el.addEventListener('change', renderOptionsTab);
+          }
         });
         document.getElementById('btnExecuteOptionOrder').addEventListener('click', executeOptionOrder);
 
@@ -28532,6 +29704,18 @@
         });
 
         document.getElementById('btnNewGame').addEventListener('click', () => {
+          const activeBet = getActiveCasinoBetGameInfo();
+          if (activeBet) {
+            showToast(
+              '⚠️ Active Casino Bet — Resign First!',
+              `You have ${fmtMoney(activeBet.bet)} betted in ${activeBet.name}. You cannot start a New Game until you resign from the casino game first!`,
+              false
+            );
+            switchMainTab('casino');
+            casinoState.activeGame = activeBet.gameKey;
+            renderCasinoTab();
+            return;
+          }
           document.getElementById('newGameSeedInput').value = Math.floor(100000 + Math.random() * 899999);
           document.getElementById('btnConfirmNewGame').textContent = 'Launch New Game ($10,000 Locked Start)';
           document.getElementById('modalNewGame').classList.remove('hidden');
@@ -28542,16 +29726,30 @@
           document.getElementById('newGameSeedInput').value = Math.floor(100000 + Math.random() * 899999);
         });
         document.getElementById('btnConfirmNewGame').addEventListener('click', () => {
+          const activeBet = getActiveCasinoBetGameInfo();
+          if (activeBet) {
+            document.getElementById('modalNewGame').classList.add('hidden');
+            showToast(
+              '⚠️ Active Casino Bet — Resign First!',
+              `You have ${fmtMoney(activeBet.bet)} betted in ${activeBet.name}. You cannot start a New Game until you resign from the casino game first!`,
+              false
+            );
+            switchMainTab('casino');
+            casinoState.activeGame = activeBet.gameKey;
+            renderCasinoTab();
+            return;
+          }
           const seed = Number(document.getElementById('newGameSeedInput').value) || Math.floor(100000 + Math.random() * 899999);
           const reg  = document.getElementById('newGameRegimeSelect').value || 'BALANCED';
           G = createNewGame(seed, 10000, reg);
+          resetCasinoStateForNewGame();
           screenerPage = 1;
           rePage = 1;
           smallBizPage = 1;
           lastClockTickWallMs = Date.now();
           saveLiveAutoSession(true);
           document.getElementById('modalNewGame').classList.add('hidden');
-                    showToast('New InveSim Game Launched!', `Seed #${seed}: Freshly generated ${G.stocks.length.toLocaleString()} stocks, ${(G.smallBusinesses || []).length.toLocaleString()} small businesses, ${G.properties.length.toLocaleString()} properties, 24 eREITs & ${G.aiPlayers.length.toLocaleString()} AI rivals!`, true);
+          showToast('New InveSim Game Launched!', `Seed #${seed}: Freshly generated ${G.stocks.length.toLocaleString()} stocks, ${(G.smallBusinesses || []).length.toLocaleString()} small businesses, ${G.properties.length.toLocaleString()} properties, 24 eREITs & ${G.aiPlayers.length.toLocaleString()} AI rivals!`, true);
           renderAll();
         });
 
