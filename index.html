@@ -2011,6 +2011,9 @@
           <button type="button" onclick="selectCasinoGame('CHESS')" data-casino-game="CHESS" class="casino-game-btn py-2.5 px-2 rounded-xl font-bold bg-[#1C2024] text-purple-300 hover:bg-[#262B31] transition flex items-center justify-center gap-1.5">
             <span>♟️</span> <span>2D Chess</span>
           </button>
+          <button type="button" onclick="selectCasinoGame('VIKING_SAMURAI')" data-casino-game="VIKING_SAMURAI" class="casino-game-btn py-2.5 px-2 rounded-xl font-bold bg-[#1C2024] text-rose-300 hover:bg-[#262B31] transition flex items-center justify-center gap-1.5">
+            <span>🪓⚔️</span> <span>Viking vs. Samurai</span>
+          </button>
           <button type="button" onclick="selectCasinoGame('ROULETTE')" data-casino-game="ROULETTE" class="casino-game-btn py-2.5 px-2 rounded-xl font-bold bg-[#1C2024] text-white hover:bg-[#262B31] transition flex items-center justify-center gap-1.5">
             <span>🎡</span> <span>2D Roulette</span>
           </button>
@@ -11417,7 +11420,7 @@
           // (E) AI CASINO GAMBLING ACROSS ALL CASINO GAMES (2D BLACKJACK WITH SPLIT, 2D BACCARAT, 2D ROCKET 1000x, 2D ROULETTE, TEXAS HOLD'EM, 4-ROW SLOTS, SCRATCH-OFFS, 2D HORSE RACING, 2D NASCAR & SPORTSBOOK)
           // -------------------------------------------------------------------
           if (ai.cash >= 20 && rng.next() < 0.20) {
-            const games = ['2D Blackjack', '2D Baccarat', '2D Rocket', '2D Chess', '2D Roulette', 'Texas Holdem', '4-Row Slots', 'Scratch-Off Lottery', '2D Horse Racing', '2D NASCAR Racing', '2D Sportsbook'];
+            const games = ['2D Blackjack', '2D Baccarat', '2D Rocket', '2D Chess', 'Viking vs. Samurai', '2D Roulette', 'Texas Holdem', '4-Row Slots', 'Scratch-Off Lottery', '2D Horse Racing', '2D NASCAR Racing', '2D Sportsbook'];
             const gPick = games[rng.int(0, games.length - 1)];
             if (gPick === 'Scratch-Off Lottery') {
               const availPrices = [5, 10, 20, 50, 100].filter(p => ai.cash >= p);
@@ -11510,12 +11513,29 @@
                 const gmElo = 2300 + rng.int(0, 200);
                 const gmNames = ['GM Viktor Orlov', 'GM Anatoly Vance', 'GM Mikhail Kovacs', 'GM Boris Stern', 'GM Tigran Bauer', 'GM Vasily Novak', 'GM Efim Volkov'];
                 const gmName = gmNames[rng.int(0, gmNames.length - 1)];
+                const sideChoice = rng.pick(['White', 'Black', 'Random→White', 'Random→Black']);
                 const won = rng.next() < 0.19; // 5x payout against 2300-2500 ELO Old Grandmaster
                 const payout = won ? Number((wager * 5.0).toFixed(2)) : 0;
                 const netDelta = Number((payout - wager).toFixed(2));
                 ai.cash = Number((ai.cash + payout).toFixed(2));
                 ai.casinoNetProfit = Number(((ai.casinoNetProfit || 0) + netDelta).toFixed(2));
-                ai.logs.unshift(`Day ${state.day}: ♟️ Played 2D Chess vs. Old Grandmaster ${gmName} (${gmElo} ELO • 5x Prize • Max Bet $10K) → ${won ? 'Won +' + fmtMoney(netDelta) + '!' : 'Lost -' + fmtMoney(wager) + '.'}`);
+                ai.logs.unshift(`Day ${state.day}: ♟️ Played 2D Chess (${sideChoice}) vs. Old Grandmaster ${gmName} (${gmElo} ELO • 5x Prize) → ${won ? 'Won +' + fmtMoney(netDelta) + '!' : 'Lost -' + fmtMoney(wager) + '.'}`);
+              }
+            } else if (gPick === 'Viking vs. Samurai') {
+              const baseWager = Math.max(10, Math.min(Math.round(ai.cash * 0.12), 1500));
+              if (ai.cash >= baseWager) {
+                const stagesBet = rng.int(1, 5);
+                const wager = Math.min(Math.floor(ai.cash), baseWager * stagesBet);
+                ai.cash = Number((ai.cash - wager).toFixed(2));
+                const pickSide = rng.next() < 0.50 ? 'VIKING' : 'SAMURAI';
+                const winnerSide = rng.next() < 0.50 ? 'VIKING' : 'SAMURAI'; // Exact 50/50 win probability
+                const won = pickSide === winnerSide;
+                const payout = won ? Number((wager * 2.0).toFixed(2)) : 0;
+                const netDelta = Number((payout - wager).toFixed(2));
+                ai.cash = Number((ai.cash + payout).toFixed(2));
+                ai.casinoNetProfit = Number(((ai.casinoNetProfit || 0) + netDelta).toFixed(2));
+                const killDesc = winnerSide === 'VIKING' ? '🪓 Viking killed ⚔️ Samurai' : '⚔️ Samurai killed 🪓 Viking';
+                ai.logs.unshift(`Day ${state.day}: 🪓⚔️ Bet ${fmtMoney(wager)} across ${stagesBet}/5 Stages on ${pickSide === 'VIKING' ? '🪓 Viking' : '⚔️ Samurai'} (25s 5-Stage Battle: ${killDesc}) → ${won ? 'Won +' + fmtMoney(netDelta) + '!' : 'Lost -' + fmtMoney(wager) + '.'}`);
               }
             } else if (gPick === '2D Rocket') {
               const wager = Math.max(10, Math.min(Math.round(ai.cash * 0.20), 2500));
@@ -18748,15 +18768,17 @@
           seatNotice: '',
           aiPlayers: []
         },
-        // 2D Chess State (Against Randomized Old Grandmaster AI • 2300–2500 ELO • 5x Prize • Max Bet $10,000)
+        // 2D Chess State (Against Randomized Old Grandmaster AI • 2300–2500 ELO • 5x Prize • Max Bet $10,000 • Play White, Black, or Random)
         chess: {
           inMatch: false,
           maxBet: 10000,
           prizeMult: 5.0,
+          colorChoice: 'w', // 'w' (White) | 'b' (Black) | 'random' (Random 50/50 each bet)
+          humanColor: 'w',  // 'w' | 'b' active side for current/last match
           gm: null,
           activeElo: 2410,
           currentBet: 100,
-          turn: 'w', // 'w' (Human) | 'b' (Old Grandmaster AI)
+          turn: 'w', // 'w' | 'b'
           board: [],
           castling: { wK: true, wQ: true, bK: true, bQ: true },
           enPassant: null,
@@ -18768,13 +18790,61 @@
           moveHistory: [],
           capturedByWhite: [],
           capturedByBlack: [],
-          outcomeBanner: 'Challenge a randomized Old Grandmaster AI (2300–2500 ELO) for a 5x Prize (Max Bet $10,000)!',
+          outcomeBanner: 'Choose White, Black, or Random and challenge a randomized Old Grandmaster AI (2300–2500 ELO) for a 5x Prize (Max Bet $10,000)!',
           seatNotice: '',
           winner: null,
           matchesPlayed: 0,
           matchesWon: 0,
           biggestWin: 0,
           boardHitBox: null
+        },
+        // 2D Viking vs. Samurai Battle State (5 Stages × 5s = 25s Realistic Action Battle • Bet More Each Stage • 50/50 Win Chance)
+        vikingSamurai: {
+          inBattle: false,
+          battleNumber: 1,
+          selectedFighter: 'VIKING', // 'VIKING' | 'SAMURAI'
+          winnerFighter: null,       // 'VIKING' | 'SAMURAI'
+          currentBet: 100,           // Cumulative total bet across all stages in current battle
+          stageBets: [0, 0, 0, 0, 0], // Bet placed in Stage 1, 2, 3, 4, 5
+          currentStage: 0,           // 0 = pre-battle, 1..5 = active stage
+          maxStages: 5,
+          stagePhase: 'IDLE',        // 'IDLE' | 'FIGHTING' | 'STAGE_BETTING'
+          stageDurationMs: 5000,     // 5 seconds per stage
+          durationMs: 25000,         // 5 stages * 5s = 25 seconds total
+          stageElapsedSec: 0,
+          elapsedSec: 0,
+          totalSec: 25.0,
+          vikingName: 'Ragnar',
+          samuraiName: 'Hanzo',
+          vikingHp: 100,
+          samuraiHp: 100,
+          vikingXFrac: 0.34,
+          vikingYFrac: 0.56,
+          vikingJumpY: 0,
+          vikingLean: 0,
+          samuraiXFrac: 0.66,
+          samuraiYFrac: 0.56,
+          samuraiJumpY: 0,
+          samuraiLean: 0,
+          vikingStance: 'READY',  // 'READY' | 'ATTACK' | 'LEAP' | 'SHIELD' | 'HIT' | 'VICTORY' | 'DEAD'
+          samuraiStance: 'READY', // 'READY' | 'ATTACK' | 'DASH' | 'PARRY' | 'HIT' | 'VICTORY' | 'DEAD'
+          weaponSwingPhase: 0,
+          slashTrail: null,
+          clashEffect: null,
+          sparks: [],
+          bloodParticles: [],
+          dustClouds: [],
+          shakeX: 0,
+          shakeY: 0,
+          stageScripts: [],
+          commentary: '🪓⚔️ Pick 🪓 VIKING or ⚔️ SAMURAI (50/50 Chance • 5 Stages × 5s = 25s Battle • Bet More Each Stage) and tap Start Stage 1!',
+          seatNotice: '',
+          battlesFought: 0,
+          battlesWon: 0,
+          biggestWin: 0,
+          lastNetWin: 0,
+          recentWinners: ['VIKING', 'SAMURAI', 'SAMURAI', 'VIKING', 'VIKING', 'SAMURAI'],
+          aiPlayers: []
         },
         // Roulette State
         roulette: {
@@ -18974,6 +19044,8 @@
             updateSoccerGameAnimation(anim.progress);
           } else if (type === 'TENNIS_GAME') {
             updateTennisGameAnimation(anim.progress);
+          } else if (type === 'VIKING_SAMURAI_BATTLE') {
+            updateVikingSamuraiAnimation(anim.progress);
           }
           updateScratchParticles();
           drawCasinoCanvas();
@@ -20785,6 +20857,7 @@
         else if (gameMode === 'ROULETTE') { stateObj = casinoState.roulette; list = stateObj.aiPlayers; }
         else if (gameMode === 'POKER') { stateObj = casinoState.poker; list = stateObj.aiGamblers; }
         else if (gameMode === 'ROCKET') { stateObj = casinoState.rocket; list = stateObj.aiPlayers; }
+        else if (gameMode === 'VIKING_SAMURAI') { stateObj = casinoState.vikingSamurai; list = stateObj.aiPlayers; }
         if (!Array.isArray(list) || list.length !== 3) return;
 
         const notices = [];
@@ -20847,6 +20920,9 @@
         if (!casinoState.poker.aiGamblers || casinoState.poker.aiGamblers.length !== 3) {
           casinoState.poker.aiGamblers = generateThreeAiGamblers('POKER');
         }
+        if (casinoState.vikingSamurai && (!casinoState.vikingSamurai.aiPlayers || casinoState.vikingSamurai.aiPlayers.length !== 3)) {
+          casinoState.vikingSamurai.aiPlayers = generateThreeAiGamblers('VIKING_SAMURAI');
+        }
       }
 
       function getActiveCasinoBetGameInfo() {
@@ -20854,6 +20930,9 @@
         const cs = window.casinoState;
         if (cs.chess && cs.chess.inMatch) {
           return { gameKey: 'CHESS', name: '2D Chess', bet: cs.chess.currentBet || cs.betAmount || 100 };
+        }
+        if (cs.vikingSamurai && cs.vikingSamurai.inBattle) {
+          return { gameKey: 'VIKING_SAMURAI', name: 'Viking vs. Samurai', bet: cs.vikingSamurai.currentBet || cs.betAmount || 100 };
         }
         if (cs.bj && cs.bj.inProgress) {
           return { gameKey: 'BLACKJACK', name: '2D Blackjack', bet: cs.bj.currentBet || cs.betAmount || 100 };
@@ -20960,10 +21039,38 @@
         // Reset 2D Chess
         const freshGm = generateRandomOldGrandmaster();
         cs.chess.inMatch = false;
+        cs.chess.colorChoice = 'w';
+        cs.chess.humanColor = 'w';
         cs.chess.gm = freshGm;
         cs.chess.activeElo = freshGm.elo;
         cs.chess.currentBet = 100;
         cs.chess.turn = 'w';
+
+        // Reset 2D Viking vs. Samurai
+        if (cs.vikingSamurai) {
+          cs.vikingSamurai.inBattle = false;
+          cs.vikingSamurai.battleNumber = 1;
+          cs.vikingSamurai.winnerFighter = null;
+          cs.vikingSamurai.currentBet = 100;
+          cs.vikingSamurai.stageBets = [0, 0, 0, 0, 0];
+          cs.vikingSamurai.currentStage = 0;
+          cs.vikingSamurai.stagePhase = 'IDLE';
+          cs.vikingSamurai.elapsedSec = 0;
+          cs.vikingSamurai.stageElapsedSec = 0;
+          cs.vikingSamurai.vikingName = 'Ragnar';
+          cs.vikingSamurai.samuraiName = 'Hanzo';
+          cs.vikingSamurai.vikingHp = 100;
+          cs.vikingSamurai.samuraiHp = 100;
+          cs.vikingSamurai.vikingStance = 'READY';
+          cs.vikingSamurai.samuraiStance = 'READY';
+          cs.vikingSamurai.sparks = [];
+          cs.vikingSamurai.bloodParticles = [];
+          cs.vikingSamurai.dustClouds = [];
+          cs.vikingSamurai.battlesFought = 0;
+          cs.vikingSamurai.battlesWon = 0;
+          cs.vikingSamurai.biggestWin = 0;
+          cs.vikingSamurai.aiPlayers = generateThreeAiGamblers('VIKING_SAMURAI');
+        }
         cs.chess.board = createStartingChessBoard();
         cs.chess.castling = { wK: true, wQ: true, bK: true, bQ: true };
         cs.chess.enPassant = null;
@@ -21025,6 +21132,10 @@
           showToast('Chess Match in Progress', 'Complete or Resign your current 2D Chess match before inviting a new Old Grandmaster!', false);
           return;
         }
+        if (mode === 'VIKING_SAMURAI' && casinoState.vikingSamurai.inBattle) {
+          showToast('Battle in Progress', 'Wait for the Viking vs. Samurai battle to finish or Resign first!', false);
+          return;
+        }
         casinoState.lastAiHumanCashRef = Math.max(100, Number(G ? G.human.cash : 1000));
         if (mode === 'BLACKJACK') {
           casinoState.bj.aiPlayers = generateThreeAiGamblers('BLACKJACK');
@@ -21045,6 +21156,10 @@
           casinoState.chess.seatNotice = `🎲 New Old Grandmaster seated: ${newGm.avatar} ${newGm.name} (Age ${newGm.age} • ${newGm.elo} ELO • ${newGm.style})`;
           casinoState.chess.outcomeBanner = `♟️ Seated vs. ${newGm.avatar} ${newGm.name} (Age ${newGm.age} • ${newGm.elo} ELO [2300–2500] • 5x Prize • Max Bet $10,000)!`;
           casinoState.statusText = casinoState.chess.outcomeBanner;
+        } else if (mode === 'VIKING_SAMURAI') {
+          casinoState.vikingSamurai.aiPlayers = generateThreeAiGamblers('VIKING_SAMURAI');
+          casinoState.vikingSamurai.seatNotice = `🎲 New Arena Bettors joined: ${casinoState.vikingSamurai.aiPlayers.map(a => a.name).join(', ')}`;
+          casinoState.statusText = `🪓⚔️ New Viking vs. Samurai Bettors: ${casinoState.vikingSamurai.aiPlayers.map(a => a.name).join(', ')}!`;
         } else if (mode === 'ROULETTE') {
           casinoState.roulette.aiPlayers = generateThreeAiGamblers('ROULETTE');
           casinoState.roulette.seatNotice = `🎲 New Casino Patrons seated: ${casinoState.roulette.aiPlayers.map(a => a.name).join(', ')}`;
@@ -21072,7 +21187,7 @@
       }
 
       window.selectCasinoGame = function(gameKey) {
-        const allowedGames = ['BLACKJACK', 'BACCARAT', 'ROCKET', 'CHESS', 'ROULETTE', 'POKER', 'SLOTS', 'SCRATCH', 'HORSES', 'NASCAR'];
+        const allowedGames = ['BLACKJACK', 'BACCARAT', 'ROCKET', 'CHESS', 'VIKING_SAMURAI', 'ROULETTE', 'POKER', 'SLOTS', 'SCRATCH', 'HORSES', 'NASCAR'];
         const cleanKey = allowedGames.includes(gameKey) ? gameKey : 'BLACKJACK';
         const activeBet = getActiveCasinoBetGameInfo();
         if (activeBet && activeBet.gameKey !== cleanKey) {
@@ -21121,7 +21236,11 @@
             if (inp) inp.value = '10000';
           }
           const gm = casinoState.chess.gm;
-          casinoState.statusText = `♟️ 2D Chess vs. ${gm.avatar} ${gm.name} (Age ${gm.age} • ${gm.elo} ELO [2300–2500] • 5x Prize • Max Bet $10,000): Tap Start 2D Chess Match or click any White piece!`;
+          const cLbl = casinoState.chess.colorChoice === 'w' ? 'White' : (casinoState.chess.colorChoice === 'b' ? 'Black' : 'Random Side');
+          casinoState.statusText = `♟️ 2D Chess (${cLbl}) vs. ${gm.avatar} ${gm.name} (Age ${gm.age} • ${gm.elo} ELO [2300–2500] • 5x Prize • Max Bet $10,000): Choose White, Black, or Random and tap Start 2D Chess Match!`;
+        } else if (cleanKey === 'VIKING_SAMURAI') {
+          const vs = casinoState.vikingSamurai;
+          casinoState.statusText = `🪓⚔️ Viking vs. Samurai Battle #${vs.battleNumber} (50/50 Win Chance • 10–20s Lethal Animation • 2x Payout): Backed ${vs.selectedFighter === 'VIKING' ? '🪓 VIKING' : '⚔️ SAMURAI'}!`;
         } else if (cleanKey === 'ROULETTE') {
           casinoState.statusText = `🎡 2D European Roulette: Choose your bet type below and tap Spin Roulette Wheel!`;
         } else if (cleanKey === 'POKER') {
@@ -21135,7 +21254,7 @@
 
       window.syncCasinoBetInput = function(val) {
         const activeBet = getActiveCasinoBetGameInfo();
-        if (activeBet) {
+        if (activeBet && activeBet.gameKey !== 'VIKING_SAMURAI') {
           const inp = document.getElementById('casinoBetInput');
           if (inp) inp.value = String(activeBet.bet);
           return;
@@ -21152,7 +21271,7 @@
       window.setCasinoQuickBet = function(modeOrAmt) {
         if (!G) return;
         const activeBet = getActiveCasinoBetGameInfo();
-        if (activeBet) {
+        if (activeBet && activeBet.gameKey !== 'VIKING_SAMURAI') {
           showToast('Bet Locked in Active Game', `Your ${fmtMoney(activeBet.bet)} bet is locked in ${activeBet.name}. Finish or 🏳️ Resign the game first!`, false);
           return;
         }
@@ -22532,6 +22651,39 @@
         window.rerollCasinoAiTable('CHESS');
       };
 
+      window.setChessColorChoice = function(choice) {
+        const ch = casinoState.chess;
+        if (ch.inMatch) {
+          showToast('Match in Progress', 'Finish or 🏳️ Resign your current 2D Chess match before changing your piece color!', false);
+          return;
+        }
+        const valid = ['w', 'b', 'random'].includes(choice) ? choice : 'w';
+        ch.colorChoice = valid;
+        if (valid === 'w' || valid === 'b') {
+          ch.humanColor = valid;
+        }
+        const cName = valid === 'w' ? '⚪ White (Moves First)' : (valid === 'b' ? '⚫ Black (Old GM Moves First)' : '🎲 Random (50/50 White or Black on Bet)');
+        ch.outcomeBanner = `♟️ Selected Side: ${cName}. Tap Start 2D Chess Match!`;
+        casinoState.statusText = ch.outcomeBanner;
+        renderCasinoTab();
+      };
+
+      function triggerChessAiMoveIfNeeded() {
+        const ch = casinoState.chess;
+        if (!ch.inMatch) return;
+        const humanCol = ch.humanColor || 'w';
+        const aiCol = humanCol === 'w' ? 'b' : 'w';
+        if (ch.turn !== aiCol) return;
+        const gm = ch.gm || generateRandomOldGrandmaster();
+        setTimeout(() => {
+          if (!ch.inMatch || ch.turn !== aiCol) return;
+          const aiMove = chooseChessMoveForSide(ch, aiCol, gm);
+          if (aiMove) {
+            executeChessMoveAndCheckState(aiMove);
+          }
+        }, 200);
+      }
+
       window.startCasinoChessMatch = function() {
         const ch = casinoState.chess;
         if (ch.inMatch) return false;
@@ -22546,7 +22698,12 @@
           if (inp) inp.value = String(MAX_CHESS_BET);
         }
 
-        // Randomize a fresh Old Grandmaster (2300-2500 ELO) if rotating or first match
+        // Resolve human piece color ('w', 'b', or 'random') for this bet
+        const pref = ch.colorChoice || 'w';
+        ch.humanColor = pref === 'random' ? (Math.random() < 0.50 ? 'w' : 'b') : pref;
+        const sideLabel = ch.humanColor === 'w' ? '⚪ White' : '⚫ Black';
+        const randTag = pref === 'random' ? ` (Randomly assigned ${sideLabel})` : ` (${sideLabel})`;
+
         if (!ch.gm || ch.matchesPlayed > 0) {
           ch.gm = generateRandomOldGrandmaster();
         }
@@ -22568,9 +22725,17 @@
         ch.moveHistory = [];
         ch.capturedByWhite = [];
         ch.capturedByBlack = [];
-        ch.outcomeBanner = `♟️ Match Live vs. ${ch.gm.avatar} ${ch.gm.name} (Age ${ch.gm.age} • ${ch.gm.elo} ELO • 5x Prize = ${fmtMoney(bet * CHESS_PRIZE_MULT)})! Your Turn (White) — Click a piece on the board!`;
-        casinoState.statusText = ch.outcomeBanner;
-        renderCasinoTab();
+
+        if (ch.humanColor === 'w') {
+          ch.outcomeBanner = `♟️ Match Live${randTag} vs. ${ch.gm.avatar} ${ch.gm.name} (${ch.gm.elo} ELO • 5x = ${fmtMoney(bet * CHESS_PRIZE_MULT)})! Your Turn (⚪ White) — Click a White piece!`;
+          casinoState.statusText = ch.outcomeBanner;
+          renderCasinoTab();
+        } else {
+          ch.outcomeBanner = `♟️ Match Live${randTag} vs. ${ch.gm.avatar} ${ch.gm.name} (${ch.gm.elo} ELO • 5x = ${fmtMoney(bet * CHESS_PRIZE_MULT)})! ${ch.gm.name} (⚪ White) is making the opening move...`;
+          casinoState.statusText = ch.outcomeBanner;
+          renderCasinoTab();
+          triggerChessAiMoveIfNeeded();
+        }
         return true;
       };
 
@@ -22578,24 +22743,30 @@
         initChessBoardIfNeeded();
         const gm = ch.gm;
         const bet = ch.currentBet || Math.min(MAX_CHESS_BET, casinoState.betAmount || 100);
+        const humanCol = ch.humanColor || 'w';
+        const sideTag = humanCol === 'w' ? '⚪ White' : '⚫ Black';
         ch.inMatch = false;
         ch.selectedSq = null;
         ch.legalMoves = [];
         ch.matchesPlayed = (ch.matchesPlayed || 0) + 1;
         casinoState.rounds++;
 
-        if (resultType === 'WHITE_WIN') {
+        const isHumanVictory = resultType === 'HUMAN_WIN' ||
+          (resultType === 'WHITE_WIN' && humanCol === 'w') ||
+          (resultType === 'BLACK_WIN' && humanCol === 'b');
+
+        if (isHumanVictory) {
           const payout = Number((bet * CHESS_PRIZE_MULT).toFixed(2));
           const profit = Number((payout - bet).toFixed(2));
           recordCasinoDelta(payout);
-          ch.winner = 'WHITE';
+          ch.winner = humanCol === 'w' ? 'WHITE' : 'BLACK';
           ch.matchesWon = (ch.matchesWon || 0) + 1;
           if (profit > (ch.biggestWin || 0)) ch.biggestWin = profit;
           casinoState.wins++;
-          ch.outcomeBanner = `🏆 VICTORY! ${reasonText} vs. ${gm.avatar} ${gm.name} (${gm.elo} ELO) — Paid 5x (${fmtMoney(payout)} total / +${fmtMoney(profit)} profit)!`;
+          ch.outcomeBanner = `🏆 VICTORY (${sideTag})! ${reasonText} vs. ${gm.avatar} ${gm.name} (${gm.elo} ELO) — Paid 5x (${fmtMoney(payout)} total / +${fmtMoney(profit)} profit)!`;
           casinoState.statusText = ch.outcomeBanner;
-          logCasinoEvent(`♟️ 2D Chess Win vs. Old Grandmaster ${gm.name} (${gm.elo} ELO) — Won 5x (+${fmtMoney(profit)})!`);
-          showToast(`♟️ Defeated ${gm.avatar} ${gm.name} (5x)!`, `You won ${fmtMoney(payout)} (+${fmtMoney(profit)} net profit)!`, true);
+          logCasinoEvent(`♟️ 2D Chess Win (${sideTag}) vs. Old Grandmaster ${gm.name} (${gm.elo} ELO) — Won 5x (+${fmtMoney(profit)})!`);
+          showToast(`♟️ Defeated ${gm.avatar} ${gm.name} (5x)!`, `You won ${fmtMoney(payout)} (+${fmtMoney(profit)} net profit) playing ${sideTag}!`, true);
         } else if (resultType === 'DRAW') {
           recordCasinoDelta(bet);
           ch.winner = 'DRAW';
@@ -22603,7 +22774,7 @@
           casinoState.statusText = ch.outcomeBanner;
           logCasinoEvent(`♟️ 2D Chess Draw (${reasonText}) vs. ${gm.name} (${gm.elo} ELO) — ${fmtMoney(bet)} returned.`);
         } else {
-          ch.winner = 'BLACK';
+          ch.winner = humanCol === 'w' ? 'BLACK' : 'WHITE';
           ch.outcomeBanner = `❌ DEFEAT (${reasonText}) vs. ${gm.avatar} ${gm.name} (${gm.elo} ELO) — Lost -${fmtMoney(bet)}.`;
           casinoState.statusText = ch.outcomeBanner;
           logCasinoEvent(`♟️ 2D Chess Loss (${reasonText}) vs. ${gm.name} (${gm.elo} ELO) (-${fmtMoney(bet)}).`);
@@ -22616,6 +22787,7 @@
         if (!ch.inMatch || !move) return false;
         initChessBoardIfNeeded();
         const gm = ch.gm;
+        const humanCol = ch.humanColor || 'w';
         const movingColor = ch.turn;
         const oppColor = movingColor === 'w' ? 'b' : 'w';
         const movingPiece = ch.board[move.fromR][move.fromC];
@@ -22653,10 +22825,10 @@
 
         if (oppMoves.length === 0) {
           if (oppInCheck) {
-            if (movingColor === 'w') {
-              settleChessMatchOutcome(ch, 'WHITE_WIN', `Checkmate (${notation})`);
+            if (movingColor === humanCol) {
+              settleChessMatchOutcome(ch, 'HUMAN_WIN', `Checkmate (${notation})`);
             } else {
-              settleChessMatchOutcome(ch, 'BLACK_WIN', `Checkmated by ${gm.name} (${notation})`);
+              settleChessMatchOutcome(ch, 'AI_WIN', `Checkmated by ${gm.name} (${notation})`);
             }
           } else {
             settleChessMatchOutcome(ch, 'DRAW', 'Stalemate');
@@ -22679,26 +22851,23 @@
           return true;
         }
 
+        // Check if Old Grandmaster resigns when down overwhelming material (-1500+ cp after move 10)
         const evalBlk = evaluateChessBoardForBlack(ch.board);
-        if (movingColor === 'w' && ch.fullMoveNumber >= 10 && evalBlk <= -1500) {
-          settleChessMatchOutcome(ch, 'WHITE_WIN', `${gm.name} Resigned (Overwhelming Material Lead)`);
+        const aiMaterialScore = humanCol === 'w' ? evalBlk : -evalBlk;
+        if (movingColor === humanCol && ch.fullMoveNumber >= 10 && aiMaterialScore <= -1500) {
+          settleChessMatchOutcome(ch, 'HUMAN_WIN', `${gm.name} Resigned (Overwhelming Material Lead)`);
           return true;
         }
 
-        if (ch.turn === 'b') {
+        if (ch.turn !== humanCol) {
           ch.outcomeBanner = `♟️ You played ${notation}. ${gm.avatar} ${gm.name} (${gm.elo} ELO) is calculating...`;
           casinoState.statusText = ch.outcomeBanner;
           renderCasinoTab();
-          setTimeout(() => {
-            if (!ch.inMatch || ch.turn !== 'b') return;
-            const aiMove = chooseChessMoveForSide(ch, 'b', gm);
-            if (aiMove) {
-              executeChessMoveAndCheckState(aiMove);
-            }
-          }, 180);
+          triggerChessAiMoveIfNeeded();
         } else {
           const chkAlert = oppInCheck ? ' ⚠️ CHECK!' : '';
-          ch.outcomeBanner = `♟️ ${gm.avatar} ${gm.name} (${gm.elo} ELO) played ${notation}.${chkAlert} Your Turn (White)!`;
+          const yourSideLbl = humanCol === 'w' ? '⚪ White' : '⚫ Black';
+          ch.outcomeBanner = `♟️ ${gm.avatar} ${gm.name} (${gm.elo} ELO) played ${notation}.${chkAlert} Your Turn (${yourSideLbl})!`;
           casinoState.statusText = ch.outcomeBanner;
           renderCasinoTab();
         }
@@ -22711,8 +22880,9 @@
         if (!ch.inMatch) {
           if (!window.startCasinoChessMatch()) return;
         }
-        if (!ch.inMatch || ch.turn !== 'w') return;
-        const move = chooseChessMoveForSide(ch, 'w', { depth: 3, noise: 0 });
+        const humanCol = ch.humanColor || 'w';
+        if (!ch.inMatch || ch.turn !== humanCol) return;
+        const move = chooseChessMoveForSide(ch, humanCol, { depth: 3, noise: 0 });
         if (move) {
           executeChessMoveAndCheckState(move);
         }
@@ -22721,7 +22891,7 @@
       window.resignCasinoChessMatch = function() {
         const ch = casinoState.chess;
         if (!ch.inMatch) return;
-        settleChessMatchOutcome(ch, 'BLACK_WIN', 'You Resigned');
+        settleChessMatchOutcome(ch, 'AI_WIN', 'You Resigned');
       };
 
       function handleChessCanvasTap(clientX, clientY) {
@@ -22730,7 +22900,8 @@
         if (!ch.inMatch) {
           if (!window.startCasinoChessMatch()) return;
         }
-        if (ch.turn !== 'w' || !ch.boardHitBox) return;
+        const humanCol = ch.humanColor || 'w';
+        if (ch.turn !== humanCol || !ch.boardHitBox) return;
 
         const canvas = document.getElementById('casinoMainCanvas');
         if (!canvas) return;
@@ -22741,8 +22912,11 @@
         if (x < hb.x || x > hb.x + hb.size || y < hb.y || y > hb.y + hb.size) return;
 
         const sqSize = hb.size / 8;
-        const col = Math.max(0, Math.min(7, Math.floor((x - hb.x) / sqSize)));
-        const row = Math.max(0, Math.min(7, Math.floor((y - hb.y) / sqSize)));
+        const dispCol = Math.max(0, Math.min(7, Math.floor((x - hb.x) / sqSize)));
+        const dispRow = Math.max(0, Math.min(7, Math.floor((y - hb.y) / sqSize)));
+        // Flip board coordinates when playing Black so player's Black pieces are at the bottom!
+        const row = humanCol === 'b' ? (7 - dispRow) : dispRow;
+        const col = humanCol === 'b' ? (7 - dispCol) : dispCol;
 
         if (ch.selectedSq && Array.isArray(ch.legalMoves)) {
           const chosenMove = ch.legalMoves.find(m => m.toR === row && m.toC === col);
@@ -22753,9 +22927,9 @@
         }
 
         const clickedPiece = ch.board[row][col];
-        if (clickedPiece && clickedPiece[0] === 'w') {
+        if (clickedPiece && clickedPiece[0] === humanCol) {
           ch.selectedSq = { r: row, c: col };
-          const allLegal = generateLegalChessMoves(ch.board, 'w', ch.castling, ch.enPassant);
+          const allLegal = generateLegalChessMoves(ch.board, humanCol, ch.castling, ch.enPassant);
           ch.legalMoves = allLegal.filter(m => m.fromR === row && m.fromC === col);
           drawCasinoCanvas();
         } else {
@@ -22763,6 +22937,479 @@
           ch.legalMoves = [];
           drawCasinoCanvas();
         }
+      }
+
+      // -----------------------------------------------------------------------
+      // GAME 1E: 2D VIKING VS. SAMURAI (5 STAGES × 5s = 25s REALISTIC BATTLE • BET MORE EACH STAGE)
+      // -----------------------------------------------------------------------
+      const VIKING_WARRIOR_NAMES = [
+        'Ragnar', 'Bjorn', 'Ivar', 'Harald', 'Torstein', 'Erik',
+        'Gunnar', 'Sigurd', 'Rollo', 'Leif', 'Ulf', 'Hakon'
+      ];
+      const SAMURAI_WARRIOR_NAMES = [
+        'Kenshin', 'Musashi', 'Takezo', 'Jin', 'Ryuji', 'Hanzo',
+        'Takahiro', 'Kazuki', 'Kojiro', 'Masamune', 'Raiden', 'Nobunaga'
+      ];
+
+      window.selectVikingOrSamurai = function(fighterKey) {
+        const vs = casinoState.vikingSamurai;
+        if (vs.inBattle) {
+          showToast('Fighter Locked for Current Battle', 'You can bet more on your chosen warrior in each of the 5 stages, or finish/resign to switch warriors!', false);
+          return;
+        }
+        vs.selectedFighter = fighterKey === 'SAMURAI' ? 'SAMURAI' : 'VIKING';
+        const lbl = vs.selectedFighter === 'VIKING' ? `🪓 VIKING (${vs.vikingName})` : `⚔️ SAMURAI (${vs.samuraiName})`;
+        vs.commentary = `🪓⚔️ Selected ${lbl} (50/50 Win Chance • 5 Stages × 5s = 25s Battle • 2x Payout)! Tap Start Stage 1!`;
+        casinoState.statusText = vs.commentary;
+        renderCasinoTab();
+      };
+
+      function spawnBattleParticles(vs, xFrac, yFrac, kind = 'SPARK', count = 14) {
+        const targetArr = kind === 'BLOOD' ? vs.bloodParticles : (kind === 'DUST' ? vs.dustClouds : vs.sparks);
+        for (let i = 0; i < count; i++) {
+          const ang = (Math.random() * Math.PI * 2);
+          const spd = (kind === 'DUST' ? 0.003 : 0.008) + Math.random() * 0.016;
+          targetArr.push({
+            xFrac: xFrac + (Math.random() - 0.5) * 0.04,
+            yFrac: yFrac + (Math.random() - 0.5) * 0.04,
+            vx: Math.cos(ang) * spd,
+            vy: Math.sin(ang) * spd - (kind === 'BLOOD' ? 0.006 : 0.004),
+            size: kind === 'DUST' ? (5 + Math.random() * 6) : (2 + Math.random() * 3.2),
+            life: 1.0,
+            color: kind === 'BLOOD'
+              ? (Math.random() < 0.6 ? '#EF4444' : '#991B1B')
+              : (kind === 'DUST' ? 'rgba(148, 163, 184, 0.45)' : (Math.random() < 0.5 ? '#FDE047' : '#FB923C'))
+          });
+        }
+        if (targetArr.length > 80) targetArr.splice(0, targetArr.length - 80);
+      }
+
+      function stepBattleParticles(vs) {
+        for (const arr of [vs.sparks, vs.bloodParticles, vs.dustClouds]) {
+          if (!Array.isArray(arr)) continue;
+          for (let i = arr.length - 1; i >= 0; i--) {
+            const p = arr[i];
+            p.xFrac += p.vx;
+            p.yFrac += p.vy;
+            p.vy += 0.0009; // gravity
+            p.life -= 0.06;
+            if (p.life <= 0) arr.splice(i, 1);
+          }
+        }
+      }
+
+      function buildFiveStageRealisticBattleScript(winner, vName, sName) {
+        // Builds 5 distinct 5-second stages (Stages 1..5 = 25s total), each with 8 rapid realistic combat exchanges!
+        const vMovePool = [
+          { style: 'LEAP',   banner: `💥 ${vName.toUpperCase()} LEAPING AXE CLEAVE!`,  desc: `🪓 ${vName} leaps high and slams a two-handed battle-axe cleave onto ${sName}'s shoulder guard!` },
+          { style: 'SHIELD', banner: `🛡️ ${vName.toUpperCase()} NORDIC SHIELD BASH!`,  desc: `🪓 ${vName} parries the katana with his iron-rimmed shield and rams ${sName} backward!` },
+          { style: 'ATTACK', banner: `🪓 ${vName.toUpperCase()} BERSERKER COMBO!`,     desc: `🪓 ${vName} unleashes a ferocious left-right bearded axe hook and heavy front kick!` },
+          { style: 'ATTACK', banner: `⚡ ${vName.toUpperCase()} HOOK & POMMEL CRUSH!`, desc: `🪓 ${vName} hooks ${sName}'s blade aside and drives the steel axe pommel into his chest!` }
+        ];
+        const sMovePool = [
+          { style: 'DASH',   banner: `⚡ ${sName.toUpperCase()} IAIDO FLASH SLASH!`,   desc: `⚔️ ${sName} blitzes low across the dirt and carves a blazing crescent katana slash across ${vName}!` },
+          { style: 'PARRY',  banner: `✨ ${sName.toUpperCase()} PARRY & RIPOSTE!`,     desc: `⚔️ ${sName} deflects the heavy battle-axe in a shower of sparks and counters with a 3-cut flurry!` },
+          { style: 'ATTACK', banner: `⚔️ ${sName.toUpperCase()} WHIRLWIND TWIN-CUT!`,  desc: `⚔️ ${sName} spins under ${vName}'s swing and slices twice through his chainmail!` },
+          { style: 'DASH',   banner: `🔥 ${sName.toUpperCase()} DRAGON THRUST!`,       desc: `⚔️ ${sName} lunges forward with a pinpoint katana thrust that pierces ${vName}'s guard!` }
+        ];
+
+        const stages = [];
+        let vHp = 100;
+        let sHp = 100;
+
+        // Target HP milestones at end of Stage 1, 2, 3, 4, 5 so fight stays tense and realistic all 25 seconds
+        for (let stg = 1; stg <= 5; stg++) {
+          const beats = [];
+          for (let b = 0; b < 8; b++) {
+            const isClashBeat = (b % 3 === 0);
+            if (isClashBeat && !(stg === 5 && b >= 6)) {
+              vHp = Math.max(12, vHp - (1 + Math.floor(Math.random() * 2)));
+              sHp = Math.max(12, sHp - (1 + Math.floor(Math.random() * 2)));
+              beats.push({
+                type: 'CLASH',
+                attacker: 'BOTH',
+                vStyle: 'ATTACK',
+                sStyle: 'PARRY',
+                vHp,
+                sHp,
+                banner: '⚔️🔥 AXE & KATANA STEEL CLASH!',
+                desc: `🪓 ${vName} and ⚔️ ${sName} lock weapons in the center of the arena as steel sparks fly!`
+              });
+            } else if (stg === 5 && b >= 6) {
+              // Final 1.25 seconds of Stage 5 (23.75s - 25.0s): Lethal Kill Sequence!
+              if (winner === 'VIKING') {
+                sHp = 0;
+                vHp = Math.max(14, vHp);
+                beats.push({
+                  type: 'KILL',
+                  attacker: 'VIKING',
+                  vStyle: 'VICTORY',
+                  sStyle: 'DEAD',
+                  vHp,
+                  sHp: 0,
+                  banner: `💀 ${vName.toUpperCase()} LETHAL AXE EXECUTION! ${sName.toUpperCase()} SLAIN!`,
+                  desc: `💀 LETHAL FINISH! 🪓 ${vName} shatters ${sName}'s katana guard and delivers a fatal battle-axe execution!`
+                });
+              } else {
+                vHp = 0;
+                sHp = Math.max(14, sHp);
+                beats.push({
+                  type: 'KILL',
+                  attacker: 'SAMURAI',
+                  vStyle: 'DEAD',
+                  sStyle: 'VICTORY',
+                  vHp: 0,
+                  sHp,
+                  banner: `💀 ${sName.toUpperCase()} LETHAL KATANA EXECUTION! ${vName.toUpperCase()} SLAIN!`,
+                  desc: `💀 LETHAL FINISH! ⚔️ ${sName} flashes past ${vName}'s shield and delivers a fatal katana execution slash!`
+                });
+              }
+            } else {
+              // Normal high-action exchange beat
+              const attacker = (stg === 5 && b === 5) ? winner : (Math.random() < 0.50 ? 'VIKING' : 'SAMURAI');
+              const dmg = 2 + Math.floor(Math.random() * 4);
+              if (attacker === 'VIKING') {
+                const mv = vMovePool[Math.floor(Math.random() * vMovePool.length)];
+                sHp = Math.max(10, sHp - dmg);
+                beats.push({
+                  type: 'HIT',
+                  attacker: 'VIKING',
+                  vStyle: mv.style,
+                  sStyle: 'HIT',
+                  vHp,
+                  sHp,
+                  banner: mv.banner,
+                  desc: mv.desc
+                });
+              } else {
+                const mv = sMovePool[Math.floor(Math.random() * sMovePool.length)];
+                vHp = Math.max(10, vHp - dmg);
+                beats.push({
+                  type: 'HIT',
+                  attacker: 'SAMURAI',
+                  vStyle: 'HIT',
+                  sStyle: mv.style,
+                  vHp,
+                  sHp,
+                  banner: mv.banner,
+                  desc: mv.desc
+                });
+              }
+            }
+          }
+          stages.push(beats);
+        }
+        return stages;
+      }
+
+      window.startVikingSamuraiBattle = function() {
+        ensureAllCasinoAiTables();
+        const vs = casinoState.vikingSamurai;
+        if (vs.inBattle) {
+          // If paused between stages, starting resumes the next stage without extra bet
+          if (vs.stagePhase === 'STAGE_BETTING') {
+            window.proceedVikingSamuraiNextStage(false);
+          }
+          return;
+        }
+        const bet = getValidatedCasinoBet();
+        if (!bet) return;
+
+        recordCasinoDelta(-bet);
+        vs.currentBet = bet;
+        vs.stageBets = [bet, 0, 0, 0, 0];
+        vs.inBattle = true;
+        vs.currentStage = 1;
+        vs.maxStages = 5;
+        vs.stagePhase = 'FIGHTING';
+        vs.stageDurationMs = 5000;
+        vs.durationMs = 25000;
+        vs.totalSec = 25.0;
+        vs.elapsedSec = 0;
+        vs.stageElapsedSec = 0;
+        vs.winnerFighter = Math.random() < 0.50 ? 'VIKING' : 'SAMURAI'; // Exact 50/50 win probability!
+        vs.vikingName = VIKING_WARRIOR_NAMES[Math.floor(Math.random() * VIKING_WARRIOR_NAMES.length)];
+        vs.samuraiName = SAMURAI_WARRIOR_NAMES[Math.floor(Math.random() * SAMURAI_WARRIOR_NAMES.length)];
+        vs.vikingHp = 100;
+        vs.samuraiHp = 100;
+        vs.vikingStance = 'READY';
+        vs.samuraiStance = 'READY';
+        vs.sparks = [];
+        vs.bloodParticles = [];
+        vs.dustClouds = [];
+        vs.stageScripts = buildFiveStageRealisticBattleScript(vs.winnerFighter, vs.vikingName, vs.samuraiName);
+
+        // 3 Casino AI Patrons place their Stage 1 bets on either Viking or Samurai
+        (vs.aiPlayers || []).forEach((ai, idx) => {
+          const aiWager = Math.max(10, Math.min(ai.chips, Math.round(bet * (0.65 + idx * 0.20))));
+          ai.bet = aiWager;
+          ai.chips = Math.max(0, ai.chips - aiWager);
+          ai.vsPick = Math.random() < 0.50 ? 'VIKING' : 'SAMURAI';
+          ai.lastAction = `Stg 1: ${fmtCompact(aiWager)} on ${ai.vsPick === 'VIKING' ? '🪓 ' + vs.vikingName : '⚔️ ' + vs.samuraiName}`;
+          ai.outcome = `Total Bet: ${fmtCompact(ai.bet)}`;
+        });
+
+        runVikingSamuraiCurrentStageAnimation();
+      };
+
+      function runVikingSamuraiCurrentStageAnimation() {
+        const vs = casinoState.vikingSamurai;
+        if (!vs.inBattle) return;
+        const stg = vs.currentStage || 1;
+        vs.stagePhase = 'FIGHTING';
+        vs.stageElapsedSec = 0;
+        renderCasinoTab();
+
+        startCasinoAnimation('VIKING_SAMURAI_BATTLE', 5000, () => {
+          if (!vs.inBattle) return;
+          if (stg < 5) {
+            // Pause after 5-second stage so player (and AI patrons) can choose to bet more for the next stage!
+            vs.currentStage = stg + 1;
+            vs.stagePhase = 'STAGE_BETTING';
+            vs.elapsedSec = stg * 5.0;
+            vs.stageElapsedSec = 5.0;
+            vs.vikingStance = 'READY';
+            vs.samuraiStance = 'READY';
+            vs.slashTrail = null;
+            vs.shakeX = 0;
+            vs.shakeY = 0;
+            vs.clashEffect = {
+              xFrac: 0.50,
+              yFrac: 0.40,
+              text: `🔔 STAGE ${stg}/5 COMPLETE (${stg * 5}s) — STAGE ${stg + 1}/5 BETTING OPEN!`
+            };
+
+            // AI Patrons decide whether to bet more in this stage
+            (vs.aiPlayers || []).forEach(ai => {
+              if (ai.chips >= 25 && Math.random() < 0.65) {
+                const extra = Math.max(10, Math.min(ai.chips, Math.round((ai.bet || 50) * 0.45)));
+                ai.chips = Math.max(0, ai.chips - extra);
+                ai.bet = (ai.bet || 0) + extra;
+                ai.lastAction = `Stg ${stg + 1}: +${fmtCompact(extra)} more on ${ai.vsPick === 'VIKING' ? '🪓 ' + vs.vikingName : '⚔️ ' + vs.samuraiName}`;
+                ai.outcome = `Total Bet: ${fmtCompact(ai.bet)}`;
+              } else {
+                ai.lastAction = `Stg ${stg + 1}: Holds ${fmtCompact(ai.bet)} on ${ai.vsPick === 'VIKING' ? '🪓 ' + vs.vikingName : '⚔️ ' + vs.samuraiName}`;
+              }
+            });
+
+            const pickedName = vs.selectedFighter === 'VIKING' ? `🪓 ${vs.vikingName}` : `⚔️ ${vs.samuraiName}`;
+            vs.commentary = `🔔 Stage ${stg}/5 finished (${stg * 5}.0s / 25.0s)! 🪓 ${vs.vikingName} (${vs.vikingHp}% HP) vs. ⚔️ ${vs.samuraiName} (${vs.samuraiHp}% HP). Bet more on ${pickedName} for Stage ${stg + 1}/5 or continue fighting!`;
+            casinoState.statusText = vs.commentary;
+            renderCasinoTab();
+            drawCasinoCanvas();
+          } else {
+            // Stage 5 (25.0s) finished -> Settle the 5-stage battle!
+            settleVikingSamuraiBattleOutcome(false);
+          }
+        });
+      }
+
+      window.betMoreVikingSamuraiStage = function(customAddAmt, autoContinue = true) {
+        const vs = casinoState.vikingSamurai;
+        if (!vs.inBattle) {
+          window.startVikingSamuraiBattle();
+          return;
+        }
+        const rawAdd = customAddAmt !== undefined
+          ? Math.max(5, Math.round(Number(customAddAmt) || 100))
+          : getValidatedCasinoBet();
+        if (!rawAdd) return;
+        if (!G || G.human.cash < rawAdd) {
+          showToast('Insufficient Cash to Bet More', `You need ${fmtMoney(rawAdd)} in liquid cash (Available: ${fmtMoney(G ? G.human.cash : 0)}).`, false);
+          return;
+        }
+
+        recordCasinoDelta(-rawAdd);
+        const stgIdx = Math.max(0, Math.min(4, (vs.currentStage || 1) - 1));
+        vs.stageBets[stgIdx] = (vs.stageBets[stgIdx] || 0) + rawAdd;
+        vs.currentBet = Number((vs.currentBet + rawAdd).toFixed(2));
+        const pickedName = vs.selectedFighter === 'VIKING' ? `🪓 ${vs.vikingName}` : `⚔️ ${vs.samuraiName}`;
+        logCasinoEvent(`🪓⚔️ Stage ${vs.currentStage}/5: Added +${fmtMoney(rawAdd)} on ${pickedName} (Total Bet: ${fmtMoney(vs.currentBet)} → 2x Win = ${fmtMoney(vs.currentBet * 2)})!`);
+        showToast(`➕ Added +${fmtMoney(rawAdd)} in Stage ${vs.currentStage}/5!`, `Total Bet on ${pickedName}: ${fmtMoney(vs.currentBet)} (Win Payout: ${fmtMoney(vs.currentBet * 2)})!`, true);
+
+        if (vs.stagePhase === 'STAGE_BETTING' && autoContinue) {
+          runVikingSamuraiCurrentStageAnimation();
+        } else {
+          renderCasinoTab();
+        }
+      };
+
+      window.proceedVikingSamuraiNextStage = function(addBetFirst = false) {
+        const vs = casinoState.vikingSamurai;
+        if (!vs.inBattle || vs.stagePhase !== 'STAGE_BETTING') return;
+        if (addBetFirst) {
+          window.betMoreVikingSamuraiStage(undefined, true);
+        } else {
+          runVikingSamuraiCurrentStageAnimation();
+        }
+      };
+
+      function settleVikingSamuraiBattleOutcome(wasResigned = false) {
+        const vs = casinoState.vikingSamurai;
+        if (!vs.inBattle && !wasResigned) return;
+        if (casinoAnimRafId) {
+          cancelAnimationFrame(casinoAnimRafId);
+          casinoState.anim.active = false;
+        }
+        vs.inBattle = false;
+        vs.stagePhase = 'IDLE';
+        const bet = vs.currentBet || casinoState.betAmount || 100;
+        const winSide = wasResigned ? (vs.selectedFighter === 'VIKING' ? 'SAMURAI' : 'VIKING') : (vs.winnerFighter || 'VIKING');
+        vs.winnerFighter = winSide;
+        vs.vikingHp = winSide === 'VIKING' ? Math.max(14, vs.vikingHp) : 0;
+        vs.samuraiHp = winSide === 'SAMURAI' ? Math.max(14, vs.samuraiHp) : 0;
+        vs.vikingStance = winSide === 'VIKING' ? 'VICTORY' : 'DEAD';
+        vs.samuraiStance = winSide === 'SAMURAI' ? 'VICTORY' : 'DEAD';
+        vs.slashTrail = null;
+        vs.shakeX = 0;
+        vs.shakeY = 0;
+
+        vs.battlesFought = (vs.battlesFought || 0) + 1;
+        casinoState.rounds++;
+
+        // Settle 3 Casino AI Patrons
+        (vs.aiPlayers || []).forEach(ai => {
+          const aiWon = ai.vsPick === winSide;
+          if (aiWon) {
+            const aiPay = ai.bet * 2;
+            ai.chips += aiPay;
+            ai.outcome = `🏆 WON +${fmtCompact(ai.bet)}!`;
+          } else {
+            ai.outcome = `💀 Lost -${fmtCompact(ai.bet)}`;
+          }
+        });
+
+        const killText = winSide === 'VIKING'
+          ? `🪓 ${vs.vikingName} KILLED ⚔️ ${vs.samuraiName}`
+          : `⚔️ ${vs.samuraiName} KILLED 🪓 ${vs.vikingName}`;
+
+        if (!wasResigned && vs.selectedFighter === winSide) {
+          const payout = Number((bet * 2.0).toFixed(2));
+          const profit = Number((payout - bet).toFixed(2));
+          recordCasinoDelta(payout);
+          vs.battlesWon = (vs.battlesWon || 0) + 1;
+          vs.lastNetWin = profit;
+          if (profit > (vs.biggestWin || 0)) vs.biggestWin = profit;
+          casinoState.wins++;
+          vs.commentary = `🏆 5-STAGE VICTORY! ${killText} (25.0s) — Paid 2x on ${fmtMoney(bet)} Total Bet = ${fmtMoney(payout)} (+${fmtMoney(profit)} profit)!`;
+          casinoState.statusText = vs.commentary;
+          logCasinoEvent(`🪓⚔️ Viking vs. Samurai (#${vs.battleNumber}): ${killText} — Won +${fmtMoney(profit)} across 5 stages!`);
+          showToast(`🏆 ${winSide === 'VIKING' ? '🪓 ' + vs.vikingName : '⚔️ ' + vs.samuraiName} Wins!`, `${killText}! You won ${fmtMoney(payout)} (+${fmtMoney(profit)} net profit)!`, true);
+        } else {
+          vs.lastNetWin = -bet;
+          vs.commentary = wasResigned
+            ? `🏳️ You resigned Battle #${vs.battleNumber} (-${fmtMoney(bet)}). ${killText}!`
+            : `💀 DEFEAT! ${killText} (25.0s) — Lost -${fmtMoney(bet)} total bet.`;
+          casinoState.statusText = vs.commentary;
+          logCasinoEvent(`🪓⚔️ Viking vs. Samurai (#${vs.battleNumber}): ${killText} — Lost -${fmtMoney(bet)}.`);
+        }
+
+        vs.recentWinners.unshift(winSide);
+        if (vs.recentWinners.length > 10) vs.recentWinners.length = 10;
+        vs.battleNumber = (vs.battleNumber || 1) + 1;
+        rotateCasinoTablePatronsIfNeeded('VIKING_SAMURAI');
+        renderCasinoTab();
+      }
+
+      window.resignVikingSamuraiBattle = function() {
+        const vs = casinoState.vikingSamurai;
+        if (!vs.inBattle) return;
+        settleVikingSamuraiBattleOutcome(true);
+      };
+
+      function updateVikingSamuraiAnimation(progress) {
+        const vs = casinoState.vikingSamurai;
+        const stg = Math.max(1, Math.min(5, vs.currentStage || 1));
+        vs.stageElapsedSec = Number((progress * 5.0).toFixed(1));
+        vs.elapsedSec = Number((((stg - 1) * 5.0) + progress * 5.0).toFixed(1));
+        vs.weaponSwingPhase = progress * Math.PI * 22;
+
+        const stgBeats = (vs.stageScripts && vs.stageScripts[stg - 1])
+          ? vs.stageScripts[stg - 1]
+          : buildFiveStageRealisticBattleScript(vs.winnerFighter || 'VIKING', vs.vikingName, vs.samuraiName)[stg - 1];
+
+        const beatIdx = Math.min(stgBeats.length - 1, Math.floor(progress * stgBeats.length));
+        const beat = stgBeats[beatIdx];
+        const beatLocalP = (progress * stgBeats.length) - beatIdx;
+
+        vs.vikingHp  = beat.vHp;
+        vs.samuraiHp = beat.sHp;
+        vs.vikingStance  = beat.vStyle || 'READY';
+        vs.samuraiStance = beat.sStyle || 'READY';
+
+        // Realistic footwork, leaps, dashes, knockback & weapon clash positioning
+        const arenaOsc = Math.sin(progress * Math.PI * 6) * 0.06;
+        const strikeWave = Math.sin(beatLocalP * Math.PI);
+
+        if (beat.type === 'CLASH') {
+          vs.vikingXFrac  = 0.45 + arenaOsc - (1 - strikeWave) * 0.04;
+          vs.samuraiXFrac = 0.55 + arenaOsc + (1 - strikeWave) * 0.04;
+          vs.vikingJumpY  = 0;
+          vs.samuraiJumpY = 0;
+          vs.vikingLean   = 0.22 * strikeWave;
+          vs.samuraiLean  = -0.22 * strikeWave;
+          vs.slashTrail   = { side: 'BOTH', xFrac: 0.50 + arenaOsc, yFrac: 0.48, angle: beatLocalP * Math.PI };
+          vs.shakeX = (Math.random() - 0.5) * 4 * strikeWave;
+          vs.shakeY = (Math.random() - 0.5) * 3 * strikeWave;
+          if (Math.random() < 0.45) {
+            spawnBattleParticles(vs, 0.50 + arenaOsc, 0.47, 'SPARK', 6);
+          }
+        } else if (beat.type === 'KILL') {
+          const winSide = vs.winnerFighter || 'VIKING';
+          vs.vikingXFrac  = winSide === 'VIKING' ? 0.47 : 0.36;
+          vs.samuraiXFrac = winSide === 'SAMURAI' ? 0.53 : 0.64;
+          vs.vikingJumpY  = 0;
+          vs.samuraiJumpY = 0;
+          vs.vikingLean   = winSide === 'VIKING' ? 0.18 : 0;
+          vs.samuraiLean  = winSide === 'SAMURAI' ? -0.18 : 0;
+          vs.shakeX = (Math.random() - 0.5) * 6 * (1 - beatLocalP);
+          vs.shakeY = (Math.random() - 0.5) * 6 * (1 - beatLocalP);
+          if (beatLocalP < 0.45 && Math.random() < 0.65) {
+            spawnBattleParticles(vs, winSide === 'VIKING' ? vs.samuraiXFrac : vs.vikingXFrac, 0.48, 'BLOOD', 10);
+            spawnBattleParticles(vs, 0.50, 0.48, 'SPARK', 8);
+          }
+        } else if (beat.attacker === 'VIKING') {
+          const lunge = strikeWave * 0.11;
+          vs.vikingXFrac  = 0.37 + arenaOsc + lunge;
+          vs.samuraiXFrac = 0.58 + arenaOsc + strikeWave * 0.045;
+          vs.vikingJumpY  = beat.vStyle === 'LEAP' ? (-34 * strikeWave) : 0;
+          vs.samuraiJumpY = 0;
+          vs.vikingLean   = 0.28 * strikeWave;
+          vs.samuraiLean  = 0.24 * strikeWave; // knocked back
+          vs.slashTrail   = { side: 'VIKING', xFrac: vs.vikingXFrac + 0.05, yFrac: 0.46, progress: beatLocalP };
+          vs.shakeX = strikeWave > 0.6 ? (Math.random() - 0.5) * 5 : 0;
+          vs.shakeY = strikeWave > 0.6 ? (Math.random() - 0.5) * 4 : 0;
+          if (strikeWave > 0.65 && Math.random() < 0.55) {
+            spawnBattleParticles(vs, vs.samuraiXFrac, 0.47, 'BLOOD', 7);
+            spawnBattleParticles(vs, (vs.vikingXFrac + vs.samuraiXFrac) / 2, 0.47, 'SPARK', 5);
+            spawnBattleParticles(vs, vs.samuraiXFrac, 0.62, 'DUST', 4);
+          }
+        } else {
+          const dash = strikeWave * 0.12;
+          vs.samuraiXFrac = 0.63 + arenaOsc - dash;
+          vs.vikingXFrac  = 0.42 + arenaOsc - strikeWave * 0.045;
+          vs.samuraiJumpY = beat.sStyle === 'DASH' ? (-18 * strikeWave) : (-28 * strikeWave);
+          vs.vikingJumpY  = 0;
+          vs.samuraiLean  = -0.30 * strikeWave;
+          vs.vikingLean   = -0.24 * strikeWave; // knocked back
+          vs.slashTrail   = { side: 'SAMURAI', xFrac: vs.samuraiXFrac - 0.05, yFrac: 0.46, progress: beatLocalP };
+          vs.shakeX = strikeWave > 0.6 ? (Math.random() - 0.5) * 5 : 0;
+          vs.shakeY = strikeWave > 0.6 ? (Math.random() - 0.5) * 4 : 0;
+          if (strikeWave > 0.65 && Math.random() < 0.55) {
+            spawnBattleParticles(vs, vs.vikingXFrac, 0.47, 'BLOOD', 7);
+            spawnBattleParticles(vs, (vs.vikingXFrac + vs.samuraiXFrac) / 2, 0.47, 'SPARK', 5);
+            spawnBattleParticles(vs, vs.vikingXFrac, 0.62, 'DUST', 4);
+          }
+        }
+
+        stepBattleParticles(vs);
+        vs.clashEffect = {
+          xFrac: 0.50,
+          yFrac: 0.39,
+          text: beat.banner
+        };
+        vs.commentary = `⚔️ Stage ${stg}/5 (${vs.elapsedSec.toFixed(1)}s / 25.0s) • ${beat.desc}`;
+        casinoState.statusText = vs.commentary;
       }
 
       // -----------------------------------------------------------------------
@@ -23957,12 +24604,13 @@
         } else if (mode === 'CHESS') {
           initChessBoardIfNeeded();
           const ch = casinoState.chess;
+          const humanCol = ch.humanColor || (ch.colorChoice === 'b' ? 'b' : 'w');
 
           // Dark Grandmaster Tournament Hall Background
           ctx.fillStyle = '#0B1017';
           ctx.fillRect(6, 6, W - 12, H - 12);
 
-          // Full-size centered 8x8 Chessboard (no right-side info box so board is maximum size for easy gameplay)
+          // Full-size centered 8x8 Chessboard (flips perspective automatically when playing Black!)
           const availSpan = Math.min(W - 16, H - 16);
           const boardSize = Math.max(200, Math.floor(availSpan / 8) * 8);
           const bx = Math.floor((W - boardSize) / 2);
@@ -23970,7 +24618,6 @@
           const sq = boardSize / 8;
           ch.boardHitBox = { x: bx, y: by, size: boardSize };
 
-          // Outer Board Frame
           ctx.fillStyle = '#1E293B';
           ctx.strokeStyle = '#F59E0B';
           ctx.lineWidth = 2.5;
@@ -23987,10 +24634,12 @@
           const wInChk = isChessKingInCheck(ch.board, 'w');
           const bInChk = isChessKingInCheck(ch.board, 'b');
 
-          for (let r = 0; r < 8; r++) {
-            for (let c = 0; c < 8; c++) {
-              const sx = bx + c * sq;
-              const sy = by + r * sq;
+          for (let dispR = 0; dispR < 8; dispR++) {
+            for (let dispC = 0; dispC < 8; dispC++) {
+              const r = humanCol === 'b' ? (7 - dispR) : dispR;
+              const c = humanCol === 'b' ? (7 - dispC) : dispC;
+              const sx = bx + dispC * sq;
+              const sy = by + dispR * sq;
               const isLight = (r + c) % 2 === 0;
               ctx.fillStyle = isLight ? '#E2D6B5' : '#4E7837';
 
@@ -24006,13 +24655,13 @@
               }
               ctx.fillRect(sx, sy, sq, sq);
 
-              if (c === 0) {
+              if (dispC === 0) {
                 ctx.fillStyle = isLight ? '#334155' : '#F8FAFC';
                 ctx.font = 'bold 9.5px Inter, monospace';
                 ctx.textAlign = 'left';
                 ctx.fillText(String(8 - r), sx + 3, sy + 11);
               }
-              if (r === 7) {
+              if (dispR === 7) {
                 ctx.fillStyle = isLight ? '#334155' : '#F8FAFC';
                 ctx.font = 'bold 9.5px Inter, monospace';
                 ctx.textAlign = 'right';
@@ -24055,6 +24704,430 @@
               }
             }
           }
+        } else if (mode === 'VIKING_SAMURAI') {
+          const vs = casinoState.vikingSamurai;
+          ctx.save();
+          if (vs.inBattle && vs.stagePhase === 'FIGHTING' && (vs.shakeX || vs.shakeY)) {
+            ctx.translate(vs.shakeX || 0, vs.shakeY || 0);
+          }
+
+          // Dramatic Split Torchlit Arena Background
+          const skyGrad = ctx.createLinearGradient(0, 6, W, H - 12);
+          skyGrad.addColorStop(0, '#091326');
+          skyGrad.addColorStop(0.5, '#181436');
+          skyGrad.addColorStop(1, '#2D0F24');
+          ctx.fillStyle = skyGrad;
+          ctx.fillRect(6, 6, W - 12, H - 12);
+
+          // Subtle Moon / Torch Glow in Center
+          const moonGrad = ctx.createRadialGradient(W / 2, H * 0.42, 10, W / 2, H * 0.42, W * 0.45);
+          moonGrad.addColorStop(0, 'rgba(251, 191, 36, 0.12)');
+          moonGrad.addColorStop(1, 'rgba(15, 23, 42, 0)');
+          ctx.fillStyle = moonGrad;
+          ctx.fillRect(6, 6, W - 12, H - 12);
+
+          // Ground Arena Floor
+          const groundY = Math.floor(H * 0.67);
+          const groundGrad = ctx.createLinearGradient(0, groundY, 0, H - 62);
+          groundGrad.addColorStop(0, '#1E293B');
+          groundGrad.addColorStop(1, '#090D16');
+          ctx.fillStyle = groundGrad;
+          ctx.fillRect(6, groundY, W - 12, H - groundY - 62);
+          ctx.strokeStyle = 'rgba(245, 158, 11, 0.55)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(6, groundY);
+          ctx.lineTo(W - 6, groundY);
+          ctx.stroke();
+
+          // ZERO-OVERLAP TOP HUD:
+          // Row 1: Left HP Bar | Center Stage & Clock | Right HP Bar
+          // Row 2: Left 1-Word Viking Name | Center 5-Stage Dots & Total Bet | Right 1-Word Samurai Name
+          const barW = Math.min(118, Math.floor((W - 134) / 2));
+          // Viking HP Bar
+          ctx.fillStyle = '#0F172A';
+          ctx.strokeStyle = '#38BDF8';
+          ctx.lineWidth = 1.5;
+          ctx.fillRect(12, 13, barW, 12);
+          ctx.strokeRect(12, 13, barW, 12);
+          ctx.fillStyle = vs.vikingHp > 35 ? '#38BDF8' : '#EF4444';
+          ctx.fillRect(13, 14, Math.max(0, (barW - 2) * (vs.vikingHp / 100)), 10);
+
+          ctx.fillStyle = '#FFFFFF';
+          ctx.font = 'bold 10px Inter, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText(`🪓 ${vs.vikingName} (${vs.vikingHp}%)`, 12, 37);
+
+          // Samurai HP Bar
+          const rBarX = W - 12 - barW;
+          ctx.fillStyle = '#0F172A';
+          ctx.strokeStyle = '#F43F5E';
+          ctx.lineWidth = 1.5;
+          ctx.fillRect(rBarX, 13, barW, 12);
+          ctx.strokeRect(rBarX, 13, barW, 12);
+          const samFillW = Math.max(0, (barW - 2) * (vs.samuraiHp / 100));
+          ctx.fillStyle = vs.samuraiHp > 35 ? '#F43F5E' : '#EF4444';
+          ctx.fillRect(rBarX + barW - 1 - samFillW, 14, samFillW, 10);
+
+          ctx.fillStyle = '#FFFFFF';
+          ctx.font = 'bold 10px Inter, sans-serif';
+          ctx.textAlign = 'right';
+          ctx.fillText(`⚔️ ${vs.samuraiName} (${vs.samuraiHp}%)`, W - 12, 37);
+
+          // Center Stage & Timer Readout (never overlaps 1-word names!)
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#FACC15';
+          ctx.font = 'bold 10px Inter, monospace';
+          const stgText = vs.inBattle
+            ? `STAGE ${vs.currentStage}/5 • ${vs.elapsedSec.toFixed(1)}s/25s`
+            : `5 STAGES × 5s (25s)`;
+          ctx.fillText(stgText, W / 2, 22);
+
+          // 5 Stage Progress Pills in Center Row 2
+          const dotStartX = W / 2 - 34;
+          for (let s = 1; s <= 5; s++) {
+            const dx = dotStartX + (s - 1) * 17;
+            const isDone = vs.inBattle ? (s < vs.currentStage) : (vs.winnerFighter !== null);
+            const isCur  = vs.inBattle && s === vs.currentStage;
+            ctx.fillStyle = isCur ? '#FACC15' : (isDone ? '#00C805' : '#1E293B');
+            ctx.strokeStyle = isCur ? '#FFFFFF' : '#475569';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.roundRect(dx - 6, 28, 13, 11, 3);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = (isCur || isDone) ? '#000000' : '#94A3B8';
+            ctx.font = 'bold 7.5px Inter, monospace';
+            ctx.fillText(`S${s}`, dx + 0.5, 36.5);
+          }
+
+          ctx.fillStyle = '#4ADE80';
+          ctx.font = 'bold 9px Inter, monospace';
+          const totBetShow = vs.inBattle ? vs.currentBet : (casinoState.betAmount || 100);
+          ctx.fillText(
+            `BET: ${fmtMoney(totBetShow, 0)} ON ${vs.selectedFighter === 'VIKING' ? '🪓 ' + vs.vikingName.toUpperCase() : '⚔️ ' + vs.samuraiName.toUpperCase()}`,
+            W / 2,
+            50
+          );
+
+          // Draw Slash Arcs Behind/Around Warriors
+          if (vs.slashTrail && vs.inBattle && vs.stagePhase === 'FIGHTING') {
+            ctx.save();
+            const sx = vs.slashTrail.xFrac * W;
+            const sy = vs.slashTrail.yFrac * H;
+            ctx.translate(sx, sy);
+            ctx.strokeStyle = vs.slashTrail.side === 'VIKING'
+              ? 'rgba(56, 189, 248, 0.85)'
+              : (vs.slashTrail.side === 'SAMURAI' ? 'rgba(244, 63, 94, 0.90)' : 'rgba(250, 204, 21, 0.90)');
+            ctx.lineWidth = 4.5;
+            ctx.beginPath();
+            ctx.arc(0, 0, 38, -Math.PI * 0.65, Math.PI * 0.45);
+            ctx.stroke();
+            ctx.restore();
+          }
+
+          // Draw Articulated 2D Viking Warrior (Left Side)
+          const vx = vs.vikingXFrac * W;
+          const vy = groundY - 4 + (vs.vikingJumpY || 0);
+          const swing = Math.sin(vs.weaponSwingPhase || 0);
+          const runStride = vs.inBattle && vs.stagePhase === 'FIGHTING' ? Math.sin((vs.weaponSwingPhase || 0) * 0.8) * 9 : 0;
+
+          ctx.save();
+          ctx.translate(vx, vy);
+          if (vs.vikingStance === 'DEAD') {
+            ctx.rotate(-Math.PI / 2);
+            ctx.translate(14, 0);
+          } else if (vs.vikingLean) {
+            ctx.rotate(vs.vikingLean);
+          }
+
+          // Flowing Fur/Blue Nordic Cloak
+          ctx.fillStyle = '#1E3A8A';
+          ctx.beginPath();
+          ctx.moveTo(-8, -56);
+          ctx.quadraticCurveTo(-26, -36, -22 - Math.abs(runStride) * 0.4, -14);
+          ctx.lineTo(-10, -22);
+          ctx.closePath();
+          ctx.fill();
+
+          // Articulated Legs with Fur Boots & Knee Stride
+          ctx.strokeStyle = '#94A3B8';
+          ctx.lineWidth = 5.5;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(-5, -24); ctx.lineTo(-8 - runStride, -11); ctx.lineTo(-10 - runStride * 0.8, 0);
+          ctx.moveTo(6, -24);  ctx.lineTo(9 + runStride, -11);  ctx.lineTo(11 + runStride * 0.8, 0);
+          ctx.stroke();
+
+          // Chainmail & Leather Brigandine Torso + Fur Pauldrons
+          ctx.fillStyle = '#334155';
+          ctx.strokeStyle = '#93C5FD';
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.roundRect(-13, -58, 26, 35, 6);
+          ctx.fill();
+          ctx.stroke();
+          // Leather War Belt
+          ctx.fillStyle = '#78350F';
+          ctx.fillRect(-13, -31, 26, 5);
+          ctx.fillStyle = '#FACC15';
+          ctx.fillRect(-3, -31, 6, 5);
+
+          // Head, Fierce Eyes, Braided Red-Gold Beard & Horned Nasal Gjermundbu Helmet
+          ctx.fillStyle = '#FDE68A';
+          ctx.beginPath();
+          ctx.arc(0, -70, 11, 0, Math.PI * 2);
+          ctx.fill();
+          // Braided Viking Beard
+          ctx.fillStyle = '#B45309';
+          ctx.beginPath();
+          ctx.moveTo(-8, -67);
+          ctx.quadraticCurveTo(4, -52, 11, -56);
+          ctx.quadraticCurveTo(9, -68, -8, -67);
+          ctx.fill();
+          // Steel Helmet & Horns
+          ctx.fillStyle = '#64748B';
+          ctx.strokeStyle = '#CBD5E1';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(0, -73, 12, Math.PI, 0);
+          ctx.fill();
+          ctx.stroke();
+          // Curved Ivory Horns
+          ctx.strokeStyle = '#FEF08A';
+          ctx.lineWidth = 2.8;
+          ctx.beginPath();
+          ctx.moveTo(-9, -75); ctx.quadraticCurveTo(-22, -88, -13, -95);
+          ctx.moveTo(9, -75);  ctx.quadraticCurveTo(22, -88, 13, -95);
+          ctx.stroke();
+
+          // Articulated Right Arm + Heavy Bearded Battle-Axe
+          ctx.save();
+          ctx.translate(8, -50);
+          const axeAngle = vs.vikingStance === 'VICTORY'
+            ? -1.05
+            : (vs.vikingStance === 'ATTACK' || vs.vikingStance === 'LEAP' ? (0.35 + swing * 0.95) : (vs.vikingStance === 'HIT' ? -0.45 : 0.12));
+          ctx.rotate(axeAngle);
+          // Arm
+          ctx.strokeStyle = '#FDE68A';
+          ctx.lineWidth = 4.5;
+          ctx.beginPath();
+          ctx.moveTo(0, 0); ctx.lineTo(12, -10);
+          ctx.stroke();
+          // Ash Wood Haft
+          ctx.strokeStyle = '#78350F';
+          ctx.lineWidth = 3.8;
+          ctx.beginPath();
+          ctx.moveTo(4, 10); ctx.lineTo(28, -30);
+          ctx.stroke();
+          // Curved Bearded Steel Axe Head
+          ctx.fillStyle = '#E2E8F0';
+          ctx.strokeStyle = '#38BDF8';
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(20, -24);
+          ctx.quadraticCurveTo(39, -28, 33, -7);
+          ctx.quadraticCurveTo(22, -13, 20, -24);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+
+          // Round Bossed Nordic Shield (Raises forward during SHIELD bash/parry)
+          const shX = vs.vikingStance === 'SHIELD' ? 8 : -8;
+          const shY = vs.vikingStance === 'SHIELD' ? -44 : -41;
+          ctx.fillStyle = '#1E40AF';
+          ctx.strokeStyle = '#FACC15';
+          ctx.lineWidth = 2.6;
+          ctx.beginPath();
+          ctx.arc(shX, shY, 13.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = '#94A3B8';
+          ctx.beginPath();
+          ctx.arc(shX, shY, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+
+          if (vs.vikingStance === 'DEAD') {
+            ctx.fillStyle = '#EF4444';
+            ctx.font = 'bold 11px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('💀 SLAIN', vx, vy - 28);
+          } else if (vs.vikingStance === 'VICTORY') {
+            ctx.fillStyle = '#4ADE80';
+            ctx.font = 'bold 11px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🏆 VICTOR!', vx, vy - 102);
+          }
+
+          // Draw Articulated 2D Samurai Warrior (Right Side)
+          const sxPos = vs.samuraiXFrac * W;
+          const syPos = groundY - 4 + (vs.samuraiJumpY || 0);
+
+          ctx.save();
+          ctx.translate(sxPos, syPos);
+          if (vs.samuraiStance === 'DEAD') {
+            ctx.rotate(Math.PI / 2);
+            ctx.translate(-14, 0);
+          } else if (vs.samuraiLean) {
+            ctx.rotate(vs.samuraiLean);
+          }
+
+          // Articulated Hakama Legs with Shin Guards (Suneate)
+          ctx.strokeStyle = '#1E293B';
+          ctx.lineWidth = 6;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(-5, -24); ctx.lineTo(-9 + runStride, -11); ctx.lineTo(-11 + runStride * 0.8, 0);
+          ctx.moveTo(6, -24);  ctx.lineTo(9 - runStride, -11);  ctx.lineTo(11 - runStride * 0.8, 0);
+          ctx.stroke();
+
+          // Crimson Lacquered Do-Maru Lamellar Armor + Gold Lacing
+          ctx.fillStyle = '#991B1B';
+          ctx.strokeStyle = '#FCA5A5';
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.roundRect(-13, -58, 26, 35, 5);
+          ctx.fill();
+          ctx.stroke();
+          // Sode Shoulder Armor Plates
+          ctx.fillStyle = '#7F1D1D';
+          ctx.strokeStyle = '#FACC15';
+          ctx.lineWidth = 1.3;
+          ctx.fillRect(-16, -56, 7, 16);
+          ctx.strokeRect(-16, -56, 7, 16);
+          ctx.fillRect(9, -56, 7, 16);
+          ctx.strokeRect(9, -56, 7, 16);
+
+          // Head, Menpo Battle Mask & Kabuto Helmet with Gold Crescent Maedate
+          ctx.fillStyle = '#FDE68A';
+          ctx.beginPath();
+          ctx.arc(0, -70, 10.5, 0, Math.PI * 2);
+          ctx.fill();
+          // Black Iron Menpo Face Mask
+          ctx.fillStyle = '#111827';
+          ctx.beginPath();
+          ctx.arc(0, -68, 9.5, 0.1, Math.PI - 0.1);
+          ctx.fill();
+          // Kabuto Bowl + Shikoro Neck Guard
+          ctx.fillStyle = '#0F172A';
+          ctx.strokeStyle = '#F87171';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(0, -73, 12.5, Math.PI * 0.92, Math.PI * 0.08);
+          ctx.fill();
+          ctx.stroke();
+          // Golden Crescent Kuwa-Gata Crest
+          ctx.strokeStyle = '#FACC15';
+          ctx.lineWidth = 2.6;
+          ctx.beginPath();
+          ctx.moveTo(0, -82); ctx.quadraticCurveTo(-12, -90, -14, -98);
+          ctx.moveTo(0, -82); ctx.quadraticCurveTo(12, -90, 14, -98);
+          ctx.stroke();
+
+          // Articulated Arms + Curved Razor Katana Sword
+          ctx.save();
+          ctx.translate(-9, -48);
+          const katanaAngle = vs.samuraiStance === 'VICTORY'
+            ? 0.95
+            : (vs.samuraiStance === 'ATTACK' || vs.samuraiStance === 'DASH' ? (-0.50 - swing * 1.05) : (vs.samuraiStance === 'PARRY' ? 0.35 : -0.18));
+          ctx.rotate(katanaAngle);
+          // Arm
+          ctx.strokeStyle = '#991B1B';
+          ctx.lineWidth = 4.5;
+          ctx.beginPath();
+          ctx.moveTo(0, 0); ctx.lineTo(-11, -8);
+          ctx.stroke();
+          // Tsuka (Wrapped Hilt) & Gold Tsuba Guard
+          ctx.strokeStyle = '#111827';
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          ctx.moveTo(4, 8); ctx.lineTo(-4, -2);
+          ctx.stroke();
+          ctx.fillStyle = '#FACC15';
+          ctx.fillRect(-8, -4, 9, 3);
+          // Curved Tamahagane Steel Katana Blade
+          ctx.strokeStyle = '#F8FAFC';
+          ctx.lineWidth = 3.2;
+          ctx.beginPath();
+          ctx.moveTo(-4, -3);
+          ctx.quadraticCurveTo(-22, -18, -40, -38);
+          ctx.stroke();
+          ctx.restore();
+          ctx.restore();
+
+          if (vs.samuraiStance === 'DEAD') {
+            ctx.fillStyle = '#EF4444';
+            ctx.font = 'bold 11px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('💀 SLAIN', sxPos, syPos - 28);
+          } else if (vs.samuraiStance === 'VICTORY') {
+            ctx.fillStyle = '#4ADE80';
+            ctx.font = 'bold 11px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🏆 VICTOR!', sxPos, syPos - 102);
+          }
+
+          // Render Flying Steel Sparks, Blood Droplets & Ground Dust Clouds
+          for (const arr of [vs.dustClouds, vs.bloodParticles, vs.sparks]) {
+            if (!Array.isArray(arr)) continue;
+            for (const p of arr) {
+              ctx.save();
+              ctx.globalAlpha = Math.max(0, Math.min(1, p.life));
+              ctx.fillStyle = p.color;
+              ctx.beginPath();
+              ctx.arc(p.xFrac * W, p.yFrac * H, p.size, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.restore();
+            }
+          }
+
+          // Center Clash / Stage Betting Callout Banner
+          if (vs.clashEffect) {
+            const cx = W / 2;
+            const cy = 68;
+            ctx.save();
+            ctx.fillStyle = vs.stagePhase === 'STAGE_BETTING' ? 'rgba(16, 185, 129, 0.92)' : 'rgba(220, 38, 38, 0.90)';
+            ctx.strokeStyle = '#FDE047';
+            ctx.lineWidth = 1.6;
+            const bTxt = vs.clashEffect.text;
+            ctx.font = 'bold 9.5px Inter, sans-serif';
+            const bw = Math.min(W - 20, Math.max(150, ctx.measureText(bTxt).width + 20));
+            ctx.beginPath();
+            ctx.roundRect(cx - bw / 2, cy - 11, bw, 21, 6);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.textAlign = 'center';
+            ctx.fillText(bTxt, cx, cy + 3);
+            ctx.restore();
+          }
+
+          // Bottom 3 Casino AI Arena Bettors
+          const aiRowY = H - 56;
+          const cardW = Math.floor((W - 24) / 3);
+          (vs.aiPlayers || []).forEach((ai, idx) => {
+            const ax = 10 + idx * (cardW + 2);
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+            ctx.strokeStyle = '#F43F5E';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.roundRect(ax, aiRowY, cardW - 2, 46, 6);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 8.5px Inter, sans-serif';
+            ctx.fillText(`${ai.avatar} ${ai.name.slice(0, 14)}`, ax + 5, aiRowY + 12);
+            ctx.fillStyle = '#4ADE80';
+            ctx.font = 'bold 8px Inter, monospace';
+            ctx.fillText(`${fmtCompact(ai.chips)} • Bet ${fmtCompact(ai.bet)}`, ax + 5, aiRowY + 24);
+            ctx.fillStyle = '#FACC15';
+            ctx.font = '8px Inter, sans-serif';
+            ctx.fillText((ai.lastAction || ai.outcome || 'Backed Fighter').slice(0, 22), ax + 5, aiRowY + 37);
+          });
+          ctx.restore();
         } else if (mode === 'ROULETTE') {
           const r = casinoState.roulette;
           const cx = Math.min(W * 0.32, 128);
@@ -25814,7 +26887,8 @@
           BLACKJACK:  '🃏 2D Blackjack Table (You + 3 Casino AI Players vs. Dealer • Pays 3:2 • Split, Double, Insurance & Surrender)',
           BACCARAT:   '🎴 2D Baccarat Table (You + 3 Casino AI Players • Player 1:1, Banker 0.95:1, Tie 8:1 & Pairs 11:1)',
           ROCKET:     '🚀 2D Rocket (97% RTP • 1,000x Max Multiplier • Cash Out Before the Rocket Explodes!)',
-          CHESS:      `♟️ 2D Chess vs. ${(casinoState.chess.gm || generateRandomOldGrandmaster()).avatar} ${(casinoState.chess.gm || generateRandomOldGrandmaster()).name} (Old Grandmaster • ${(casinoState.chess.gm || {elo:2400}).elo} ELO [2300–2500] • 5x Prize • Max Bet $10,000)`, 
+          CHESS:      `♟️ 2D Chess vs. ${(casinoState.chess.gm || generateRandomOldGrandmaster()).avatar} ${(casinoState.chess.gm || generateRandomOldGrandmaster()).name} (Old Grandmaster • ${(casinoState.chess.gm || {elo:2400}).elo} ELO [2300–2500] • 5x Prize • Max Bet $10,000)`,
+          VIKING_SAMURAI: `🪓⚔️ 2D Viking vs. Samurai (Battle #${casinoState.vikingSamurai.battleNumber || 1} • 5 Stages × 5s = 25s Battle • Bet More Each Stage • 50/50 Win Chance)`, 
           ROULETTE:   '🎡 2D European Roulette (You + 3 Casino AI Players • Inside, Dozens & Columns)',
           POKER:      '🤠 2D Texas Hold\'em Poker (You vs. 3 AI Players • Full Bet, Raise & Fold Action)',
           SLOTS:      '🎰 👑 4-Row Royal Gold Slot Machine (4×4 • 10 Paylines)',
@@ -25949,8 +27023,7 @@
             if (ch.inMatch) {
               const bInp = document.getElementById('casinoBetInput');
               if (bInp) bInp.value = String(curBet);
-            }
-            if (casinoState.betAmount > MAX_CHESS_BET) {
+            } else if (casinoState.betAmount > MAX_CHESS_BET) {
               casinoState.betAmount = MAX_CHESS_BET;
               const bInp = document.getElementById('casinoBetInput');
               if (bInp) bInp.value = String(MAX_CHESS_BET);
@@ -25958,32 +27031,48 @@
             const quickBetBtn = (amt, lbl) => `
               <button type="button" onclick="setCasinoQuickBet(${amt})" ${ch.inMatch ? 'disabled' : ''} class="px-2.5 py-1 rounded-lg font-mono text-[11px] font-bold transition ${curBet === amt ? 'bg-purple-400 text-black font-extrabold ring-1 ring-white' : 'bg-[#1C2024] text-white hover:bg-[#262B31] disabled:opacity-40'}">${lbl}</button>
             `;
+            const cChoice = ch.colorChoice || 'w';
+            const colorBtn = (key, lbl) => `
+              <button type="button" onclick="setChessColorChoice('${key}')" ${ch.inMatch ? 'disabled' : ''} class="px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition ${cChoice === key ? 'bg-amber-400 text-black ring-1 ring-white' : 'bg-[#1C2024] text-white hover:bg-[#262B31] disabled:opacity-40'}">${lbl}</button>
+            `;
+            const activeSideLbl = (ch.humanColor || 'w') === 'w' ? '⚪ White' : '⚫ Black';
             ctrlPanel.innerHTML = `
-              <!-- Randomized Old Grandmaster Info Banner & $10,000 Max Bet Selector -->
-              <div class="p-3 rounded-xl bg-[#161B22] border border-purple-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                <div>
-                  <div class="font-extrabold text-white text-sm flex items-center gap-1.5">
-                    <span>${gm.avatar} ${gm.name} (Age ${gm.age})</span>
-                    <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[11px] font-extrabold">${gm.elo} ELO (2300–2500)</span>
-                    <span class="px-2 py-0.5 rounded-full bg-[#00C805]/20 text-[#00C805] font-mono text-[11px] font-extrabold">5x PRIZE</span>
+              <!-- Randomized Old Grandmaster Info Banner, Color Selector (White/Black/Random) & $10,000 Max Bet Selector -->
+              <div class="p-3 rounded-xl bg-[#161B22] border border-purple-500/40 flex flex-col gap-2 text-xs">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <div class="font-extrabold text-white text-sm flex flex-wrap items-center gap-1.5">
+                      <span>${gm.avatar} ${gm.name} (Age ${gm.age})</span>
+                      <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[11px] font-extrabold">${gm.elo} ELO (2300–2500)</span>
+                      <span class="px-2 py-0.5 rounded-full bg-[#00C805]/20 text-[#00C805] font-mono text-[11px] font-extrabold">5x PRIZE</span>
+                    </div>
+                    <div class="text-[11px] text-[#8A919E] mt-0.5">Style: <strong class="text-slate-200">${gm.style}</strong> • Max Bet: <strong class="text-amber-300">$10,000</strong> (Win up to <strong class="text-[#00C805]">$50,000</strong>!)</div>
                   </div>
-                  <div class="text-[11px] text-[#8A919E] mt-0.5">Style: <strong class="text-slate-200">${gm.style}</strong> • Max Bet: <strong class="text-amber-300">$10,000</strong> (Win up to <strong class="text-[#00C805]">$50,000</strong>!)</div>
+                  <div class="flex flex-wrap items-center gap-1">
+                    <span class="text-[10px] font-bold text-[#8A919E] mr-1">Play As:</span>
+                    ${colorBtn('w', '⚪ White')}
+                    ${colorBtn('b', '⚫ Black')}
+                    ${colorBtn('random', '🎲 Random')}
+                  </div>
                 </div>
-                <div class="flex flex-wrap items-center gap-1">
-                  <span class="text-[10px] font-bold text-[#8A919E] mr-1">Chess Wager (Max $10K):</span>
-                  ${quickBetBtn(100, '$100')}
-                  ${quickBetBtn(500, '$500')}
-                  ${quickBetBtn(1000, '$1K')}
-                  ${quickBetBtn(2500, '$2.5K')}
-                  ${quickBetBtn(5000, '$5K')}
-                  ${quickBetBtn(10000, '$10K MAX')}
+                <div class="flex flex-wrap items-center justify-between gap-2 border-t border-[#22262A] pt-2">
+                  <div class="text-[11px] text-[#8A919E]">Active Side: <strong class="text-white">${ch.inMatch ? activeSideLbl : (cChoice === 'w' ? '⚪ White' : (cChoice === 'b' ? '⚫ Black' : '🎲 Random (50/50)'))}</strong></div>
+                  <div class="flex flex-wrap items-center gap-1">
+                    <span class="text-[10px] font-bold text-[#8A919E] mr-1">Chess Wager (Max $10K):</span>
+                    ${quickBetBtn(100, '$100')}
+                    ${quickBetBtn(500, '$500')}
+                    ${quickBetBtn(1000, '$1K')}
+                    ${quickBetBtn(2500, '$2.5K')}
+                    ${quickBetBtn(5000, '$5K')}
+                    ${quickBetBtn(10000, '$10K MAX')}
+                  </div>
                 </div>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1 text-xs">
                 <button type="button" id="btnStartChessMatch" onclick="startCasinoChessMatch()" ${ch.inMatch ? 'disabled' : ''} class="sm:col-span-2 py-2.5 px-4 rounded-xl bg-[#00C805] hover:bg-[#00E006] disabled:opacity-40 text-black font-extrabold transition shadow-lg">
-                  ${ch.inMatch ? `🔴 Match Active vs. ${gm.avatar} ${gm.name} (${fmtMoney(curBet)} Bet Locked → 5x = ${fmtMoney(curBet * CHESS_PRIZE_MULT)})` : `♟️ Start 2D Chess vs. ${gm.avatar} ${gm.name} (${fmtMoney(curBet)} Bet → 5x = ${fmtMoney(curBet * CHESS_PRIZE_MULT)})`}
+                  ${ch.inMatch ? `🔴 Match Active (${activeSideLbl}) vs. ${gm.avatar} ${gm.name} (${fmtMoney(curBet)} Bet → 5x = ${fmtMoney(curBet * CHESS_PRIZE_MULT)})` : `♟️ Start 2D Chess vs. ${gm.avatar} ${gm.name} (${fmtMoney(curBet)} Bet → 5x = ${fmtMoney(curBet * CHESS_PRIZE_MULT)})`}
                 </button>
-                <button type="button" id="btnChessSmartMove" onclick="playSmartChessMoveForHuman()" ${(!ch.inMatch || ch.turn !== 'w') ? 'disabled' : ''} class="py-2.5 px-3 rounded-xl bg-sky-500 hover:bg-sky-400 disabled:opacity-40 text-black font-extrabold transition">
+                <button type="button" id="btnChessSmartMove" onclick="playSmartChessMoveForHuman()" ${(!ch.inMatch || ch.turn !== (ch.humanColor || 'w')) ? 'disabled' : ''} class="py-2.5 px-3 rounded-xl bg-sky-500 hover:bg-sky-400 disabled:opacity-40 text-black font-extrabold transition">
                   💡 Play Smart Move (Or Click Board)
                 </button>
                 <div class="grid grid-cols-2 gap-1.5">
@@ -25995,6 +27084,110 @@
                   </button>
                 </div>
               </div>
+            `;
+          } else if (casinoState.activeGame === 'VIKING_SAMURAI') {
+            const vs = casinoState.vikingSamurai;
+            const addBetAmt = Math.max(5, casinoState.betAmount || 100);
+            const totalLockedBet = vs.inBattle ? (vs.currentBet || addBetAmt) : addBetAmt;
+            const pickedLbl = vs.selectedFighter === 'VIKING' ? `🪓 ${vs.vikingName}` : `⚔️ ${vs.samuraiName}`;
+
+            const pickCard = (key, title, sub, borderCls) => {
+              const isSel = vs.selectedFighter === key;
+              return `
+                <button type="button" onclick="selectVikingOrSamurai('${key}')" ${vs.inBattle ? 'disabled' : ''} class="p-3 rounded-xl text-left transition flex items-center justify-between border-2 bg-[#0F172A] ${isSel ? borderCls + ' ring-2 shadow-md' : 'border-[#262C36] opacity-80 hover:opacity-100'}">
+                  <div>
+                    <div class="font-extrabold text-sm text-white flex items-center gap-1.5">
+                      <span>${title}</span>
+                      ${isSel ? '<span class="px-2 py-0.5 rounded-full bg-[#00C805] text-black text-[10px] font-extrabold">CHOSEN</span>' : ''}
+                    </div>
+                    <div class="text-[11px] text-slate-300 mt-0.5">${sub}</div>
+                  </div>
+                  <div class="text-right font-mono">
+                    <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-extrabold text-xs">50% • 2x</span>
+                    <div class="text-[11px] text-[#4ADE80] font-bold mt-1">Win: ${fmtMoney(totalLockedBet * 2, 0)}</div>
+                  </div>
+                </button>
+              `;
+            };
+
+            const stageBadges = [1, 2, 3, 4, 5].map(s => {
+              const stgBet = (vs.stageBets && vs.stageBets[s - 1]) || 0;
+              const isCur = vs.inBattle && vs.currentStage === s;
+              const isDone = vs.inBattle && s < vs.currentStage;
+              return `
+                <div class="p-1.5 rounded-lg border text-center font-mono ${isCur ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-extrabold' : (isDone ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : 'bg-[#0C0E10] border-[#22262A] text-[#8A919E]')}">
+                  <div class="text-[10px] font-bold">Stage ${s} (${s * 5}s)</div>
+                  <div class="text-[11px] text-white font-extrabold">${stgBet > 0 ? '+' + fmtMoney(stgBet, 0) : '$0'}</div>
+                </div>
+              `;
+            }).join('');
+
+            const quickAddBtn = (amt) => `
+              <button type="button" onclick="betMoreVikingSamuraiStage(${amt}, true)" ${!vs.inBattle ? 'disabled' : ''} class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-300 font-mono font-extrabold text-[11px] disabled:opacity-40 transition">
+                +${fmtCompact(amt)}
+              </button>
+            `;
+
+            ctrlPanel.innerHTML = `
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                ${pickCard('VIKING', `🪓 VIKING (${vs.vikingName})`, 'Bearded Battle-Axe & Nordic Shield • 50/50 Chance', 'border-sky-400 ring-sky-400')}
+                ${pickCard('SAMURAI', `⚔️ SAMURAI (${vs.samuraiName})`, 'Razor Katana & Crimson Kabuto Armor • 50/50 Chance', 'border-rose-400 ring-rose-400')}
+              </div>
+
+              <!-- 5-Stage Betting Tracker (Every Stage = 5s of Fighting = 25s Total) -->
+              <div class="p-2.5 rounded-xl bg-[#0F172A] border border-[#262C36] flex flex-col gap-2 text-xs">
+                <div class="flex flex-wrap items-center justify-between gap-1">
+                  <span class="font-extrabold text-white">🔥 5 Stages of Betting (5s Fighting / Stage = 25s Total):</span>
+                  <span class="font-mono text-[#4ADE80] font-extrabold">Total Bet on ${pickedLbl}: ${fmtMoney(totalLockedBet)} → 2x Payout = ${fmtMoney(totalLockedBet * 2)}</span>
+                </div>
+                <div class="grid grid-cols-5 gap-1.5">
+                  ${stageBadges}
+                </div>
+                ${vs.inBattle ? `
+                  <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-[#1E293B]">
+                    <span class="text-[11px] text-amber-300 font-bold">➕ Quick Bet More on ${pickedLbl} (Stage ${vs.currentStage}/5):</span>
+                    <div class="flex flex-wrap items-center gap-1">
+                      ${quickAddBtn(50)}
+                      ${quickAddBtn(100)}
+                      ${quickAddBtn(500)}
+                      ${quickAddBtn(1000)}
+                      ${quickAddBtn(2500)}
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+
+              ${!vs.inBattle ? `
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1 text-xs">
+                  <button type="button" id="btnStartVikingSamurai" onclick="startVikingSamuraiBattle()" class="sm:col-span-3 py-3 px-4 rounded-xl bg-[#00C805] hover:bg-[#00E006] text-black font-extrabold transition shadow-lg">
+                    🪓⚔️ Start Stage 1/5 Battle (5s Fight • Bet ${fmtMoney(addBetAmt)} on ${pickedLbl} → Win ${fmtMoney(addBetAmt * 2)})
+                  </button>
+                  <button type="button" disabled class="py-3 px-3 rounded-xl bg-[#262B31] opacity-40 text-white font-extrabold">
+                    🏳️ Resign
+                  </button>
+                </div>
+              ` : (vs.stagePhase === 'STAGE_BETTING' ? `
+                <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 pt-1 text-xs">
+                  <button type="button" id="btnBetMoreStage" onclick="proceedVikingSamuraiNextStage(true)" class="sm:col-span-2 py-3 px-3 rounded-xl bg-[#00C805] hover:bg-[#00E006] text-black font-extrabold transition shadow-lg">
+                    ➕ Bet +${fmtMoney(addBetAmt)} More & Fight Stage ${vs.currentStage}/5 (5s)
+                  </button>
+                  <button type="button" id="btnContinueStageNoBet" onclick="proceedVikingSamuraiNextStage(false)" class="sm:col-span-2 py-3 px-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-black font-extrabold transition shadow-lg">
+                    ▶️ Fight Stage ${vs.currentStage}/5 (5s — Keep ${fmtMoney(vs.currentBet)} Bet)
+                  </button>
+                  <button type="button" id="btnResignVikingSamurai" onclick="resignVikingSamuraiBattle()" class="py-3 px-3 rounded-xl bg-[#FF5000] hover:bg-[#ff6622] text-white font-extrabold transition">
+                    🏳️ Resign
+                  </button>
+                </div>
+              ` : `
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1 text-xs">
+                  <button type="button" id="btnLiveBetMoreStage" onclick="betMoreVikingSamuraiStage(undefined, false)" class="sm:col-span-3 py-3 px-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-extrabold transition shadow-lg">
+                    ⚔️ Stage ${vs.currentStage}/5 Fighting (${vs.elapsedSec.toFixed(1)}s / 25.0s) — Tap to Bet +${fmtMoney(addBetAmt)} More on ${pickedLbl}!
+                  </button>
+                  <button type="button" id="btnResignVikingSamurai" onclick="resignVikingSamuraiBattle()" class="py-3 px-3 rounded-xl bg-[#FF5000] hover:bg-[#ff6622] text-white font-extrabold transition">
+                    🏳️ Resign
+                  </button>
+                </div>
+              `)}
             `;
           } else if (casinoState.activeGame === 'ROULETTE') {
             const r = casinoState.roulette;
@@ -26399,6 +27592,30 @@
               <div class="text-[11px] text-[#8A919E] flex items-center justify-between pt-1">
                 <span>Matches Won: <strong class="text-white">${ch.matchesWon || 0} / ${ch.matchesPlayed || 0}</strong></span>
                 <span>Best Chess Win: <strong class="text-[#00C805]">${fmtMoney(ch.biggestWin || 0)}</strong></span>
+              </div>
+            `;
+          } else if (activeMode === 'VIKING_SAMURAI') {
+            const vs = casinoState.vikingSamurai;
+            const curBet = vs.inBattle ? (vs.currentBet || 100) : (casinoState.betAmount || 100);
+            aiCard.innerHTML = `
+              <div class="flex items-center justify-between text-xs">
+                <div>
+                  <div class="font-extrabold text-rose-300">🪓⚔️ Viking vs. Samurai Arena</div>
+                  <div class="text-[10px] text-[#8A919E]">50/50 Win Chance • 10–20s Lethal Animation • 3 AI Bettors</div>
+                </div>
+                <button type="button" onclick="rerollCasinoAiTable('VIKING_SAMURAI')" ${vs.inBattle ? 'disabled' : ''} class="px-2 py-0.5 rounded-lg bg-[#1C2024] hover:bg-[#262B31] disabled:opacity-40 text-rose-300 font-bold text-[10px]">🎲 New Bettors</button>
+              </div>
+              <div class="space-y-1 text-[11px] bg-[#0C0E10] p-2.5 rounded-xl border border-[#22262A] font-mono">
+                ${(vs.aiPlayers || []).map(ai => `
+                  <div class="flex items-center justify-between border-b border-[#1E2227] last:border-0 py-1">
+                    <span class="text-white font-bold">${ai.avatar} ${ai.name} <span class="text-[10px] text-[#8A919E]">(${fmtCompact(ai.chips)})</span></span>
+                    <span class="text-amber-300 font-bold">${ai.outcome || ai.lastAction || 'Ready'}</span>
+                  </div>
+                `).join('')}
+              </div>
+              <div class="text-[11px] text-[#8A919E] flex items-center justify-between pt-1">
+                <span>Battles Won: <strong class="text-white">${vs.battlesWon || 0} / ${vs.battlesFought || 0}</strong></span>
+                <span>2x Payout (${fmtMoney(curBet, 0)}): <strong class="text-[#00C805]">${fmtMoney(curBet * 2, 0)}</strong></span>
               </div>
             `;
           } else if (activeMode === 'NASCAR') {
