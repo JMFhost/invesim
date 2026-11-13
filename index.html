@@ -392,8 +392,510 @@
       background-color: rgba(15, 23, 42, 0.55) !important;
     }
   </style>
+<style id="ph-shell-css">
+/* ================= InveSim Phone shell (Phase 1) =================
+   Self-contained: no Tailwind dependency. All selectors prefixed ph- / #phone-.
+   The original game chrome (header, main, bottom nav) is hidden; the game
+   engines keep running and the finance tab is re-parented into the Bank app. */
+
+/* ---- page / stage ---- */
+body.ph-shell-active {
+  height: 100dvh !important;
+  min-height: 0 !important;
+  margin: 0;
+  overflow: hidden;
+  background: #04060a;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+body.ph-shell-active > header,
+body.ph-shell-active > main,
+body.ph-shell-active #androidBottomNav { display: none !important; }
+
+#phone-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background:
+    radial-gradient(1100px 500px at 50% -10%, rgba(0,200,5,.10), transparent 60%),
+    radial-gradient(900px 600px at 85% 110%, rgba(20,90,220,.14), transparent 60%),
+    linear-gradient(180deg, #07090d 0%, #04060a 100%);
+  overflow: hidden;
+}
+#phone-frame {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 12px 8px;
+}
+#ph-stage-footer { flex: 0 0 auto; text-align: center; }
+#ph-stage-footer footer { padding: 2px 12px 8px !important; font-size: 12px !important; }
+
+/* ---- phone hardware (generic; no maker trade dress) ---- */
+#phone-screen {
+  position: relative;
+  height: 100%;
+  max-height: 940px;
+  aspect-ratio: 430 / 932;
+  max-width: 100%;
+  background: #0b0e11;
+  border-radius: 54px;
+  border: 11px solid #191d21;
+  outline: 1px solid #34383e;
+  box-shadow: 0 40px 90px rgba(0,0,0,.75), 0 0 0 2px #05070a, inset 0 0 0 1px #000;
+  overflow: hidden;
+  color: #fff;
+  user-select: none;
+}
+#ph-camera {
+  position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+  width: 13px; height: 13px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #2c3138 0%, #05070a 60%);
+  border: 2px solid #10131a; z-index: 62; pointer-events: none;
+}
+@media (max-width: 560px) {
+  #phone-frame { padding: 0; }
+  #phone-screen {
+    width: 100%; max-height: none; aspect-ratio: auto;
+    border: none; border-radius: 0; outline: none; box-shadow: none;
+  }
+  #ph-camera { top: 9px; width: 11px; height: 11px; }
+}
+
+/* ---- status bar ---- */
+#ph-statusbar {
+  position: absolute; top: 0; left: 0; right: 0; height: 46px; z-index: 60;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 22px 0 26px; cursor: pointer;
+  font-size: 13.5px; font-weight: 600; letter-spacing: .01em;
+  text-shadow: 0 1px 6px rgba(0,0,0,.65);
+}
+#ph-statusbar .ph-sb-icons { display: flex; align-items: center; gap: 6px; }
+#ph-statusbar svg { display: block; filter: drop-shadow(0 1px 4px rgba(0,0,0,.6)); }
+#ph-sb-clock { font-family: 'JetBrains Mono', ui-monospace, monospace; font-weight: 600; }
+
+/* ---- wallpaper (original art: gradient dusk + drifting orbs + chart line) ---- */
+.ph-wallpaper { position: absolute; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; background: linear-gradient(168deg, #0e2237 0%, #0d2b2e 34%, #123b2e 58%, #0a1f33 100%); }
+#ph-home > :not(.ph-wallpaper), #ph-lock > :not(.ph-wallpaper) { position: relative; z-index: 1; }
+.ph-wallpaper::before {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(240px 240px at 82% 16%, rgba(0,200,5,.34), transparent 70%),
+    radial-gradient(300px 300px at 12% 68%, rgba(0,140,255,.30), transparent 70%),
+    radial-gradient(200px 200px at 55% 92%, rgba(255,176,32,.20), transparent 70%);
+}
+.ph-orb { position: absolute; border-radius: 50%; filter: blur(46px); opacity: .5; animation: ph-drift 26s ease-in-out infinite alternate; }
+.ph-orb-a { width: 190px; height: 190px; left: -40px; top: 12%; background: #00c805; }
+.ph-orb-b { width: 160px; height: 160px; right: -30px; top: 52%; background: #1f7dff; animation-delay: -9s; }
+.ph-orb-c { width: 130px; height: 130px; left: 34%; bottom: -30px; background: #ffb020; animation-delay: -17s; opacity: .35; }
+@keyframes ph-drift { from { transform: translate(0,0) scale(1); } to { transform: translate(26px,-30px) scale(1.12); } }
+.ph-chartline { position: absolute; left: 0; right: 0; bottom: 20%; width: 100%; height: 120px; opacity: .28; }
+
+/* ---- lock screen ---- */
+#ph-lock {
+  position: absolute; inset: 0; z-index: 50;
+  display: flex; flex-direction: column; align-items: center;
+  cursor: pointer; touch-action: none;
+  transition: transform .45s cubic-bezier(.32,.72,.28,1), opacity .45s ease;
+  will-change: transform;
+}
+#ph-lock.ph-unlocking { transform: translateY(-104%); opacity: .25; pointer-events: none; }
+#ph-lock .ph-lock-top { padding-top: 86px; text-align: center; position: relative; }
+#ph-lock-clock { font-size: 76px; line-height: 1; font-weight: 200; letter-spacing: -.02em; text-shadow: 0 2px 24px rgba(0,0,0,.5); font-variant-numeric: tabular-nums; }
+#ph-lock-date { margin-top: 8px; font-size: 18px; font-weight: 500; text-shadow: 0 1px 10px rgba(0,0,0,.6); }
+#ph-lock-brand { margin-top: 14px; font-size: 11px; font-weight: 700; letter-spacing: .42em; text-transform: uppercase; opacity: .72; text-shadow: 0 1px 8px rgba(0,0,0,.6); }
+#ph-lock-gameday { margin-top: 6px; font-size: 12.5px; font-family: 'JetBrains Mono', ui-monospace, monospace; opacity: .85; text-shadow: 0 1px 8px rgba(0,0,0,.6); }
+#ph-lock .ph-lock-spacer { flex: 1; }
+#ph-lock-hint { padding-bottom: 44px; text-align: center; font-size: 14px; font-weight: 500; opacity: .92; text-shadow: 0 1px 8px rgba(0,0,0,.6); }
+#ph-lock-hint .ph-chev { display: block; margin: 0 auto 4px; animation: ph-bob 1.8s ease-in-out infinite; }
+@keyframes ph-bob { 0%,100% { transform: translateY(0); opacity:.7;} 50% { transform: translateY(-7px); opacity:1;} }
+
+/* ---- home screen ---- */
+#ph-home {
+  position: absolute; inset: 0; z-index: 10;
+  display: flex; flex-direction: column;
+  padding: 52px 0 14px;
+}
+#ph-ticker {
+  margin: 0 16px; padding: 7px 12px; border-radius: 999px;
+  background: rgba(6,10,14,.55); border: 1px solid rgba(255,255,255,.10);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  font-size: 12px; font-family: 'JetBrains Mono', ui-monospace, monospace;
+  display: flex; gap: 10px; align-items: center; white-space: nowrap; overflow: hidden;
+}
+#ph-ticker .ph-tk-nw { font-weight: 700; color: #fff; }
+#ph-ticker .ph-up { color: #00e006; } #ph-ticker .ph-down { color: #ff5a4e; }
+#ph-ticker .ph-tk-dim { color: #9aa3b2; }
+#ph-widgets { margin: 10px 16px 0; display: flex; flex-direction: column; gap: 8px; }
+.ph-widget {
+  background: rgba(8,12,16,.58); border: 1px solid rgba(255,255,255,.11);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-radius: 18px; padding: 10px 14px;
+}
+.ph-widget .ph-w-label { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #9aa3b2; }
+#ph-w-nw { font-size: 27px; font-weight: 800; letter-spacing: -.01em; line-height: 1.15; font-variant-numeric: tabular-nums; }
+#ph-w-nw-sub { font-size: 12px; font-family: 'JetBrains Mono', ui-monospace, monospace; margin-top: 1px; }
+#ph-w-nw-sub .ph-up { color: #00e006; } #ph-w-nw-sub .ph-down { color: #ff5a4e; }
+.ph-widget-row { display: flex; gap: 8px; }
+.ph-widget-row .ph-widget { flex: 1; min-width: 0; }
+.ph-widget .ph-w-big { font-size: 15px; font-weight: 700; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-widget .ph-w-small { font-size: 11.5px; color: #c3cad4; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+#ph-controls { margin: 10px 16px 0; display: flex; gap: 8px; }
+.ph-pill-btn {
+  flex: 1 1 0; min-width: 0; border: 1px solid rgba(255,255,255,.14); background: rgba(8,12,16,.55);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  color: #fff; border-radius: 999px; padding: 8px 4px; font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ph-pill-btn:active { transform: scale(.97); }
+.ph-pill-btn.ph-on { border-color: rgba(0,200,5,.6); color: #7dff8a; }
+
+/* app pages + grid */
+#ph-pages { flex: 1 1 auto; min-height: 0; margin-top: 12px; overflow: hidden; touch-action: pan-y; }
+#ph-track { display: flex; height: 100%; transition: transform .32s cubic-bezier(.32,.72,.28,1); }
+.ph-page { min-width: 100%; height: 100%; }
+.ph-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px 8px; padding: 8px 18px 0; align-content: start; }
+.ph-app-btn { position: relative; background: none; border: none; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-family: inherit; }
+.ph-app-btn:active .ph-icon { transform: scale(.88); }
+.ph-icon {
+  width: 50px; height: 50px; border-radius: 13px; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 16px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.25);
+  transition: transform .15s ease;
+}
+.ph-icon svg { width: 27px; height: 27px; }
+.ph-app-label { font-size: 11px; font-weight: 500; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.8); max-width: 76px; text-align: center; line-height: 1.15; }
+.ph-badge {
+  position: absolute; top: -4px; right: calc(50% - 34px); min-width: 19px; height: 19px; padding: 0 5px;
+  border-radius: 999px; background: #ff3b30; color: #fff; font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; border: 2px solid rgba(10,14,18,.9);
+}
+.ph-badge.ph-hidden { display: none; }
+#ph-dots { display: flex; justify-content: center; gap: 7px; padding: 8px 0 10px; }
+#ph-dots button { width: 7px; height: 7px; border-radius: 50%; border: none; padding: 0; background: rgba(255,255,255,.35); cursor: pointer; }
+#ph-dots button.ph-active { background: #fff; }
+
+/* short viewports: shrink chrome so all 15 icons still fit on one screen */
+@media (max-height: 700px) {
+  #ph-home { padding-top: 44px; }
+  #ph-widgets { margin-top: 8px; gap: 6px; }
+  .ph-widget { padding: 6px 12px; }
+  #ph-w-nw { font-size: 22px; }
+  #ph-controls { margin-top: 6px; }
+  .ph-pill-btn { padding: 6px 4px; }
+  #ph-pages { margin-top: 6px; }
+  .ph-grid { gap: 10px 8px; padding-top: 6px; }
+  .ph-icon { width: 42px; height: 42px; border-radius: 12px; }
+  .ph-icon svg { width: 23px; height: 23px; }
+}
+
+/* ---- arrange mode: long-press to jiggle, drag / tap-to-move, A-Z ---- */
+#ph-edit-bar { display: none; margin: 10px 16px 0; gap: 8px; }
+#ph-home.ph-editing #ph-edit-bar { display: flex; }
+.ph-edit-btn { flex: 1 1 0; border: 1px solid rgba(255,255,255,.16); background: rgba(8,12,16,.6); color: #fff; border-radius: 999px; padding: 8px 4px; font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.ph-edit-btn.ph-edit-done { background: #00c805; border-color: #00c805; color: #000; }
+#ph-home.ph-editing .ph-app-btn { touch-action: none; }
+#ph-home.ph-editing #ph-track .ph-icon { animation: ph-jiggle .28s ease-in-out infinite; }
+#ph-home.ph-editing #ph-track .ph-app-btn:nth-child(even) .ph-icon { animation-delay: -.14s; }
+@keyframes ph-jiggle { 0%,100% { transform: rotate(-1.6deg); } 50% { transform: rotate(1.6deg); } }
+#ph-track .ph-app-btn.ph-selected .ph-icon { box-shadow: 0 0 0 3px #fff, 0 6px 16px rgba(0,0,0,.45); transform: scale(1.06); }
+#ph-track .ph-app-btn.ph-drag-src { opacity: .35; }
+#ph-drag-ghost { position: absolute; z-index: 95; width: 76px; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
+#ph-drag-ghost .ph-icon { width: 64px; height: 64px; border-radius: 17px; box-shadow: 0 18px 34px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.25); }
+#ph-drag-ghost .ph-icon svg { width: 34px; height: 34px; }
+
+/* ---- app windows ---- */
+#ph-app-layer { position: absolute; inset: 0; z-index: 20; pointer-events: none; }
+.ph-window {
+  position: absolute; inset: 0; display: none; flex-direction: column;
+  background: #0b0e11; pointer-events: auto; overflow: hidden;
+}
+.ph-window.ph-open { display: flex; animation: ph-app-in .3s cubic-bezier(.32,.72,.28,1); }
+.ph-window.ph-closing { display: flex; animation: ph-app-out .18s ease forwards; }
+@keyframes ph-app-in { from { transform: scale(.84); opacity: 0; border-radius: 44px; } to { transform: scale(1); opacity: 1; border-radius: 0; } }
+@keyframes ph-app-out { from { transform: scale(1); opacity: 1; } to { transform: scale(.9); opacity: 0; } }
+.ph-topbar {
+  flex: 0 0 auto; margin-top: 46px; height: 50px; display: flex; align-items: center; gap: 8px;
+  padding: 0 12px; border-bottom: 1px solid #1e2227; background: #0b0e11; z-index: 2;
+}
+.ph-topbar .ph-back { background: none; border: none; color: #00c805; font-size: 26px; line-height: 1; cursor: pointer; padding: 4px 8px 4px 0; font-family: inherit; }
+.ph-topbar .ph-title { flex: 1; text-align: center; font-size: 16.5px; font-weight: 700; margin-right: 34px; }
+.ph-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 14px 14px 40px; overscroll-behavior: contain; }
+
+/* placeholder cards */
+.ph-coming { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 34px 12px 0; gap: 0; }
+.ph-coming .ph-icon { width: 76px; height: 76px; border-radius: 19px; }
+.ph-coming .ph-icon svg { width: 40px; height: 40px; }
+.ph-coming h2 { margin: 16px 0 0; font-size: 21px; font-weight: 800; }
+.ph-coming .ph-coming-tag { margin-top: 8px; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #00c805; border: 1px solid rgba(0,200,5,.45); border-radius: 999px; padding: 4px 12px; }
+.ph-coming p { margin: 14px 0 0; font-size: 13.5px; line-height: 1.55; color: #9aa3b2; max-width: 300px; }
+.ph-coming .ph-home-btn { margin-top: 22px; background: #00c805; color: #000; border: none; font-weight: 700; font-size: 14px; border-radius: 999px; padding: 10px 26px; cursor: pointer; font-family: inherit; }
+.ph-coming .ph-mini-feed { margin-top: 20px; width: 100%; text-align: left; display: flex; flex-direction: column; gap: 8px; }
+.ph-coming .ph-mini-feed h3 { margin: 0; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #9aa3b2; }
+.ph-mini-item { background: #14171a; border: 1px solid #23282e; border-radius: 12px; padding: 9px 12px; font-size: 12.5px; line-height: 1.45; }
+.ph-mini-item b { color: #fff; }
+.ph-mini-item span { color: #9aa3b2; font-size: 11px; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+.ph-about-line { margin-top: 20px; font-size: 12px; color: #7d8590; line-height: 1.5; }
+.ph-settings-music { margin-top: 18px; width: 100%; background: #14171a; border: 1px solid #23282e; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; }
+.ph-settings-music .ph-sm-label { font-size: 13.5px; font-weight: 600; }
+.ph-settings-music .ph-sm-sub { font-size: 11.5px; color: #9aa3b2; margin-top: 2px; }
+.ph-toggle { flex: 0 0 auto; width: 48px; height: 28px; border-radius: 999px; border: none; background: #2a2e33; position: relative; cursor: pointer; padding: 0; }
+.ph-toggle::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: left .18s ease; }
+.ph-toggle.ph-on { background: #00c805; }
+.ph-toggle.ph-on::after { left: 23px; }
+
+/* ---- Bank app ---- */
+#ph-bank-hero {
+  border-radius: 20px; padding: 18px 18px 16px; margin-bottom: 16px; color: #fff;
+  background: linear-gradient(135deg, #063d1c 0%, #0a6b2d 55%, #00a344 130%);
+  box-shadow: 0 10px 26px rgba(0,120,40,.35);
+}
+#ph-bank-hero .ph-bh-label { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; opacity: .85; }
+#ph-bank-cash { font-size: 34px; font-weight: 800; letter-spacing: -.01em; margin-top: 4px; font-variant-numeric: tabular-nums; }
+#ph-bank-hero .ph-bh-row { display: flex; gap: 16px; margin-top: 12px; font-size: 12px; }
+#ph-bank-hero .ph-bh-row b { display: block; font-size: 14.5px; margin-top: 1px; font-variant-numeric: tabular-nums; }
+#ph-bank-hero .ph-bh-row span { opacity: .8; font-size: 11px; }
+/* keep migrated game tabs single-column inside the phone (Phase 2: every host) */
+.ph-host { width: 100%; }
+.ph-host [class*="lg:grid-cols-"], .ph-host [class*="md:grid-cols-"], .ph-host [class*="xl:grid-cols-"] { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+.ph-host [class*="lg:col-span-"], .ph-host [class*="md:col-span-"], .ph-host [class*="xl:col-span-"] { grid-column: auto !important; }
+.ph-host .rh-card { padding: 16px !important; }
+.ph-host .sticky { top: 0 !important; }
+/* real-estate loans card (inside the finance section) */
+#bank-loans-card { background: #14171a; border: 1px solid #262a2e; border-radius: 18px; padding: 18px; }
+#bank-loans-card h3 { margin: 0; font-size: 16px; font-weight: 800; color: #fff; }
+#bank-loans-card .ph-loans-sub { font-size: 12px; color: #8a919e; margin-top: 3px; line-height: 1.5; }
+.ph-loan { border-top: 1px solid #23282e; margin-top: 14px; padding-top: 14px; }
+.ph-loan:first-of-type { border-top: none; margin-top: 10px; padding-top: 0; }
+.ph-loan-name { font-size: 14px; font-weight: 700; color: #fff; }
+.ph-loan-meta { font-size: 12px; color: #9aa3b2; margin-top: 2px; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+.ph-loan-bar { height: 7px; border-radius: 99px; background: #22262a; margin-top: 9px; overflow: hidden; }
+.ph-loan-bar i { display: block; height: 100%; background: #00c805; border-radius: 99px; }
+.ph-loan-amounts { display: flex; justify-content: space-between; font-size: 12px; margin-top: 6px; }
+.ph-loan-amounts b { color: #fff; font-variant-numeric: tabular-nums; }
+.ph-loan-amounts span { color: #8a919e; }
+.ph-loan-actions { display: flex; gap: 8px; margin-top: 11px; flex-wrap: wrap; }
+.ph-loan-actions input {
+  flex: 1 1 110px; min-width: 0; background: #0c0e10; border: 1px solid #2a2e33; color: #fff;
+  border-radius: 10px; padding: 8px 10px; font-size: 13px; font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+.ph-loan-actions button { border: none; border-radius: 10px; padding: 8px 12px; font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.ph-loan-pay { background: #00c805; color: #000; }
+.ph-loan-full { background: #1e2227; color: #fff; border: 1px solid #2c3137 !important; }
+.ph-loan-refi { background: #12283f; color: #7db4ff; border: 1px solid #1d3a5f !important; }
+.ph-loans-empty { font-size: 13px; color: #9aa3b2; line-height: 1.55; margin-top: 10px; }
+
+/* ---- home indicator ---- */
+#ph-home-indicator {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 30px; z-index: 55;
+  background: none; border: none; padding: 0; cursor: pointer; display: flex; align-items: flex-end; justify-content: center;
+}
+#ph-home-indicator i { display: block; width: 122px; height: 4.5px; border-radius: 99px; background: rgba(255,255,255,.88); margin-bottom: 8px; box-shadow: 0 1px 6px rgba(0,0,0,.5); animation: ph-home-pulse 2.4s ease-in-out infinite; }
+@keyframes ph-home-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+body.ph-locked #ph-home-indicator { display: none; }
+
+/* ---- notification center ---- */
+#ph-notif-center {
+  position: absolute; inset: 0; z-index: 80; display: flex; flex-direction: column;
+  background: rgba(4,7,10,.86); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  transform: translateY(-103%); transition: transform .34s cubic-bezier(.32,.72,.28,1);
+}
+#ph-notif-center.ph-open { transform: translateY(0); }
+#ph-notif-center .ph-nc-head { display: flex; align-items: center; justify-content: space-between; padding: 58px 18px 10px; }
+#ph-notif-center .ph-nc-head h2 { margin: 0; font-size: 19px; font-weight: 800; }
+#ph-notif-center .ph-nc-head .ph-nc-btns { display: flex; gap: 8px; }
+#ph-notif-center .ph-nc-head button { background: rgba(255,255,255,.12); color: #fff; border: none; border-radius: 999px; padding: 7px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit; }
+#ph-notif-list { flex: 1; overflow-y: auto; padding: 4px 14px 30px; display: flex; flex-direction: column; gap: 9px; }
+.ph-notif-item { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.10); border-radius: 16px; padding: 11px 13px; cursor: pointer; text-align: left; width: 100%; color: #fff; font-family: inherit; position: relative; }
+.ph-notif-item.ph-unread::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3.5px; border-radius: 99px; background: #00c805; }
+.ph-notif-item .ph-n-tag { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #c9d1db; }
+.ph-notif-item .ph-n-text { font-size: 13px; line-height: 1.45; margin-top: 3px; color: #eef1f4; }
+.ph-notif-item .ph-n-day { font-size: 11px; color: #8a919e; margin-top: 5px; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+.ph-nc-empty { text-align: center; color: #8a919e; font-size: 13px; padding-top: 40px; line-height: 1.6; }
+
+/* ---- notification banners ---- */
+#ph-banners { position: absolute; top: 52px; left: 10px; right: 10px; z-index: 90; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.ph-banner {
+  pointer-events: auto; cursor: pointer; text-align: left; width: 100%; font-family: inherit; color: #fff;
+  background: rgba(13,17,22,.97); border: 1px solid rgba(255,255,255,.16); border-radius: 18px;
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  padding: 10px 13px; box-shadow: 0 12px 30px rgba(0,0,0,.5);
+  animation: ph-banner-in .3s cubic-bezier(.32,.72,.28,1);
+}
+.ph-banner.ph-out { animation: ph-banner-out .25s ease forwards; }
+@keyframes ph-banner-in { from { transform: translateY(-16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes ph-banner-out { to { transform: translateY(-12px); opacity: 0; } }
+.ph-banner .ph-b-tag { font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: #7dff8a; display: flex; justify-content: space-between; gap: 8px; }
+.ph-banner .ph-b-tag span:last-child { color: #8a919e; font-weight: 500; text-transform: none; letter-spacing: 0; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+.ph-banner .ph-b-text { font-size: 13px; line-height: 1.4; margin-top: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* scrollbars inside the phone */
+.ph-scroll::-webkit-scrollbar, #ph-notif-list::-webkit-scrollbar { width: 4px; }
+.ph-scroll::-webkit-scrollbar-thumb, #ph-notif-list::-webkit-scrollbar-thumb { background: #2a2e33; border-radius: 99px; }
+
+/* ================= Phase 2: app heroes, sub-tabs, settings, containment ================= */
+.ph-hero { border-radius: 20px; padding: 16px 18px 14px; margin-bottom: 14px; color: #fff; box-shadow: 0 10px 26px rgba(0,0,0,.35); }
+.ph-hero-label { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; opacity: .85; }
+.ph-hero-big { font-size: 30px; font-weight: 800; letter-spacing: -.01em; margin-top: 4px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-hero-row { display: flex; gap: 14px; margin-top: 10px; font-size: 12px; }
+.ph-hero-row > div { flex: 1 1 0; min-width: 0; }
+.ph-hero-row b { display: block; font-size: 13.5px; margin-top: 1px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-hero-row span { opacity: .8; font-size: 11px; }
+.ph-hero-stocks { background: linear-gradient(135deg, #0b3d91, #1f7dff 130%); }
+.ph-hero-realestate { background: linear-gradient(135deg, #7c3a06, #d97706 130%); }
+.ph-hero-ereits { background: linear-gradient(135deg, #16283f, #3b6ea5 130%); }
+.ph-hero-smallbiz { background: linear-gradient(135deg, #7c2d12, #ea580c 130%); }
+.ph-hero-forex { background: linear-gradient(135deg, #155e75, #06b6d4 130%); }
+.ph-hero-commodities { background: linear-gradient(135deg, #713f12, #b45309 130%); }
+.ph-hero-vc { background: linear-gradient(135deg, #4c1d95, #9333ea 130%); }
+.ph-hero-casino { background: linear-gradient(135deg, #14532d, #16a34a 130%); }
+.ph-hero-job { background: linear-gradient(135deg, #1e293b, #475569 130%); }
+.ph-hero-rivals { background: linear-gradient(135deg, #831843, #db2777 130%); }
+.ph-hero-managers { background: linear-gradient(135deg, #134e4a, #14b8a6 130%); }
+.ph-hero-portfolio { background: linear-gradient(135deg, #064e3b, #10b981 130%); }
+
+/* Stocks sub-tabs: Stocks / ETFs / Options */
+.ph-subtabs { display: flex; gap: 6px; margin-bottom: 14px; background: #14171a; border: 1px solid #23282e; border-radius: 999px; padding: 4px; }
+.ph-subtabs button { flex: 1 1 0; border: none; background: transparent; color: #9aa3b2; font-size: 13px; font-weight: 700; font-family: inherit; border-radius: 999px; padding: 8px 4px; cursor: pointer; }
+.ph-subtabs button.ph-sub-on { background: #1f7dff; color: #fff; }
+
+/* Settings rows */
+.ph-settings { display: flex; flex-direction: column; gap: 16px; padding-top: 4px; }
+.ph-set-group { background: #14171a; border: 1px solid #23282e; border-radius: 16px; overflow: hidden; }
+.ph-set-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px 14px; background: none; border: none; border-bottom: 1px solid #23282e; color: #fff; font-family: inherit; text-align: left; cursor: pointer; text-decoration: none; box-sizing: border-box; }
+.ph-set-row:last-child { border-bottom: none; }
+button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
+.ph-set-ic { font-size: 19px; flex: 0 0 auto; width: 26px; text-align: center; }
+.ph-set-tx { flex: 1 1 auto; min-width: 0; }
+.ph-set-tx b { display: block; font-size: 14.5px; font-weight: 600; }
+.ph-set-tx i { display: block; font-size: 12px; color: #8a919e; font-style: normal; margin-top: 1px; }
+.ph-set-chev { font-size: 22px; color: #565d66; line-height: 1; }
+.ph-set-pill { flex: 0 0 auto; background: #1e2227; border: 1px solid #2c3137; color: #fff; border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; }
+.ph-set-foot { margin: -6px 0 0; font-size: 12px; color: #7d8590; text-align: center; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+/* toasts + modals contained inside the phone frame */
+#phone-screen > #toastContainer { position: absolute !important; top: auto !important; bottom: 56px !important; left: 12px !important; right: 12px !important; max-width: none !important; align-items: flex-end; }
+#phone-screen > #toastContainer > * { max-width: 100%; }
+#phone-screen > .ph-contained { position: absolute !important; z-index: 70 !important; }
+#phone-screen #modalSmallBizReport .rh-card { max-height: calc(100% - 8px) !important; }
+
+/* casino game selector: 2 columns inside the phone */
+#casino-host .ph-casino-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+
+/* news wire flows with the app scroll; economy monitor below it */
+#news-wire-host #liveFeedContainer { max-height: none !important; overflow-y: visible !important; }
+#news-monitor-host { margin-top: 16px; }
+
+</style>
 </head>
-<body class="light-theme min-h-screen flex flex-col selection:bg-[#00C805] selection:text-black">
+<body class="light-theme min-h-screen flex flex-col selection:bg-[#00C805] selection:text-black ph-shell-active ph-locked">
+<!-- ==================== INVESIM PHONE SHELL (Phase 1) ==================== -->
+<div id="phone-stage">
+  <div id="phone-frame">
+    <div id="phone-screen">
+      <div id="ph-camera" aria-hidden="true"></div>
+
+      <!-- Status bar: game clock + decorative glyphs. Tap opens Notification Center. -->
+      <div id="ph-statusbar" role="button" aria-label="Open notifications" title="Notifications">
+        <span id="ph-sb-clock">Day 1 &bull; 08:30 AM</span>
+        <span class="ph-sb-icons" aria-hidden="true">
+          <svg width="17" height="11" viewBox="0 0 17 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="1" fill="#fff"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="#fff"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#fff"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#fff"/></svg>
+          <svg width="16" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 10.6a1.4 1.4 0 1 0 .01 0z" fill="#fff"/><path d="M5.2 8.2a4 4 0 0 1 5.6 0" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><path d="M2.6 5.6a7.6 7.6 0 0 1 10.8 0" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><path d="M0 3a11.3 11.3 0 0 1 16 0" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".45"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.2" stroke="#fff" opacity=".5"/><rect x="2" y="2" width="16" height="8" rx="1.8" fill="#fff"/><path d="M23.2 4v4a2.2 2.2 0 0 0 0-4z" fill="#fff" opacity=".5"/></svg>
+        </span>
+      </div>
+
+      <!-- Lock screen -->
+      <div id="ph-lock" role="button" aria-label="Unlock">
+        <div class="ph-wallpaper" aria-hidden="true">
+          <div class="ph-orb ph-orb-a"></div><div class="ph-orb ph-orb-b"></div><div class="ph-orb ph-orb-c"></div>
+          <svg class="ph-chartline" viewBox="0 0 430 120" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,96 42,84 84,92 126,66 168,74 210,46 252,58 294,30 336,42 378,18 430,26" fill="none" stroke="#7dff8a" stroke-width="2.5" stroke-linejoin="round"/><polyline points="0,108 52,100 104,106 156,88 208,94 260,74 312,82 364,58 430,66" fill="none" stroke="#ffffff" stroke-width="1.5" opacity=".5"/></svg>
+        </div>
+        <div class="ph-lock-top">
+          <div id="ph-lock-clock">9:41</div>
+          <div id="ph-lock-date">Thursday, November 12</div>
+          <div id="ph-lock-brand">JMF Games Phone</div>
+          <div id="ph-lock-gameday">Day 1 &bull; 08:30 AM in-game</div>
+        </div>
+        <div class="ph-lock-spacer"></div>
+        <div id="ph-lock-hint">
+          <svg class="ph-chev" width="26" height="14" viewBox="0 0 26 14" fill="none"><path d="M2 12L13 2l11 10" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Swipe up to unlock
+        </div>
+      </div>
+
+      <!-- Home screen -->
+      <div id="ph-home">
+        <div class="ph-wallpaper" aria-hidden="true">
+          <div class="ph-orb ph-orb-a"></div><div class="ph-orb ph-orb-b"></div><div class="ph-orb ph-orb-c"></div>
+          <svg class="ph-chartline" viewBox="0 0 430 120" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,96 42,84 84,92 126,66 168,74 210,46 252,58 294,30 336,42 378,18 430,26" fill="none" stroke="#7dff8a" stroke-width="2.5" stroke-linejoin="round"/><polyline points="0,108 52,100 104,106 156,88 208,94 260,74 312,82 364,58 430,66" fill="none" stroke="#ffffff" stroke-width="1.5" opacity=".5"/></svg>
+        </div>
+        <div id="ph-ticker"><span class="ph-tk-nw" id="ph-tk-nw">$10,000.00</span><span id="ph-tk-day" class="ph-up">+0.00% today</span><span class="ph-tk-dim" id="ph-tk-cash">Cash $10,000.00</span></div>
+        <div id="ph-widgets">
+          <div class="ph-widget">
+            <div class="ph-w-label">Net Worth</div>
+            <div id="ph-w-nw">$10,000.00</div>
+            <div id="ph-w-nw-sub"><span class="ph-up">+$0.00 today</span> &nbsp;&middot;&nbsp; Cash $10,000.00</div>
+          </div>
+          <div class="ph-widget-row">
+            <div class="ph-widget">
+              <div class="ph-w-label">Market</div>
+              <div class="ph-w-big" id="ph-w-fg">55 &middot; Neutral</div>
+              <div class="ph-w-small" id="ph-w-mover">Top mover &mdash;</div>
+            </div>
+            <div class="ph-widget">
+              <div class="ph-w-label">Game Day</div>
+              <div class="ph-w-big" id="ph-w-day">Day 1</div>
+              <div class="ph-w-small" id="ph-w-tax">Tax in 251d</div>
+            </div>
+          </div>
+        </div>
+        <div id="ph-controls">
+          <button type="button" class="ph-pill-btn" id="ph-btn-autoplay">&#10073;&#10073; Pause time</button>
+          <button type="button" class="ph-pill-btn" id="ph-btn-stepday">+1 Day</button>
+          <button type="button" class="ph-pill-btn" id="ph-btn-music">&#9834; Music: Off</button>
+        </div>
+        <div id="ph-edit-bar" role="toolbar" aria-label="Arrange apps">
+          <button type="button" class="ph-edit-btn ph-edit-done" id="ph-edit-done">Done</button>
+          <button type="button" class="ph-edit-btn" id="ph-edit-az">Sort A-Z</button>
+          <button type="button" class="ph-edit-btn" id="ph-edit-reset">Reset order</button>
+        </div>
+        <div id="ph-pages"><div id="ph-track"></div></div>
+        <div id="ph-dots" role="tablist" aria-label="Home screen pages"></div>
+      </div>
+
+      <!-- App windows (built by shell JS) -->
+      <div id="ph-app-layer"></div>
+
+      <!-- Notification Center -->
+      <div id="ph-notif-center" aria-hidden="true">
+        <div class="ph-nc-head">
+          <h2>Notifications</h2>
+          <div class="ph-nc-btns">
+            <button type="button" id="ph-nc-clear">Clear</button>
+            <button type="button" id="ph-nc-close">Done</button>
+          </div>
+        </div>
+        <div id="ph-notif-list"></div>
+      </div>
+
+      <!-- Sliding notification banners -->
+      <div id="ph-banners"></div>
+
+      <!-- Home indicator -->
+      <button type="button" id="ph-home-indicator" aria-label="Home"><i></i></button>
+    </div>
+  </div>
+  <div id="ph-stage-footer"></div>
+</div>
+<!-- ================== / INVESIM PHONE SHELL ================== -->
+
 
   <!-- ==================== INVESTSIM TOP NAVIGATION BAR ==================== -->
   <header class="backdrop-blur-md border-b border-[#22262A] sticky top-0 z-30">
@@ -31127,6 +31629,965 @@
     setTimeout(function() { if (isFilled()) showBanner(); }, 5000);
   }
 })();
+</script>
+<script>
+/* ================= InveSim Phone shell JS (Phase 1) =================
+   Additive only: the game IIFE is untouched. The shell reads window.G
+   (exposed by the game), calls window.switchMainTab, and re-parents the
+   existing #tab-finance node into the Bank app window. No game logic is
+   duplicated; Bank actions call the game's own window-exposed functions. */
+(function () {
+  'use strict';
+  if (window.__phShellLoaded) return;
+  window.__phShellLoaded = true;
+
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function fmtMoney(n) {
+    n = Number(n) || 0;
+    var neg = n < 0;
+    return (neg ? '-$' : '$') + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function fmtSigned(n, suffix) { var v = Number(n) || 0; return (v >= 0 ? '+' : '-') + Math.abs(v).toFixed(2) + (suffix || ''); }
+
+  /* ---------- app catalogue: original glyphs, original gradients ---------- */
+  var GL = function (inner) { return '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>'; };
+  var APPS = [
+    { id: 'bank', name: 'Bank', grad: 'linear-gradient(135deg,#0a6b2d,#00c805)', glyph: GL('<path d="M3 9.2 12 4l9 5.2"/><path d="M4.5 9.2h15"/><path d="M6 11.5v6M10 11.5v6M14 11.5v6M18 11.5v6"/><path d="M3.5 19.5h17"/>'), desc: 'Available cash, margin & leverage, every loan, and the Tax Center.' },
+    { id: 'stocks', name: 'Stocks', grad: 'linear-gradient(135deg,#0b3d91,#1f7dff)', glyph: GL('<path d="M6 4v3M6 15v5M12 3v4M12 15v6M18 6v3M18 15v4"/><rect x="4" y="7" width="4" height="8" rx="1"/><rect x="10" y="7" width="4" height="8" rx="1"/><rect x="16" y="9" width="4" height="6" rx="1"/>'), desc: '15,025 stocks, 150 ETFs and options on one trading terminal.' },
+    { id: 'realestate', name: 'Real Estate', grad: 'linear-gradient(135deg,#b45309,#f59e0b)', glyph: GL('<path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/>'), desc: '21,500 properties, 20%-down mortgages and property managers.' },
+    { id: 'ereits', name: 'eREITs', grad: 'linear-gradient(135deg,#1e3a5f,#3b6ea5)', glyph: GL('<path d="M4 20V6l6-2.5V20"/><path d="M14 20V9.5L20 7v13"/><path d="M2.5 20h19"/><path d="M7 8h1.5M7 11.5h1.5M7 15h1.5M16.5 12h1.5M16.5 15.5h1.5"/>'), desc: 'Private real estate equity funds, quarterly and compounding.' },
+    { id: 'smallbiz', name: 'Small Biz', grad: 'linear-gradient(135deg,#c2410c,#fb923c)', glyph: GL('<path d="M4 9.5 5.2 4h13.6L20 9.5"/><path d="M4 9.5h16v10.5H4z"/><path d="M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0A2.7 2.7 0 0 0 20 9.5"/><path d="M10 20v-4.5h4V20"/>'), desc: '52,000 real-world small businesses, 8–18% cash flow.' },
+    { id: 'forex', name: 'Forex', grad: 'linear-gradient(135deg,#0e7490,#22d3ee)', glyph: GL('<path d="M4 8.5h12.5M14.5 5 18 8.5 14.5 12"/><path d="M20 15.5H7.5M9.5 12 6 15.5l3.5 3.5"/>'), desc: 'The interbank desk — 5 major pairs, 24 hours a day.' },
+    { id: 'commodities', name: 'Commodities', grad: 'linear-gradient(135deg,#92400e,#d6a756)', glyph: GL('<path d="M7 3.5h10v17H7z"/><path d="M7 8h10M7 16h10"/><path d="M7 3.5c0 1.4 2.2 2.3 5 2.3s5-.9 5-2.3M7 20.5c0-1.4 2.2-2.3 5-2.3s5 .9 5 2.3"/>'), desc: 'Oil, gold, wheat and the world\'s raw materials.' },
+    { id: 'vc', name: 'Venture Cap', grad: 'linear-gradient(135deg,#6d28d9,#a855f7)', glyph: GL('<path d="M12 2.8c3.4 2 5 5.4 4.6 9.4l-2.8.7L12 15l-1.8-2.1-2.8-.7C6.9 8.2 8.6 4.8 12 2.8z"/><circle cx="12" cy="8.6" r="1.7"/><path d="M8.6 13.6 7 18.4l3.4-1.6M15.4 13.6 17 18.4l-3.4-1.6"/><path d="M12 15.5v4.2"/>'), desc: 'Startup pipeline, multi-year horizon to IPO.' },
+    { id: 'casino', name: 'Casino', grad: 'linear-gradient(135deg,#b91c1c,#f59e0b)', glyph: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4.5" stroke="#fff" stroke-width="1.8"/><circle cx="8.2" cy="8.2" r="1.5" fill="#fff"/><circle cx="15.8" cy="8.2" r="1.5" fill="#fff"/><circle cx="12" cy="12" r="1.5" fill="#fff"/><circle cx="8.2" cy="15.8" r="1.5" fill="#fff"/><circle cx="15.8" cy="15.8" r="1.5" fill="#fff"/></svg>', desc: 'The Grand Casino & High-Roller Lounge — 11 games.' },
+    { id: 'job', name: 'Job', grad: 'linear-gradient(135deg,#334155,#64748b)', glyph: GL('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3.2 2"/><path d="M9 2.8h6"/>'), desc: 'Clock in, work shifts, and collect your salary.' },
+    { id: 'rivals', name: 'AI Rivals', grad: 'linear-gradient(135deg,#be185d,#ec4899)', glyph: GL('<rect x="5" y="8" width="14" height="11" rx="3.5"/><path d="M12 8V4.5"/><circle cx="12" cy="3.4" r="1.1"/><circle cx="9.4" cy="12.8" r="1.1" fill="#fff" stroke="none"/><circle cx="14.6" cy="12.8" r="1.1" fill="#fff" stroke="none"/><path d="M9 16.2h6"/>'), desc: '5,200 robot traders racing you to the top.' },
+    { id: 'managers', name: 'Managers', grad: 'linear-gradient(135deg,#0f766e,#2dd4bf)', glyph: GL('<circle cx="8" cy="8.4" r="3"/><path d="M2.8 19.5c.6-3.2 2.7-5 5.2-5s4.6 1.8 5.2 5"/><circle cx="16.6" cy="9.4" r="2.5"/><path d="M14.5 14.6c2.9-.4 5.7 1.2 6.3 4.4"/>'), desc: 'Hire wealth managers, trading firms and robot traders.' },
+    { id: 'portfolio', name: 'Portfolio', grad: 'linear-gradient(135deg,#047857,#34d399)', glyph: GL('<path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5H12z"/><path d="M14.5 2.6A8.5 8.5 0 0 1 21.4 9.5H14.5z"/>'), desc: 'Everything you own, grouped by asset class.' },
+    { id: 'news', name: 'News', grad: 'linear-gradient(135deg,#0369a1,#38bdf8)', glyph: GL('<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H5.5A1.5 1.5 0 0 1 4 17.5z"/><path d="M19 15.5h1.5V6.5L19 5.5"/><path d="M7 8h7M7 11h7M7 14h4.5"/>'), desc: 'The wire: markets, rivals, shocks and the world economy.' },
+    { id: 'settings', name: 'Settings', grad: 'linear-gradient(135deg,#3f3f46,#71717a)', glyph: GL('<path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2.1" fill="#0b0e11"/><circle cx="15" cy="12" r="2.1" fill="#0b0e11"/><circle cx="8" cy="17" r="2.1" fill="#0b0e11"/>'), desc: 'Save & load, new game, theme, music and About.' },
+    { id: 'games', name: 'Games', grad: 'linear-gradient(135deg,#312e81,#7c3aed)', glyph: GL('<path d="M7 8.5h10a5 5 0 0 1 5 5v2.6a3 3 0 0 1-5.3 1.9L15 16H9l-1.7 2A3 3 0 0 1 2 16.1v-2.6a5 5 0 0 1 5-5z"/><path d="M7.5 11v3.4M5.8 12.7h3.4"/><circle cx="16" cy="11.8" r="1" fill="#fff" stroke="none"/><circle cx="18.2" cy="13.8" r="1" fill="#fff" stroke="none"/>'), desc: 'More free games from JMF Games — jmfgames.com.', external: 'https://jmfgames.com' }
+  ];
+  var APP_MAP = {};
+  APPS.forEach(function (a) { APP_MAP[a.id] = a; });
+  var PAGE_SIZE = APPS.length; /* single home screen: every app on one page */
+  var DEFAULT_ORDER = APPS.map(function (a) { return a.id; });
+
+  /* ---------- preferences (separate key; never touches game saves) ---------- */
+  var PREFS_KEY = 'INVESIM_PHONE_PREFS';
+  var prefs = { music: false, order: null, stocksTab: 'stocks' };
+  try { var raw = localStorage.getItem(PREFS_KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p.music === 'boolean') prefs.music = p.music; if (p && Array.isArray(p.order)) prefs.order = p.order; if (p && (p.stocksTab === 'stocks' || p.stocksTab === 'etfs' || p.stocksTab === 'options')) prefs.stocksTab = p.stocksTab; } } catch (e) {}
+  function savePrefs() { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {} }
+  function validOrder(o) {
+    if (!Array.isArray(o) || o.length !== APPS.length) return false;
+    var seen = {};
+    for (var i = 0; i < o.length; i++) { if (!APP_MAP[o[i]] || seen[o[i]]) return false; seen[o[i]] = true; }
+    return true;
+  }
+  var appOrder = validOrder(prefs.order) ? prefs.order.slice() : (migrateOrder(prefs.order) || DEFAULT_ORDER.slice());
+  if (!validOrder(prefs.order)) persistOrder(); /* persist migrated orders so newly added apps keep the player's arrangement */
+  function migrateOrder(o) {
+    if (!Array.isArray(o)) return null;
+    var seen = {}, out = [];
+    for (var i = 0; i < o.length; i++) { if (APP_MAP[o[i]] && !seen[o[i]]) { seen[o[i]] = true; out.push(o[i]); } }
+    DEFAULT_ORDER.forEach(function (id) { if (!seen[id]) out.push(id); });
+    return out.length === APPS.length ? out : null;
+  }
+  function orderedApps() { return appOrder.map(function (id) { return APP_MAP[id]; }); }
+  function pageCount() { return Math.max(1, Math.ceil(appOrder.length / PAGE_SIZE)); }
+  function persistOrder() { prefs.order = appOrder.slice(); savePrefs(); }
+
+  /* ---------- state ---------- */
+  var unlocked = false, currentApp = null, currentPage = 0, histPushed = false;
+  var editing = false, selectedId = null, suppressNextClick = false, suppressClickTimer = null, dragSession = null;
+  function armClickSuppress() {
+    suppressNextClick = true;
+    clearTimeout(suppressClickTimer);
+    suppressClickTimer = setTimeout(function () { suppressNextClick = false; }, 600);
+  }
+  var notifications = [], unread = 0, seenSigs = new Set(), newsInit = false;
+  var bannerQueue = [], bannerBusy = false, loansSig = '', moverCache = null, moverTick = 0;
+  var windows = {}, screenEl = $('phone-screen');
+  var extraNodes = { job: null, wire: null, monitor: null };
+
+  /* ---------- Phase 2: per-app hosts, game tabs, re-parent map, hero labels ---------- */
+  var HOSTS = { stocks: 'stocks-host', realestate: 're-host', ereits: 'ereit-host', smallbiz: 'sb-host', forex: 'forex-host', commodities: 'cmd-host', vc: 'vc-host', casino: 'casino-host', job: 'job-host', rivals: 'rivals-host', managers: 'mgr-host', portfolio: 'portfolio-host' };
+  var APP_TAB = { bank: 'finance', realestate: 'realestate', ereits: 'privatere', smallbiz: 'smallbiz', forex: 'forex', commodities: 'commodities', vc: 'vc', casino: 'casino', rivals: 'competitors', managers: 'managers', portfolio: 'portfolio', news: 'finance' };
+  var REPARENTS = [
+    ['tab-finance', 'bank-host'], ['tab-stocks', 'stocks-host'], ['tab-etfs', 'stocks-host'], ['tab-options', 'stocks-host'],
+    ['tab-realestate', 're-host'], ['tab-privatere', 'ereit-host'], ['tab-smallbiz', 'sb-host'],
+    ['tab-forex', 'forex-host'], ['tab-commodities', 'cmd-host'], ['tab-vc', 'vc-host'],
+    ['tab-casino', 'casino-host'], ['tab-competitors', 'rivals-host'], ['tab-managers', 'mgr-host'], ['tab-portfolio', 'portfolio-host']
+  ];
+  var HERO_LABELS = { stocks: 'Trading Terminal', realestate: 'Property Equity', ereits: 'Private Real Estate', smallbiz: 'Business Portfolio', forex: 'Forex Equity', commodities: 'Commodities Desk', vc: 'Venture Portfolio', casino: 'Casino Balance', job: 'Casino Career', rivals: 'Championship Race', managers: 'Managed Capital', portfolio: 'Total Net Worth' };
+  function heroHtml(app) {
+    return '<div class="ph-hero ph-hero-' + app.id + '" id="ph-hero-' + app.id + '"><div class="ph-hero-label">' + esc(HERO_LABELS[app.id] || app.name) + '</div><div class="ph-hero-big" id="ph-hero-big-' + app.id + '">—</div><div class="ph-hero-row" id="ph-hero-row-' + app.id + '"></div></div>';
+  }
+
+  /* ---------- build home grid, dots, windows ---------- */
+  function iconEl(app, withBadge) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'ph-app-btn'; b.setAttribute('aria-label', app.name); b.setAttribute('data-app-id', app.id);
+    b.innerHTML = '<span class="ph-icon" style="background:' + app.grad + '">' + app.glyph + '</span>' +
+      '<span class="ph-app-label">' + esc(app.name) + '</span>' +
+      (withBadge ? '<span class="ph-badge ph-hidden" id="ph-badge-' + app.id + '">0</span>' : '');
+    b.addEventListener('click', function (ev) {
+      if (suppressNextClick) { suppressNextClick = false; ev.preventDefault(); ev.stopPropagation(); return; }
+      if (editing) { handleEditTap(app.id); return; }
+      openApp(app.id, b);
+    });
+    bindPress(b, app.id);
+    return b;
+  }
+  function renderHomeGrid() {
+    var track = $('ph-track');
+    track.innerHTML = '';
+    var apps = orderedApps();
+    for (var p = 0; p < pageCount(); p++) {
+      var page = document.createElement('div'); page.className = 'ph-page';
+      var grid = document.createElement('div'); grid.className = 'ph-grid';
+      apps.slice(p * PAGE_SIZE, p * PAGE_SIZE + PAGE_SIZE).forEach(function (a) { grid.appendChild(iconEl(a, a.id === 'news')); });
+      page.appendChild(grid); track.appendChild(page);
+    }
+    var dots = $('ph-dots');
+    dots.innerHTML = '';
+    for (var i = 0; i < pageCount(); i++) {
+      (function (idx) {
+        var d = document.createElement('button'); d.type = 'button'; d.setAttribute('aria-label', 'Page ' + (idx + 1));
+        d.addEventListener('click', function () { setPage(idx); });
+        dots.appendChild(d);
+      })(i);
+    }
+    setPage(currentPage);
+    dots.style.display = pageCount() > 1 ? '' : 'none';
+    updateBadge();
+  }
+  function buildHome() {
+    renderHomeGrid();
+  }
+  function setPage(i) {
+    currentPage = Math.max(0, Math.min(pageCount() - 1, i));
+    $('ph-track').style.transform = 'translateX(-' + (currentPage * 100) + '%)';
+    Array.prototype.forEach.call($('ph-dots').children, function (d, j) { d.className = j === currentPage ? 'ph-active' : ''; });
+  }
+  function buildWindows() {
+    var layer = $('ph-app-layer');
+    APPS.forEach(function (app) {
+      if (app.external) return; /* external apps open a link, no window */
+      var win = document.createElement('div');
+      win.className = 'ph-window'; win.id = 'ph-win-' + app.id; win.setAttribute('role', 'dialog'); win.setAttribute('aria-label', app.name);
+      var top = '<div class="ph-topbar"><button type="button" class="ph-back" aria-label="Back to Home">&lsaquo;</button><div class="ph-title">' + esc(app.name) + '</div></div>';
+      var body = '';
+      if (app.id === 'bank') {
+        body = '<div class="ph-scroll" id="ph-bank-scroll">' +
+          '<div id="ph-bank-hero"><div class="ph-bh-label">Available Cash</div><div id="ph-bank-cash">$10,000.00</div>' +
+          '<div class="ph-bh-row"><div><span>Net Worth</span><b id="ph-bank-nw">$10,000.00</b></div>' +
+          '<div><span>Day Change</span><b id="ph-bank-day">+$0.00</b></div>' +
+          '<div><span>Margin Debt</span><b id="ph-bank-debt">$0.00</b></div></div></div>' +
+          '<div id="bank-host" class="ph-host"></div></div>';
+      } else if (HOSTS[app.id]) {
+        body = '<div class="ph-scroll">' + heroHtml(app) +
+          (app.id === 'stocks' ? '<div class="ph-subtabs" id="ph-stocks-subtabs"><button type="button" data-stab="stocks">Stocks</button><button type="button" data-stab="etfs">ETFs</button><button type="button" data-stab="options">Options</button></div>' : '') +
+          '<div id="' + HOSTS[app.id] + '" class="ph-host"></div></div>';
+      } else if (app.id === 'news') {
+        body = '<div class="ph-scroll" id="ph-news-scroll"><div id="news-wire-host" class="ph-host"></div><div id="news-monitor-host" class="ph-host"></div></div>';
+      } else if (app.id === 'settings') {
+        body = '<div class="ph-scroll"><div class="ph-settings">' +
+          '<div class="ph-set-group">' +
+            '<button type="button" class="ph-set-row" id="ph-set-save"><span class="ph-set-ic">💾</span><span class="ph-set-tx"><b>Save &amp; Load</b><i>Slots, export &amp; import</i></span><span class="ph-set-chev">›</span></button>' +
+            '<button type="button" class="ph-set-row" id="ph-set-newgame"><span class="ph-set-ic">🆕</span><span class="ph-set-tx"><b>Start New Game</b><i>Fresh $10,000 run, new world seed</i></span><span class="ph-set-chev">›</span></button>' +
+          '</div>' +
+          '<div class="ph-set-group">' +
+            '<div class="ph-set-row"><span class="ph-set-ic">🎨</span><span class="ph-set-tx"><b>Theme</b><i>Light or black</i></span><button type="button" class="ph-set-pill" id="ph-set-theme"><span id="ph-set-theme-label">Light</span></button></div>' +
+            '<div class="ph-set-row"><span class="ph-set-ic">⏱️</span><span class="ph-set-tx"><b>Autoplay time</b><i>Days advance automatically</i></span><button type="button" class="ph-toggle" id="ph-set-autoplay" aria-label="Toggle autoplay"></button></div>' +
+            '<div class="ph-set-row"><span class="ph-set-ic">🎵</span><span class="ph-set-tx"><b>Soft music</b><i>Gentle ambient loop, on or off</i></span><button type="button" class="ph-toggle" id="ph-settings-music-toggle" aria-label="Toggle music"></button></div>' +
+          '</div>' +
+          '<div class="ph-set-group">' +
+            '<a class="ph-set-row" href="about.html" target="_blank" rel="noopener"><span class="ph-set-ic">ℹ️</span><span class="ph-set-tx"><b>About InveSim</b><i>What the game is</i></span><span class="ph-set-chev">›</span></a>' +
+            '<a class="ph-set-row" href="contact.html" target="_blank" rel="noopener"><span class="ph-set-ic">✉️</span><span class="ph-set-tx"><b>Contact</b><i>Reach JMF Games</i></span><span class="ph-set-chev">›</span></a>' +
+          '</div>' +
+          '<p class="ph-about-line">About: InveSim is built and owned by JMF Games.</p>' +
+          '<p class="ph-set-foot"><span id="ph-set-day">Day 1</span> &middot; Saves automatically on this device</p>' +
+          '</div></div>';
+      }
+      win.innerHTML = top + body;
+      win.querySelector('.ph-back').addEventListener('click', goHome);
+      var hb = win.querySelector('.ph-home-btn'); if (hb) hb.addEventListener('click', goHome);
+      layer.appendChild(win);
+      windows[app.id] = win;
+    });
+    var st = $('ph-settings-music-toggle');
+    if (st) st.addEventListener('click', function () { setMusic(!prefs.music); });
+    var sv = $('ph-set-save'); if (sv) sv.addEventListener('click', function () { var b = $('btnSaveGame'); if (b) b.click(); });
+    var ng = $('ph-set-newgame'); if (ng) ng.addEventListener('click', function () { var b = $('btnNewGame'); if (b) b.click(); });
+    var th = $('ph-set-theme'); if (th) th.addEventListener('click', function () { try { if (typeof window.toggleAppTheme === 'function') window.toggleAppTheme(); } catch (e) {} setTimeout(renderSettingsState, 200); });
+    var ap = $('ph-set-autoplay'); if (ap) ap.addEventListener('click', function () { var b = $('btnAutoPlay'); if (b) b.click(); setTimeout(function () { renderSettingsState(); refreshHUD(); }, 200); });
+    var stb = $('ph-stocks-subtabs');
+    if (stb) stb.addEventListener('click', function (e) { var b = e.target.closest ? e.target.closest('[data-stab]') : null; if (b) stocksSubTab(b.getAttribute('data-stab')); });
+    syncStocksSubtabs();
+  }
+
+  /* ---------- arrange mode: long-press, drag, tap-to-move, A–Z ---------- */
+  function setEditing(on) {
+    editing = !!on;
+    selectedId = null;
+    var home = $('ph-home');
+    if (home) home.classList.toggle('ph-editing', editing);
+    if (!editing) clearDragVisuals();
+  }
+  function enterEditMode() {
+    if (!unlocked || currentApp) return;
+    setEditing(true);
+    try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {}
+  }
+  function exitEditMode() { setEditing(false); }
+  function sortAZ() {
+    appOrder = orderedApps().slice().sort(function (a, b) { return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); }).map(function (a) { return a.id; });
+    persistOrder(); renderHomeGrid();
+  }
+  function resetOrder() {
+    appOrder = DEFAULT_ORDER.slice();
+    persistOrder(); renderHomeGrid();
+  }
+  function moveApp(id, toIndex) {
+    var from = appOrder.indexOf(id);
+    if (from < 0) return;
+    toIndex = Math.max(0, Math.min(appOrder.length - 1, toIndex));
+    if (from === toIndex) return;
+    appOrder.splice(from, 1);
+    appOrder.splice(toIndex, 0, id);
+  }
+  function applyOrderToDOM() {
+    var btns = {};
+    Array.prototype.forEach.call(document.querySelectorAll('#ph-track .ph-app-btn'), function (b) { btns[b.getAttribute('data-app-id')] = b; });
+    var pages = document.querySelectorAll('#ph-track .ph-page');
+    for (var p = 0; p < pages.length; p++) {
+      var grid = pages[p].querySelector('.ph-grid');
+      if (!grid) continue;
+      appOrder.slice(p * PAGE_SIZE, p * PAGE_SIZE + PAGE_SIZE).forEach(function (id) { if (btns[id]) grid.appendChild(btns[id]); });
+    }
+  }
+  function handleEditTap(id) {
+    if (dragSession) return;
+    if (!selectedId) { selectedId = id; markSelected(); return; }
+    if (selectedId === id) { selectedId = null; markSelected(); return; }
+    moveApp(selectedId, appOrder.indexOf(id));
+    selectedId = null;
+    persistOrder(); renderHomeGrid();
+  }
+  function markSelected() {
+    Array.prototype.forEach.call(document.querySelectorAll('#ph-track .ph-app-btn'), function (b) {
+      b.classList.toggle('ph-selected', b.getAttribute('data-app-id') === selectedId);
+    });
+  }
+  function markDragSrc(id) {
+    Array.prototype.forEach.call(document.querySelectorAll('#ph-track .ph-app-btn'), function (b) {
+      b.classList.toggle('ph-drag-src', b.getAttribute('data-app-id') === id);
+    });
+  }
+  function clearDragVisuals() {
+    var g = $('ph-drag-ghost'); if (g && g.parentNode) g.parentNode.removeChild(g);
+    Array.prototype.forEach.call(document.querySelectorAll('#ph-track .ph-drag-src'), function (b) { b.classList.remove('ph-drag-src'); });
+  }
+  function gridButtonsOnPage(pageIdx) {
+    var pages = document.querySelectorAll('#ph-track .ph-page');
+    var page = pages[pageIdx];
+    return page ? Array.prototype.slice.call(page.querySelectorAll('.ph-app-btn')) : [];
+  }
+  function indexFromPoint(x, y) {
+    var pagesEl = $('ph-pages');
+    if (pagesEl) {
+      var pr = pagesEl.getBoundingClientRect();
+      if (y < pr.top - 30 || y > pr.bottom + 30 || x < pr.left - 30 || x > pr.right + 30) return -1;
+    }
+    var btns = gridButtonsOnPage(currentPage);
+    var best = -1, bestD = Infinity;
+    btns.forEach(function (b, i) {
+      var r = b.getBoundingClientRect();
+      var d = Math.hypot(x - (r.left + r.width / 2), y - (r.top + r.height / 2));
+      if (d < bestD) { bestD = d; best = i; }
+    });
+    return best < 0 ? -1 : currentPage * PAGE_SIZE + best;
+  }
+  function startGhost(s, e) {
+    selectedId = null; markSelected();
+    clearDragVisuals();
+    var app = APP_MAP[s.id];
+    var g = document.createElement('div');
+    g.id = 'ph-drag-ghost';
+    g.innerHTML = '<span class="ph-icon" style="background:' + app.grad + '">' + app.glyph + '</span><span class="ph-app-label">' + esc(app.name) + '</span>';
+    screenEl.appendChild(g);
+    s.ghost = g;
+    markDragSrc(s.id);
+    moveGhost(e);
+  }
+  function moveGhost(e) {
+    var s = dragSession; if (!s || !s.ghost) return;
+    var sr = screenEl.getBoundingClientRect();
+    s.ghost.style.left = (e.clientX - sr.left - 38) + 'px';
+    s.ghost.style.top = (e.clientY - sr.top - 58) + 'px';
+  }
+  function onDragMove(e) {
+    var s = dragSession; if (!s) return;
+    if (!s.active) {
+      if (Math.hypot(e.clientX - s.startX, e.clientY - s.startY) < 8) return;
+      s.active = true;
+      armClickSuppress();
+      startGhost(s, e);
+    }
+    moveGhost(e);
+    var sr = screenEl.getBoundingClientRect();
+    var dir = 0;
+    if (e.clientX - sr.left < 28) dir = -1; else if (sr.right - e.clientX < 28) dir = 1;
+    var canTurn = (dir < 0 && currentPage > 0) || (dir > 0 && currentPage < pageCount() - 1);
+    if (dir !== 0 && canTurn) {
+      if (s.edgeDir !== dir) {
+        s.edgeDir = dir; clearTimeout(s.edgeTimer);
+        s.edgeTimer = setTimeout(function () { setPage(currentPage + dir); if (dragSession) dragSession.edgeDir = 0; }, 550);
+      }
+    } else { s.edgeDir = 0; clearTimeout(s.edgeTimer); }
+    var idx = indexFromPoint(e.clientX, e.clientY);
+    if (idx >= 0 && appOrder[idx] !== s.id) {
+      moveApp(s.id, idx);
+      applyOrderToDOM();
+      markDragSrc(s.id);
+    }
+  }
+  function onDragEnd() {
+    var s = dragSession; if (!s) return;
+    dragSession = null;
+    clearTimeout(s.edgeTimer);
+    document.removeEventListener('pointermove', onDragMove);
+    document.removeEventListener('pointerup', onDragEnd);
+    document.removeEventListener('pointercancel', onDragEnd);
+    if (s.active) { persistOrder(); armClickSuppress(); clearDragVisuals(); }
+  }
+  function attachDragListeners(id, startX, startY) {
+    if (dragSession) return;
+    dragSession = { id: id, startX: startX, startY: startY, active: false, edgeDir: 0, edgeTimer: null, ghost: null };
+    document.addEventListener('pointermove', onDragMove);
+    document.addEventListener('pointerup', onDragEnd);
+    document.addEventListener('pointercancel', onDragEnd);
+  }
+  function bindPress(el, id) {
+    var pressTimer = null, startX = 0, startY = 0;
+    el.addEventListener('pointerdown', function (e) {
+      if (!unlocked || currentApp) return;
+      if (e.button != null && e.button !== 0) return;
+      startX = e.clientX; startY = e.clientY;
+      if (editing) { attachDragListeners(id, startX, startY); return; }
+      pressTimer = setTimeout(function () {
+        pressTimer = null;
+        armClickSuppress();
+        enterEditMode();
+        selectedId = id; markSelected();
+        attachDragListeners(id, startX, startY);
+      }, 550);
+    });
+    el.addEventListener('pointermove', function (e) {
+      if (pressTimer && Math.hypot(e.clientX - startX, e.clientY - startY) > 10) { clearTimeout(pressTimer); pressTimer = null; }
+    });
+    function cancelPress() { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } }
+    el.addEventListener('pointerup', cancelPress);
+    el.addEventListener('pointercancel', cancelPress);
+  }
+
+  /* ---------- navigation ---------- */
+  function openApp(id, originEl) {
+    if (!unlocked) return;
+    closeNotifCenter();
+    var app = APP_MAP[id]; if (!app) return;
+    if (app.external) { window.location.href = app.external; return; } /* redirect, same tab: leaving the page stops the music */
+    if (currentApp && currentApp !== id) { var prev = windows[currentApp]; prev.classList.remove('ph-open', 'ph-closing'); }
+    currentApp = id;
+    if (!histPushed) { try { history.pushState({ phApp: id }, ''); histPushed = true; } catch (e) {} }
+    var win = windows[id];
+    if (originEl && screenEl) {
+      var r = originEl.getBoundingClientRect(), s = screenEl.getBoundingClientRect();
+      win.style.transformOrigin = Math.max(0, r.left + r.width / 2 - s.left) + 'px ' + Math.max(0, r.top + r.height / 2 - s.top) + 'px';
+    } else { win.style.transformOrigin = '50% 60%'; }
+    win.classList.remove('ph-closing'); win.classList.add('ph-open');
+    reparent();
+    var tab = (id === 'stocks') ? prefs.stocksTab : APP_TAB[id];
+    if (id === 'stocks') syncStocksSubtabs();
+    if (tab) {
+      try { if (typeof window.switchMainTab === 'function') window.switchMainTab(tab); } catch (e) {}
+      try { if (typeof window.renderAll === 'function') window.renderAll(); } catch (e) {}
+    }
+    if (id === 'job') { try { if (typeof window.renderAll === 'function') window.renderAll(); } catch (e) {} }
+    if (id === 'bank') { insertLoansCard(); renderLoans(true); renderBankHero(); }
+    if (id === 'news') { renderNewsTeaser(); markAllRead(); }
+    if (id === 'settings') renderSettingsState();
+    renderHero(id);
+    var sc = win.querySelector('.ph-scroll'); if (sc) sc.scrollTop = 0;
+  }
+  function closeCurrentApp() {
+    var win = windows[currentApp];
+    currentApp = null;
+    if (win) { win.classList.remove('ph-open'); win.classList.add('ph-closing'); setTimeout(function () { win.classList.remove('ph-closing'); }, 200); }
+    try { if (typeof window.switchMainTab === 'function') window.switchMainTab('home'); } catch (e) {}
+  }
+  function goHome() {
+    if (editing && !currentApp) { exitEditMode(); return; }
+    if ($('ph-notif-center').classList.contains('ph-open')) { closeNotifCenter(); return; }
+    if (!currentApp) return;
+    if (histPushed) { histPushed = false; try { history.back(); } catch (e) { closeCurrentApp(); } return; }
+    closeCurrentApp();
+  }
+  /* the phone's real Back button returns home from inside an app; from the home screen it leaves the site, as normal */
+  window.addEventListener('popstate', function () {
+    if (currentApp) { histPushed = false; closeCurrentApp(); }
+  });
+
+  /* ---------- Phase 3: cross-tab link routing ----------
+     In-tab links call the game's switchMainTab() to a DIFFERENT app's tab
+     (e.g. VC's "Switch to Private eREITs Tab"). Without routing, the current
+     window shows only its hero: the target tab lives in another (closed)
+     window. This observes tab visibility only — it never touches onclick
+     handlers, so chained actions in the game's own handlers run untouched —
+     and opens the owning app when the visible tab moves out of the current
+     window. The check runs on a short delay so the whole click handler,
+     including chained actions after the switch, settles first. */
+  var TAB_APP = { finance: 'bank', stocks: 'stocks', etfs: 'stocks', options: 'stocks', realestate: 'realestate', privatere: 'ereits', smallbiz: 'smallbiz', forex: 'forex', commodities: 'commodities', vc: 'vc', casino: 'casino', competitors: 'rivals', managers: 'managers', portfolio: 'portfolio' };
+  var APP_TABS = { bank: ['finance'], stocks: ['stocks', 'etfs', 'options'], realestate: ['realestate'], ereits: ['privatere'], smallbiz: ['smallbiz'], forex: ['forex'], commodities: ['commodities'], vc: ['vc'], casino: ['casino'], rivals: ['competitors'], managers: ['managers'], portfolio: ['portfolio'], news: ['finance'], job: [], settings: [] };
+  var routeTimer = null;
+  function scheduleRouteCheck() {
+    if (routeTimer) return;
+    routeTimer = setTimeout(function () { routeTimer = null; routeCheck(); }, 40);
+  }
+  function routeCheck() {
+    if (!unlocked || !currentApp) return;
+    var vis = null, secs = document.querySelectorAll('.tab-section');
+    for (var i = 0; i < secs.length; i++) {
+      if (!secs[i].classList.contains('hidden')) { vis = secs[i].id.replace('tab-', ''); break; }
+    }
+    if (!vis) return; /* no tab visible (legacy 'coaching' target): leave the view alone */
+    var expected = APP_TABS[currentApp] || [];
+    if (expected.indexOf(vis) !== -1) return;
+    var owner = TAB_APP[vis];
+    if (!owner) { if (vis === 'home') goHome(); return; }
+    if (owner === currentApp) return;
+    if (owner === 'stocks') { prefs.stocksTab = vis; savePrefs(); }
+    openApp(owner);
+  }
+  try {
+    var tabObs = new MutationObserver(function () { scheduleRouteCheck(); });
+    Array.prototype.forEach.call(document.querySelectorAll('.tab-section'), function (s) {
+      tabObs.observe(s, { attributes: true, attributeFilter: ['class'] });
+    });
+  } catch (e) {}
+
+  /* ---------- lock screen ---------- */
+  function updateLockClock() {
+    var d = new Date();
+    var h = d.getHours(), m = ('0' + d.getMinutes()).slice(-2);
+    var h12 = h % 12 === 0 ? 12 : h % 12;
+    $('ph-lock-clock').textContent = h12 + ':' + m;
+    var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    $('ph-lock-date').textContent = days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate();
+  }
+  function unlock() {
+    if (unlocked) return;
+    unlocked = true;
+    document.body.classList.remove('ph-locked');
+    var lock = $('ph-lock');
+    lock.classList.add('ph-unlocking');
+    setTimeout(function () { lock.style.display = 'none'; }, 500);
+    if (prefs.music) startMusic();
+  }
+  function bindLock() {
+    var lock = $('ph-lock'), startY = null, dragged = false;
+    lock.addEventListener('touchstart', function (e) { startY = e.touches[0].clientY; dragged = false; lock.style.transition = 'none'; }, { passive: true });
+    lock.addEventListener('touchmove', function (e) {
+      if (startY == null) return;
+      var dy = startY - e.touches[0].clientY;
+      if (dy > 8) { dragged = true; lock.style.transform = 'translateY(' + (-dy) + 'px)'; }
+    }, { passive: true });
+    lock.addEventListener('touchend', function (e) {
+      if (startY == null) return;
+      var dy = startY - (e.changedTouches[0].clientY || startY);
+      lock.style.transition = ''; lock.style.transform = '';
+      if (dy > 70) unlock();
+      startY = null;
+    });
+    lock.addEventListener('click', function () { if (!dragged) unlock(); });
+  }
+
+  /* ---------- HUD: status clock, ticker, widgets, hero ---------- */
+  function computeTopMover(G) {
+    try {
+      var best = null, bestPct = 0;
+      var stocks = G.stocks || [];
+      for (var i = 0; i < stocks.length; i++) {
+        var s = stocks[i], pct = null;
+        var h = s.history;
+        if (h && h.length > 1) {
+          var last = h[h.length - 1], prev = h[h.length - 2];
+          if (last && prev && prev.close) pct = (last.close - prev.close) / prev.close * 100;
+        }
+        if (pct == null && typeof s.changePct === 'number') pct = s.changePct;
+        if (pct == null && typeof s.dayChangePct === 'number') pct = s.dayChangePct;
+        if (pct != null && pct > bestPct) { bestPct = pct; best = s; }
+      }
+      return best ? { ticker: best.ticker || best.sym || '?', pct: bestPct } : null;
+    } catch (e) { return null; }
+  }
+  function refreshHUD() {
+    var sd = $('simDateDisplay');
+    var clockText = sd && sd.textContent ? sd.textContent.trim() : '';
+    if (clockText) {
+      $('ph-sb-clock').textContent = clockText;
+      var parts = clockText.split('•');
+      $('ph-w-day').textContent = parts[0] ? parts[0].trim() : clockText;
+      $('ph-lock-gameday').textContent = clockText + ' in-game';
+    }
+    var G = window.G;
+    if (!G || !G.human) return;
+    var h = G.human;
+    var nw = Number(h.netWorth) || 0, prev = Number(h.prevDayWorth) || nw;
+    var diff = nw - prev, pct = prev ? diff / prev * 100 : 0;
+    var cash = Number(h.cash) || 0;
+    var upCls = diff >= 0 ? 'ph-up' : 'ph-down';
+    $('ph-tk-nw').textContent = fmtMoney(nw);
+    var tkDay = $('ph-tk-day');
+    tkDay.textContent = fmtSigned(pct, '%') + ' today'; tkDay.className = upCls;
+    $('ph-tk-cash').textContent = 'Cash ' + fmtMoney(cash);
+    $('ph-w-nw').textContent = fmtMoney(nw);
+    $('ph-w-nw-sub').innerHTML = '<span class="' + upCls + '">' + fmtSigned(diff, '').replace(/^([+-])/, '$1$') + ' today</span> &nbsp;&middot;&nbsp; Cash ' + esc(fmtMoney(cash));
+    var fg = $('fearGreedBadge');
+    if (fg && fg.textContent) {
+      var m = fg.textContent.match(/(\d+)\s*\(([^)]+)\)/);
+      $('ph-w-fg').textContent = m ? (m[1] + ' · ' + m[2]) : fg.textContent.replace(/^[^\w]+/, '').trim();
+    }
+    moverTick++;
+    if (moverTick % 5 === 1 || !moverCache) moverCache = computeTopMover(G);
+    $('ph-w-mover').textContent = moverCache ? ('Top: ' + moverCache.ticker + ' ' + fmtSigned(moverCache.pct, '%')) : 'Top mover —';
+    var day = Number(G.day) || 1;
+    var nextTax = (Math.floor(day / 252) + 1) * 252;
+    $('ph-w-tax').textContent = 'Tax in ' + (nextTax - day) + 'd';
+    var ap = $('autoPlayIcon');
+    if (ap) {
+      var playing = ap.textContent.indexOf('⏸') !== -1;
+      $('ph-btn-autoplay').innerHTML = playing ? '&#10073;&#10073; Pause time' : '&#9654; Resume time';
+    }
+    if (currentApp === 'bank') renderBankHero();
+  }
+  function renderBankHero() {
+    var G = window.G; if (!G || !G.human) return;
+    var h = G.human;
+    var nw = Number(h.netWorth) || 0, prev = Number(h.prevDayWorth) || nw;
+    $('ph-bank-cash').textContent = fmtMoney(Number(h.cash) || 0);
+    $('ph-bank-nw').textContent = fmtMoney(nw);
+    $('ph-bank-day').textContent = fmtSigned(nw - prev, '').replace(/^([+-])/, '$1$');
+    $('ph-bank-debt').textContent = fmtMoney(Number(h.marginDebt) || 0);
+  }
+
+  /* ---------- Phase 2 app heroes: live values from window.G + the game's own labels ---------- */
+  function elText(id) { var e = $(id); return e ? e.textContent.trim() : ''; }
+  function heroStat(label, val) { return '<div><span>' + esc(label) + '</span><b>' + esc(val == null || val === '' ? '—' : String(val)) + '</b></div>'; }
+  function fearGreedText() {
+    var fg = $('fearGreedBadge');
+    if (!fg || !fg.textContent) return '—';
+    var m = fg.textContent.match(/(\d+)\s*\(([^)]+)\)/);
+    return m ? (m[1] + ' · ' + m[2]) : fg.textContent.replace(/^[^\w]+/, '').trim();
+  }
+  function renderHero(id) {
+    if (!$('ph-hero-' + id)) return;
+    var G = window.G; if (!G || !G.human) return;
+    var h = G.human;
+    var nw = Number(h.netWorth) || 0, prev = Number(h.prevDayWorth) || nw;
+    var dayChg = fmtSigned(nw - prev, '').replace(/^([+-])/, '$1$');
+    var cash = fmtMoney(Number(h.cash) || 0);
+    var big = $('ph-hero-big-' + id), row = $('ph-hero-row-' + id);
+    if (!big || !row) return;
+    if (id === 'job') { renderJobHero(); return; }
+    var b = fmtMoney(nw), r = '';
+    if (id === 'stocks') { r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Fear & Greed', fearGreedText()); }
+    else if (id === 'realestate') { b = elText('reHeaderEquity') || b; r = heroStat('Owned', elText('pmOwnedCount')) + heroStat('Mortgage Rate', elText('reCurrentRatePreview')) + heroStat('Cash', cash); }
+    else if (id === 'ereits') { r = heroStat('Next Quarter', elText('privReNextQuarterBadge')) + heroStat('Properties', elText('ereitTotalOwnedPropsBadge')) + heroStat('Cash', cash); }
+    else if (id === 'smallbiz') { r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Status', elText('smallBizBankruptcyBadge')); }
+    else if (id === 'forex') { b = elText('forexTotalEquityLabel') || b; r = heroStat('Forex Cash', elText('forexCashBalanceLabel')) + heroStat('Cash', cash) + heroStat('Day Change', dayChg); }
+    else if (id === 'commodities') { r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Fear & Greed', fearGreedText()); }
+    else if (id === 'vc') { b = elText('vcPortfolioValBadge') || b; r = heroStat('Status', elText('vcAccreditedBadge')) + heroStat('Cash', cash) + heroStat('Day Change', dayChg); }
+    else if (id === 'casino') { b = elText('casinoCashBalanceLabel') || cash; r = heroStat('Net Profit', elText('casinoNetProfitLabel')) + heroStat('Cash', cash) + heroStat('Day Change', dayChg); }
+    else if (id === 'rivals') { r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Fear & Greed', fearGreedText()); }
+    else if (id === 'managers') { var sp = elText('starPyramidSummaryBar'); r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Pyramid', sp.length > 26 ? sp.slice(0, 26) + '…' : sp); }
+    else if (id === 'portfolio') { r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Market', elText('portfolioMarketHoursBadge')); }
+    else return;
+    big.textContent = b;
+    row.innerHTML = r;
+  }
+  function renderJobHero() {
+    var big = $('ph-hero-big-job'), row = $('ph-hero-row-job');
+    var G = window.G; if (!big || !row || !G || !G.human) return;
+    var h = G.human, exp = Number(h.workExpDays) || 0, working = !!h.isWorkingAtCasino;
+    var hr = (typeof window.getCasinoHourlyWage === 'function') ? window.getCasinoHourlyWage(exp) : 10;
+    var day = (typeof window.getCasinoDailyWage === 'function') ? window.getCasinoDailyWage(exp) : 80;
+    big.textContent = working ? (fmtMoney(day) + ' / day') : 'Off duty';
+    row.innerHTML = heroStat('Wage', fmtMoney(hr) + '/hr') + heroStat('Experience', exp + ' days') + heroStat('Status', working ? 'On shift' : 'Not working');
+  }
+  function renderSettingsState() {
+    var th = $('ph-set-theme-label');
+    if (th) th.textContent = document.body.classList.contains('light-theme') ? 'Light' : 'Black';
+    var ap = $('ph-set-autoplay');
+    if (ap) { var ic = $('autoPlayIcon'); var playing = !!(ic && ic.textContent.indexOf('⏸') !== -1); ap.className = 'ph-toggle' + (playing ? ' ph-on' : ''); }
+    var day = $('ph-set-day');
+    if (day && window.G) day.textContent = 'Day ' + (Number(window.G.day) || 1);
+  }
+  function syncStocksSubtabs() {
+    var st = $('ph-stocks-subtabs'); if (!st) return;
+    Array.prototype.forEach.call(st.querySelectorAll('[data-stab]'), function (b) { b.className = b.getAttribute('data-stab') === prefs.stocksTab ? 'ph-sub-on' : ''; });
+  }
+  function stocksSubTab(key) {
+    if (key !== 'stocks' && key !== 'etfs' && key !== 'options') key = 'stocks';
+    prefs.stocksTab = key; savePrefs(); syncStocksSubtabs();
+    try { if (typeof window.switchMainTab === 'function') window.switchMainTab(key); } catch (e) {}
+    try { if (typeof window.renderAll === 'function') window.renderAll(); } catch (e) {}
+    renderHero('stocks');
+    var win = windows['stocks']; if (win) { var sc = win.querySelector('.ph-scroll'); if (sc) sc.scrollTop = 0; }
+  }
+
+  /* ---------- real-estate loans card (real state, real actions) ---------- */
+  function insertLoansCard() {
+    if ($('bank-loans-card')) return;
+    var sec = $('tab-finance'); if (!sec) return;
+    var card = document.createElement('div');
+    card.id = 'bank-loans-card';
+    card.innerHTML = '<h3>\uD83C\uDFE6 Real Estate Loans</h3><div class="ph-loans-sub">Every mortgage on your properties, in one place. Pay extra principal, pay off early, or refinance — the same actions as the property pages.</div><div id="ph-loans-list"></div>';
+    var eco = $('worldEconomyGlobalBadges'), placed = false;
+    if (eco) {
+      var top = eco, guard = 0;
+      while (top.parentElement && top.parentElement !== sec && guard < 12) { top = top.parentElement; guard++; }
+      if (top.parentElement === sec) { sec.insertBefore(card, top); placed = true; }
+    }
+    if (!placed) sec.appendChild(card);
+    card.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-act]') : null;
+      if (!b) return;
+      var idx = Number(b.getAttribute('data-idx'));
+      try {
+        if (b.getAttribute('data-act') === 'pay' && typeof window.payDownPropertyMortgage === 'function') {
+          var inp = $('phExtraPrinInput_' + idx);
+          window.payDownPropertyMortgage(idx, inp ? Math.max(1, Number(inp.value) || 100) : 100);
+        }
+        else if (b.getAttribute('data-act') === 'full' && typeof window.payDownPropertyMortgage === 'function') window.payDownPropertyMortgage(idx, 'FULL_100');
+        else if (b.getAttribute('data-act') === 'refi' && typeof window.refinancePropertyMortgage === 'function') window.refinancePropertyMortgage(idx);
+      } catch (err) {}
+      setTimeout(function () { renderLoans(true); refreshHUD(); }, 700);
+    });
+  }
+  function renderLoans(force) {
+    var list = $('ph-loans-list'); if (!list) return;
+    var G = window.G; if (!G || !G.human) return;
+    var positions = G.human.realEstate || [];
+    var sig = positions.map(function (p) { return (p.propId || 0) + ':' + Math.round(Number(p.debt) || 0); }).join('|');
+    if (!force && sig === loansSig) return;
+    loansSig = sig;
+    if (!positions.length) {
+      list.innerHTML = '<div class="ph-loans-empty">No real estate loans yet. Buy a property with a 20%-down mortgage in the Real Estate app and it will show up here automatically.</div>';
+      return;
+    }
+    var html = '';
+    positions.forEach(function (rePos, idx) {
+      var prop = (G.properties && G.properties[(rePos.propId || 1) - 1]) || {};
+      var debt = Number(rePos.debt) || 0, orig = Number(rePos.originalLoan) || debt;
+      var paidPct = orig > 0 ? Math.max(0, Math.min(100, (orig - debt) / orig * 100)) : 100;
+      html += '<div class="ph-loan"><div class="ph-loan-name">' + esc(prop.name || ('Property #' + rePos.propId)) + '</div>' +
+        '<div class="ph-loan-meta">' + esc(Number(rePos.mortgageRate || 0).toFixed(2)) + '% fixed &middot; ' + esc(rePos.termYears || 30) + '-yr &middot; ' + esc(fmtMoney(Number(rePos.dailyPaymentPI) || 0)) + '/day P&amp;I</div>' +
+        '<div class="ph-loan-bar"><i style="width:' + paidPct.toFixed(1) + '%"></i></div>' +
+        '<div class="ph-loan-amounts"><span>Owes <b>' + esc(fmtMoney(debt)) + '</b></span><span>Original <b>' + esc(fmtMoney(orig)) + '</b> &middot; ' + paidPct.toFixed(0) + '% paid</span></div>' +
+        (debt > 0 ?
+          '<div class="ph-loan-actions"><input id="phExtraPrinInput_' + idx + '" type="number" min="1" step="1" placeholder="Extra principal ($)" inputmode="numeric" />' +
+          '<button type="button" class="ph-loan-pay" data-act="pay" data-idx="' + idx + '">Pay Extra</button>' +
+          '<button type="button" class="ph-loan-full" data-act="full" data-idx="' + idx + '">Pay Off 100%</button>' +
+          '<button type="button" class="ph-loan-refi" data-act="refi" data-idx="' + idx + '">Refinance</button></div>'
+          : '<div class="ph-loan-amounts"><span><b>Owned free &amp; clear</b></span></div>') +
+        '</div>';
+    });
+    list.innerHTML = html;
+  }
+
+  /* ---------- notifications ---------- */
+  function newsSig(n) { return (n.day || 0) + '|' + (n.tag || '') + '|' + String(n.text || '').slice(0, 70); }
+  function pollNews(initial) {
+    var G = window.G;
+    if (!G || !Array.isArray(G.newsFeed)) return;
+    var feed = G.newsFeed;
+    if (initial) {
+      feed.forEach(function (n) { seenSigs.add(newsSig(n)); });
+      notifications = feed.slice(0, 15).map(function (n) { return { day: n.day, cat: n.cat, tag: n.tag, text: n.text, read: true }; });
+      renderCenter(); updateBadge(); return;
+    }
+    var fresh = [];
+    for (var i = 0; i < Math.min(feed.length, 6); i++) {
+      var s = newsSig(feed[i]);
+      if (!seenSigs.has(s)) { seenSigs.add(s); fresh.push(feed[i]); }
+    }
+    if (seenSigs.size > 500) seenSigs = new Set(feed.map(newsSig));
+    fresh.reverse().forEach(function (n) {
+      notifications.unshift({ day: n.day, cat: n.cat, tag: n.tag, text: n.text, read: false });
+      unread++;
+      if (unlocked) queueBanner(n);
+    });
+    notifications = notifications.slice(0, 30);
+    renderCenter(); updateBadge();
+  }
+  function updateBadge() {
+    var b = $('ph-badge-news');
+    if (!b) return;
+    b.textContent = unread > 9 ? '9+' : String(unread);
+    b.className = 'ph-badge' + (unread > 0 ? '' : ' ph-hidden');
+  }
+  function markAllRead() {
+    notifications.forEach(function (n) { n.read = true; });
+    unread = 0; updateBadge(); renderCenter();
+  }
+  function renderCenter() {
+    var list = $('ph-notif-list'); if (!list) return;
+    list.innerHTML = '';
+    if (!notifications.length) {
+      list.innerHTML = '<div class="ph-nc-empty">No notifications yet.<br />Big market moves, rival headlines and risk shocks will land here.</div>';
+      return;
+    }
+    notifications.forEach(function (n, i) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'ph-notif-item' + (n.read ? '' : ' ph-unread');
+      var tag = document.createElement('div'); tag.className = 'ph-n-tag'; tag.textContent = n.tag || 'NEWS';
+      var txt = document.createElement('div'); txt.className = 'ph-n-text'; txt.textContent = n.text || '';
+      var day = document.createElement('div'); day.className = 'ph-n-day'; day.textContent = 'Day ' + (n.day || '?');
+      b.appendChild(tag); b.appendChild(txt); b.appendChild(day);
+      b.addEventListener('click', function () { notifications[i].read = true; unread = Math.max(0, unread - 1); updateBadge(); openApp('news'); });
+      list.appendChild(b);
+    });
+  }
+  function openNotifCenter() { if (!unlocked) return; $('ph-notif-center').classList.add('ph-open'); $('ph-notif-center').setAttribute('aria-hidden', 'false'); }
+  function closeNotifCenter() { $('ph-notif-center').classList.remove('ph-open'); $('ph-notif-center').setAttribute('aria-hidden', 'true'); }
+  function queueBanner(n) { if (bannerQueue.length < 3) bannerQueue.push(n); }
+  function bannerPump() {
+    if (bannerBusy || !bannerQueue.length || !unlocked) return;
+    var n = bannerQueue.shift();
+    bannerBusy = true;
+    var stack = $('ph-banners');
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'ph-banner';
+    var tag = document.createElement('div'); tag.className = 'ph-b-tag';
+    var t1 = document.createElement('span'); t1.textContent = n.tag || 'NEWS';
+    var t2 = document.createElement('span'); t2.textContent = 'Day ' + (n.day || '?');
+    tag.appendChild(t1); tag.appendChild(t2);
+    var txt = document.createElement('div'); txt.className = 'ph-b-text'; txt.textContent = n.text || '';
+    b.appendChild(tag); b.appendChild(txt);
+    b.addEventListener('click', function () { dismiss(true); openApp('news'); });
+    stack.appendChild(b);
+    var done = false;
+    function dismiss(clicked) {
+      if (done) return; done = true;
+      b.classList.add('ph-out');
+      setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); bannerBusy = false; }, clicked ? 120 : 260);
+    }
+    setTimeout(function () { dismiss(false); }, 4500);
+  }
+  function renderNewsTeaser() {
+    var box = $('ph-news-teaser'); if (!box) return;
+    box.innerHTML = '<h3>Latest headlines</h3>';
+    var items = notifications.slice(0, 3);
+    if (!items.length) {
+      var G = window.G;
+      if (G && Array.isArray(G.newsFeed)) items = G.newsFeed.slice(0, 3).map(function (n) { return { tag: n.tag, text: n.text, day: n.day }; });
+    }
+    items.forEach(function (n) {
+      var d = document.createElement('div'); d.className = 'ph-mini-item';
+      var b = document.createElement('b'); b.textContent = (n.tag || 'NEWS') + ' — ';
+      var s = document.createElement('span'); s.textContent = ' Day ' + (n.day || '?');
+      d.appendChild(b); d.appendChild(document.createTextNode(n.text || '')); d.appendChild(s);
+      box.appendChild(d);
+    });
+  }
+
+  /* ---------- soft music: one original generative ambient loop ---------- */
+  var AC = null, master = null, padTimer = null, chordIdx = 0;
+  var CHORDS = [
+    [220.00, 261.63, 329.63],
+    [174.61, 220.00, 261.63],
+    [196.00, 261.63, 329.63],
+    [196.00, 246.94, 293.66]
+  ];
+  function playChord(freqs) {
+    if (!AC || !master) return;
+    var t0 = AC.currentTime;
+    var filt = AC.createBiquadFilter(); filt.type = 'lowpass'; filt.frequency.value = 820; filt.Q.value = 0.4;
+    filt.connect(master);
+    freqs.forEach(function (f, i) {
+      var o = AC.createOscillator(); o.type = 'triangle'; o.frequency.value = f; o.detune.value = (i - 1) * 4;
+      var g = AC.createGain();
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.05, t0 + 2.6);
+      g.gain.setValueAtTime(0.05, t0 + 6.4);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 10.5);
+      o.connect(g); g.connect(filt);
+      o.start(t0); o.stop(t0 + 10.8);
+    });
+    var sub = AC.createOscillator(); sub.type = 'sine'; sub.frequency.value = freqs[0] / 2;
+    var sg = AC.createGain();
+    sg.gain.setValueAtTime(0.0001, t0);
+    sg.gain.exponentialRampToValueAtTime(0.035, t0 + 3);
+    sg.gain.exponentialRampToValueAtTime(0.0001, t0 + 10.5);
+    sub.connect(sg); sg.connect(master);
+    sub.start(t0); sub.stop(t0 + 10.8);
+  }
+  function startMusic() {
+    try {
+      if (!AC) {
+        var Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        AC = new Ctx();
+        master = AC.createGain(); master.gain.value = 0.0; master.connect(AC.destination);
+      }
+      if (AC.state === 'suspended') AC.resume();
+      master.gain.cancelScheduledValues(AC.currentTime);
+      master.gain.setTargetAtTime(0.5, AC.currentTime, 0.8);
+      if (!padTimer) {
+        playChord(CHORDS[chordIdx % CHORDS.length]);
+        padTimer = setInterval(function () { chordIdx++; playChord(CHORDS[chordIdx % CHORDS.length]); }, 9000);
+      }
+    } catch (e) {}
+  }
+  function stopMusic() {
+    try {
+      if (padTimer) { clearInterval(padTimer); padTimer = null; }
+      if (AC && master) {
+        master.gain.cancelScheduledValues(AC.currentTime);
+        master.gain.setTargetAtTime(0.0, AC.currentTime, 0.4);
+        setTimeout(function () { try { if (AC && !prefs.music) AC.suspend(); } catch (e) {} }, 1200);
+      }
+    } catch (e) {}
+  }
+  function syncMusicUI() {
+    var pill = $('ph-btn-music');
+    if (pill) { pill.innerHTML = prefs.music ? '&#9834; Music: On' : '&#9834; Music: Off'; pill.className = 'ph-pill-btn' + (prefs.music ? ' ph-on' : ''); }
+    var tog = $('ph-settings-music-toggle');
+    if (tog) tog.className = 'ph-toggle' + (prefs.music ? ' ph-on' : '');
+  }
+  function setMusic(on) {
+    prefs.music = !!on; savePrefs(); syncMusicUI();
+    if (prefs.music) startMusic(); else stopMusic();
+  }
+
+  /* ---------- re-parenting + init ---------- */
+  function moveNode(node, hostId) {
+    var host = $(hostId);
+    if (node && host && node.parentNode !== host) host.appendChild(node);
+  }
+  function resolveExtras() {
+    if (!extraNodes.job) extraNodes.job = $('homeCasinoJobCard');
+    if (!extraNodes.wire) {
+      var feed = $('liveFeedContainer');
+      if (feed) { var c = feed.parentElement; while (c && !(c.classList && c.classList.contains('rh-card'))) c = c.parentElement; extraNodes.wire = c; }
+    }
+    if (!extraNodes.monitor) {
+      var badges = $('worldEconomyGlobalBadges'), sec = $('tab-finance');
+      if (badges && sec) { var top = badges, guard = 0; while (top.parentElement && top.parentElement !== sec && guard < 12) { top = top.parentElement; guard++; } if (top.parentElement === sec) extraNodes.monitor = top; }
+    }
+  }
+  function containOverlays() {
+    var tc = $('toastContainer');
+    if (tc && screenEl && tc.parentNode !== screenEl) screenEl.appendChild(tc);
+    ['modalSaveLoad', 'modalNewGame', 'modalSmallBizReport'].forEach(function (mid) {
+      var m = $(mid);
+      if (m && screenEl && m.parentNode !== screenEl) { m.classList.add('ph-contained'); screenEl.appendChild(m); }
+    });
+  }
+  function markCasinoGrid() {
+    var btn = document.querySelector('[data-casino-game]');
+    if (btn && btn.parentElement && !btn.parentElement.classList.contains('ph-casino-grid')) btn.parentElement.classList.add('ph-casino-grid');
+  }
+  function reparent() {
+    for (var i = 0; i < REPARENTS.length; i++) moveNode($(REPARENTS[i][0]), REPARENTS[i][1]);
+    resolveExtras();
+    moveNode(extraNodes.job, 'job-host');
+    moveNode(extraNodes.wire, 'news-wire-host');
+    moveNode(extraNodes.monitor, 'news-monitor-host');
+    var footer = document.querySelector('body > footer'), sf = $('ph-stage-footer');
+    if (footer && sf && footer.parentNode !== sf) sf.appendChild(footer);
+    containOverlays();
+    markCasinoGrid();
+  }
+  function bindChrome() {
+    $('ph-statusbar').addEventListener('click', function () {
+      var nc = $('ph-notif-center');
+      if (nc.classList.contains('ph-open')) closeNotifCenter(); else openNotifCenter();
+    });
+    $('ph-nc-close').addEventListener('click', closeNotifCenter);
+    $('ph-nc-clear').addEventListener('click', function () { notifications = []; unread = 0; updateBadge(); renderCenter(); });
+    $('ph-home-indicator').addEventListener('click', goHome);
+    $('ph-btn-autoplay').addEventListener('click', function () { var b = $('btnAutoPlay'); if (b) b.click(); setTimeout(refreshHUD, 150); });
+    $('ph-btn-stepday').addEventListener('click', function () { var b = $('btnStepDay'); if (b) b.click(); setTimeout(refreshHUD, 300); });
+    $('ph-btn-music').addEventListener('click', function () { setMusic(!prefs.music); });
+    $('ph-edit-done').addEventListener('click', exitEditMode);
+    $('ph-edit-az').addEventListener('click', sortAZ);
+    $('ph-edit-reset').addEventListener('click', resetOrder);
+    $('ph-pages').addEventListener('click', function (e) {
+      var t = e.target;
+      if (editing && !(t.closest && t.closest('.ph-app-btn'))) { selectedId = null; markSelected(); }
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && unlocked) goHome(); });
+    var pages = $('ph-pages'), sx = null, sy = null;
+    pages.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+    pages.addEventListener('touchend', function (e) {
+      if (sx == null) return;
+      if (dragSession && dragSession.active) { sx = null; sy = null; return; }
+      var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+      if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.4) setPage(currentPage + (dx < 0 ? 1 : -1));
+      sx = null; sy = null;
+    }, { passive: true });
+  }
+
+  buildHome();
+  buildWindows();
+  bindLock();
+  bindChrome();
+  updateLockClock();
+  setInterval(updateLockClock, 10000);
+  syncMusicUI();
+  refreshHUD();
+  setInterval(refreshHUD, 1000);
+  setInterval(function () {
+    var G = window.G;
+    if (!G || !G.human) return;
+    if (!newsInit) { newsInit = true; reparent(); insertLoansCard(); pollNews(true); }
+    else pollNews(false);
+    if (currentApp === 'bank') renderLoans(false);
+    if (currentApp) renderHero(currentApp);
+    if (currentApp === 'settings') renderSettingsState();
+    if (currentApp === 'stocks') {
+      var visTab = null;
+      ['stocks', 'etfs', 'options'].forEach(function (k) { var s = $('tab-' + k); if (s && !s.classList.contains('hidden')) visTab = k; });
+      if (visTab && visTab !== prefs.stocksTab) { prefs.stocksTab = visTab; savePrefs(); syncStocksSubtabs(); }
+    }
+  }, 2000);
+  setInterval(bannerPump, 1200);
+  /* late safety: if the game re-renders/moves nodes, keep every app host intact */
+  setInterval(function () {
+    if (!newsInit) return;
+    reparent();
+  }, 5000);
+
+  window.__phShell = {
+    get unlocked() { return unlocked; },
+    get currentApp() { return currentApp; },
+    get unread() { return unread; },
+    get notifications() { return notifications.length; },
+    get musicOn() { return prefs.music; },
+    get editing() { return editing; },
+    get order() { return appOrder.slice(); },
+    get page() { return currentPage; },
+    get histPushed() { return histPushed; },
+    get audioRunning() { try { return !!(AC && AC.state === 'running' && padTimer); } catch (e) { return false; } }
+  };
+})();
+
 </script>
 </body>
 </html>

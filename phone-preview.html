@@ -696,7 +696,7 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
   position: absolute; left: 0; right: 0; bottom: 0; height: 30px; z-index: 55;
   background: none; border: none; padding: 0; cursor: pointer; display: flex; align-items: flex-end; justify-content: center;
 }
-#ph-home-indicator svg { display: block; width: 22px; height: 22px; margin-bottom: 5px; filter: drop-shadow(0 1px 4px rgba(0,0,0,.6)); animation: ph-home-pulse 2.4s ease-in-out infinite; }
+#ph-home-indicator i { display: block; width: 122px; height: 4.5px; border-radius: 99px; background: rgba(255,255,255,.88); margin-bottom: 8px; box-shadow: 0 1px 6px rgba(0,0,0,.5); animation: ph-home-pulse 2.4s ease-in-out infinite; }
 @keyframes ph-home-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
 body.ph-locked #ph-home-indicator { display: none; }
 
@@ -889,7 +889,7 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
       <div id="ph-banners"></div>
 
       <!-- Home indicator -->
-      <button type="button" id="ph-home-indicator" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg></button>
+      <button type="button" id="ph-home-indicator" aria-label="Home"><i></i></button>
     </div>
   </div>
   <div id="ph-stage-footer"></div>
