@@ -581,13 +581,6 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
 #ph-dots button { width: 7px; height: 7px; border-radius: 50%; border: none; padding: 0; background: rgba(255,255,255,.35); cursor: pointer; }
 #ph-dots button.ph-active { background: #fff; }
 
-/* ---- home-screen help links (below the grid, above the home indicator) ---- */
-#ph-help-row { display: flex; justify-content: center; align-items: center; padding: 0 12px 18px; font-size: 12.5px; }
-#ph-help-row a { color: rgba(255,255,255,.78); text-decoration: none; padding: 6px 7px; border-radius: 8px; }
-#ph-help-row a:active { color: #fff; background: rgba(255,255,255,.12); }
-#ph-help-row span { color: rgba(255,255,255,.35); }
-#ph-home.ph-editing #ph-help-row { pointer-events: none; opacity: .45; }
-
 /* short viewports: shrink chrome so all 15 icons still fit on one screen */
 @media (max-height: 700px) {
   #ph-home { padding-top: 44px; }
@@ -947,7 +940,6 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
         </div>
         <div id="ph-pages"><div id="ph-track"></div></div>
         <div id="ph-dots" role="tablist" aria-label="Home screen pages"></div>
-        <nav id="ph-help-row" aria-label="Help and information"><a href="guide.html" target="_blank" rel="noopener">Guides</a><span aria-hidden="true">&middot;</span><a href="tutorial.html" target="_blank" rel="noopener">Tutorial</a><span aria-hidden="true">&middot;</span><a href="faq.html" target="_blank" rel="noopener">FAQ</a><span aria-hidden="true">&middot;</span><a href="about.html" target="_blank" rel="noopener">About</a><span aria-hidden="true">&middot;</span><a href="contact.html" target="_blank" rel="noopener">Contact</a></nav>
       </div>
 
       <!-- App windows (built by shell JS) -->
@@ -32630,6 +32622,22 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
     var btn = document.querySelector('[data-casino-game]');
     if (btn && btn.parentElement && !btn.parentElement.classList.contains('ph-casino-grid')) btn.parentElement.classList.add('ph-casino-grid');
   }
+  function augmentFooterLinks(footer) {
+    if (!footer || footer.getAttribute('data-ph-links')) return;
+    var about = footer.querySelector('a[href="/about.html"]');
+    if (!about) return;
+    var frag = document.createDocumentFragment();
+    [['/guide.html', 'Guides'], ['/tutorial.html', 'Tutorial'], ['/faq.html', 'FAQ']].forEach(function (pair) {
+      var a = document.createElement('a');
+      a.href = pair[0];
+      a.textContent = pair[1];
+      a.setAttribute('style', 'color:#7db4ff;');
+      frag.appendChild(a);
+      frag.appendChild(document.createTextNode(' \u00A0\u00B7\u00A0 '));
+    });
+    footer.insertBefore(frag, about);
+    footer.setAttribute('data-ph-links', '1');
+  }
   function reparent() {
     for (var i = 0; i < REPARENTS.length; i++) moveNode($(REPARENTS[i][0]), REPARENTS[i][1]);
     resolveExtras();
@@ -32638,6 +32646,7 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
     moveNode(extraNodes.monitor, 'news-monitor-host');
     var footer = document.querySelector('body > footer'), sf = $('ph-stage-footer');
     if (footer && sf && footer.parentNode !== sf) sf.appendChild(footer);
+    augmentFooterLinks(footer);
     containOverlays();
     markCasinoGrid();
   }
