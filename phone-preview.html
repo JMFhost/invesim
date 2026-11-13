@@ -661,11 +661,12 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
 #ph-bank-hero .ph-bh-row { display: flex; gap: 16px; margin-top: 12px; font-size: 12px; }
 #ph-bank-hero .ph-bh-row b { display: block; font-size: 14.5px; margin-top: 1px; font-variant-numeric: tabular-nums; }
 #ph-bank-hero .ph-bh-row span { opacity: .8; font-size: 11px; }
-/* keep the migrated finance tab single-column inside the phone */
-#bank-host { width: 100%; }
-#bank-host [class*="lg:grid-cols-"], #bank-host [class*="md:grid-cols-"], #bank-host [class*="xl:grid-cols-"] { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
-#bank-host [class*="lg:col-span-"], #bank-host [class*="md:col-span-"], #bank-host [class*="xl:col-span-"] { grid-column: auto !important; }
-#bank-host .rh-card { padding: 16px !important; }
+/* keep migrated game tabs single-column inside the phone (Phase 2: every host) */
+.ph-host { width: 100%; }
+.ph-host [class*="lg:grid-cols-"], .ph-host [class*="md:grid-cols-"], .ph-host [class*="xl:grid-cols-"] { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+.ph-host [class*="lg:col-span-"], .ph-host [class*="md:col-span-"], .ph-host [class*="xl:col-span-"] { grid-column: auto !important; }
+.ph-host .rh-card { padding: 16px !important; }
+.ph-host .sticky { top: 0 !important; }
 /* real-estate loans card (inside the finance section) */
 #bank-loans-card { background: #14171a; border: 1px solid #262a2e; border-radius: 18px; padding: 18px; }
 #bank-loans-card h3 { margin: 0; font-size: 16px; font-weight: 800; color: #fff; }
@@ -736,6 +737,59 @@ body.ph-locked #ph-home-indicator { display: none; }
 /* scrollbars inside the phone */
 .ph-scroll::-webkit-scrollbar, #ph-notif-list::-webkit-scrollbar { width: 4px; }
 .ph-scroll::-webkit-scrollbar-thumb, #ph-notif-list::-webkit-scrollbar-thumb { background: #2a2e33; border-radius: 99px; }
+
+/* ================= Phase 2: app heroes, sub-tabs, settings, containment ================= */
+.ph-hero { border-radius: 20px; padding: 16px 18px 14px; margin-bottom: 14px; color: #fff; box-shadow: 0 10px 26px rgba(0,0,0,.35); }
+.ph-hero-label { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; opacity: .85; }
+.ph-hero-big { font-size: 30px; font-weight: 800; letter-spacing: -.01em; margin-top: 4px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-hero-row { display: flex; gap: 14px; margin-top: 10px; font-size: 12px; }
+.ph-hero-row > div { flex: 1 1 0; min-width: 0; }
+.ph-hero-row b { display: block; font-size: 13.5px; margin-top: 1px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-hero-row span { opacity: .8; font-size: 11px; }
+.ph-hero-stocks { background: linear-gradient(135deg, #0b3d91, #1f7dff 130%); }
+.ph-hero-realestate { background: linear-gradient(135deg, #7c3a06, #d97706 130%); }
+.ph-hero-ereits { background: linear-gradient(135deg, #16283f, #3b6ea5 130%); }
+.ph-hero-smallbiz { background: linear-gradient(135deg, #7c2d12, #ea580c 130%); }
+.ph-hero-forex { background: linear-gradient(135deg, #155e75, #06b6d4 130%); }
+.ph-hero-commodities { background: linear-gradient(135deg, #713f12, #b45309 130%); }
+.ph-hero-vc { background: linear-gradient(135deg, #4c1d95, #9333ea 130%); }
+.ph-hero-casino { background: linear-gradient(135deg, #14532d, #16a34a 130%); }
+.ph-hero-job { background: linear-gradient(135deg, #1e293b, #475569 130%); }
+.ph-hero-rivals { background: linear-gradient(135deg, #831843, #db2777 130%); }
+.ph-hero-managers { background: linear-gradient(135deg, #134e4a, #14b8a6 130%); }
+.ph-hero-portfolio { background: linear-gradient(135deg, #064e3b, #10b981 130%); }
+
+/* Stocks sub-tabs: Stocks / ETFs / Options */
+.ph-subtabs { display: flex; gap: 6px; margin-bottom: 14px; background: #14171a; border: 1px solid #23282e; border-radius: 999px; padding: 4px; }
+.ph-subtabs button { flex: 1 1 0; border: none; background: transparent; color: #9aa3b2; font-size: 13px; font-weight: 700; font-family: inherit; border-radius: 999px; padding: 8px 4px; cursor: pointer; }
+.ph-subtabs button.ph-sub-on { background: #1f7dff; color: #fff; }
+
+/* Settings rows */
+.ph-settings { display: flex; flex-direction: column; gap: 16px; padding-top: 4px; }
+.ph-set-group { background: #14171a; border: 1px solid #23282e; border-radius: 16px; overflow: hidden; }
+.ph-set-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px 14px; background: none; border: none; border-bottom: 1px solid #23282e; color: #fff; font-family: inherit; text-align: left; cursor: pointer; text-decoration: none; box-sizing: border-box; }
+.ph-set-row:last-child { border-bottom: none; }
+button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
+.ph-set-ic { font-size: 19px; flex: 0 0 auto; width: 26px; text-align: center; }
+.ph-set-tx { flex: 1 1 auto; min-width: 0; }
+.ph-set-tx b { display: block; font-size: 14.5px; font-weight: 600; }
+.ph-set-tx i { display: block; font-size: 12px; color: #8a919e; font-style: normal; margin-top: 1px; }
+.ph-set-chev { font-size: 22px; color: #565d66; line-height: 1; }
+.ph-set-pill { flex: 0 0 auto; background: #1e2227; border: 1px solid #2c3137; color: #fff; border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; }
+.ph-set-foot { margin: -6px 0 0; font-size: 12px; color: #7d8590; text-align: center; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+/* toasts + modals contained inside the phone frame */
+#phone-screen > #toastContainer { position: absolute !important; top: auto !important; bottom: 56px !important; left: 12px !important; right: 12px !important; max-width: none !important; align-items: flex-end; }
+#phone-screen > #toastContainer > * { max-width: 100%; }
+#phone-screen > .ph-contained { position: absolute !important; z-index: 70 !important; }
+#phone-screen #modalSmallBizReport .rh-card { max-height: calc(100% - 8px) !important; }
+
+/* casino game selector: 2 columns inside the phone */
+#casino-host .ph-casino-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+
+/* news wire flows with the app scroll; economy monitor below it */
+#news-wire-host #liveFeedContainer { max-height: none !important; overflow-y: visible !important; }
+#news-monitor-host { margin-top: 16px; }
 
 </style>
 </head>
@@ -31621,8 +31675,8 @@ body.ph-locked #ph-home-indicator { display: none; }
 
   /* ---------- preferences (separate key; never touches game saves) ---------- */
   var PREFS_KEY = 'INVESIM_PHONE_PREFS';
-  var prefs = { music: false, order: null };
-  try { var raw = localStorage.getItem(PREFS_KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p.music === 'boolean') prefs.music = p.music; if (p && Array.isArray(p.order)) prefs.order = p.order; } } catch (e) {}
+  var prefs = { music: false, order: null, stocksTab: 'stocks' };
+  try { var raw = localStorage.getItem(PREFS_KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p.music === 'boolean') prefs.music = p.music; if (p && Array.isArray(p.order)) prefs.order = p.order; if (p && (p.stocksTab === 'stocks' || p.stocksTab === 'etfs' || p.stocksTab === 'options')) prefs.stocksTab = p.stocksTab; } } catch (e) {}
   function savePrefs() { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {} }
   function validOrder(o) {
     if (!Array.isArray(o) || o.length !== APPS.length) return false;
@@ -31646,6 +31700,21 @@ body.ph-locked #ph-home-indicator { display: none; }
   var notifications = [], unread = 0, seenSigs = new Set(), newsInit = false;
   var bannerQueue = [], bannerBusy = false, loansSig = '', moverCache = null, moverTick = 0;
   var windows = {}, screenEl = $('phone-screen');
+  var extraNodes = { job: null, wire: null, monitor: null };
+
+  /* ---------- Phase 2: per-app hosts, game tabs, re-parent map, hero labels ---------- */
+  var HOSTS = { stocks: 'stocks-host', realestate: 're-host', ereits: 'ereit-host', smallbiz: 'sb-host', forex: 'forex-host', commodities: 'cmd-host', vc: 'vc-host', casino: 'casino-host', job: 'job-host', rivals: 'rivals-host', managers: 'mgr-host', portfolio: 'portfolio-host' };
+  var APP_TAB = { bank: 'finance', realestate: 'realestate', ereits: 'privatere', smallbiz: 'smallbiz', forex: 'forex', commodities: 'commodities', vc: 'vc', casino: 'casino', rivals: 'competitors', managers: 'managers', portfolio: 'portfolio', news: 'finance' };
+  var REPARENTS = [
+    ['tab-finance', 'bank-host'], ['tab-stocks', 'stocks-host'], ['tab-etfs', 'stocks-host'], ['tab-options', 'stocks-host'],
+    ['tab-realestate', 're-host'], ['tab-privatere', 'ereit-host'], ['tab-smallbiz', 'sb-host'],
+    ['tab-forex', 'forex-host'], ['tab-commodities', 'cmd-host'], ['tab-vc', 'vc-host'],
+    ['tab-casino', 'casino-host'], ['tab-competitors', 'rivals-host'], ['tab-managers', 'mgr-host'], ['tab-portfolio', 'portfolio-host']
+  ];
+  var HERO_LABELS = { stocks: 'Trading Terminal', realestate: 'Property Equity', ereits: 'Private Real Estate', smallbiz: 'Business Portfolio', forex: 'Forex Equity', commodities: 'Commodities Desk', vc: 'Venture Portfolio', casino: 'Casino Balance', job: 'Casino Career', rivals: 'Championship Race', managers: 'Managed Capital', portfolio: 'Total Net Worth' };
+  function heroHtml(app) {
+    return '<div class="ph-hero ph-hero-' + app.id + '" id="ph-hero-' + app.id + '"><div class="ph-hero-label">' + esc(HERO_LABELS[app.id] || app.name) + '</div><div class="ph-hero-big" id="ph-hero-big-' + app.id + '">—</div><div class="ph-hero-row" id="ph-hero-row-' + app.id + '"></div></div>';
+  }
 
   /* ---------- build home grid, dots, windows ---------- */
   function iconEl(app, withBadge) {
@@ -31706,17 +31775,30 @@ body.ph-locked #ph-home-indicator { display: none; }
           '<div class="ph-bh-row"><div><span>Net Worth</span><b id="ph-bank-nw">$10,000.00</b></div>' +
           '<div><span>Day Change</span><b id="ph-bank-day">+$0.00</b></div>' +
           '<div><span>Margin Debt</span><b id="ph-bank-debt">$0.00</b></div></div></div>' +
-          '<div id="bank-host"></div></div>';
-      } else {
-        body = '<div class="ph-scroll"><div class="ph-coming">' +
-          '<span class="ph-icon" style="background:' + app.grad + '">' + app.glyph + '</span>' +
-          '<h2>' + esc(app.name) + '</h2><span class="ph-coming-tag">Arriving in Phase 2</span>' +
-          '<p>' + esc(app.desc) + ' The full app is being built on the live game systems — nothing here is a mock-up, it just is not wired into the phone yet.</p>' +
-          (app.id === 'news' ? '<div class="ph-mini-feed" id="ph-news-teaser"><h3>Latest headlines</h3></div>' : '') +
-          (app.id === 'settings' ?
-            '<div class="ph-settings-music"><div><div class="ph-sm-label">Soft music</div><div class="ph-sm-sub">Gentle ambient loop, on or off</div></div><button type="button" class="ph-toggle" id="ph-settings-music-toggle" aria-label="Toggle music"></button></div>' +
-            '<p class="ph-about-line">About: InveSim is built and owned by JMF Games.</p>' : '') +
-          '<button type="button" class="ph-home-btn">Back to Home</button>' +
+          '<div id="bank-host" class="ph-host"></div></div>';
+      } else if (HOSTS[app.id]) {
+        body = '<div class="ph-scroll">' + heroHtml(app) +
+          (app.id === 'stocks' ? '<div class="ph-subtabs" id="ph-stocks-subtabs"><button type="button" data-stab="stocks">Stocks</button><button type="button" data-stab="etfs">ETFs</button><button type="button" data-stab="options">Options</button></div>' : '') +
+          '<div id="' + HOSTS[app.id] + '" class="ph-host"></div></div>';
+      } else if (app.id === 'news') {
+        body = '<div class="ph-scroll" id="ph-news-scroll"><div id="news-wire-host" class="ph-host"></div><div id="news-monitor-host" class="ph-host"></div></div>';
+      } else if (app.id === 'settings') {
+        body = '<div class="ph-scroll"><div class="ph-settings">' +
+          '<div class="ph-set-group">' +
+            '<button type="button" class="ph-set-row" id="ph-set-save"><span class="ph-set-ic">💾</span><span class="ph-set-tx"><b>Save &amp; Load</b><i>Slots, export &amp; import</i></span><span class="ph-set-chev">›</span></button>' +
+            '<button type="button" class="ph-set-row" id="ph-set-newgame"><span class="ph-set-ic">🆕</span><span class="ph-set-tx"><b>Start New Game</b><i>Fresh $10,000 run, new world seed</i></span><span class="ph-set-chev">›</span></button>' +
+          '</div>' +
+          '<div class="ph-set-group">' +
+            '<div class="ph-set-row"><span class="ph-set-ic">🎨</span><span class="ph-set-tx"><b>Theme</b><i>Light or black</i></span><button type="button" class="ph-set-pill" id="ph-set-theme"><span id="ph-set-theme-label">Light</span></button></div>' +
+            '<div class="ph-set-row"><span class="ph-set-ic">⏱️</span><span class="ph-set-tx"><b>Autoplay time</b><i>Days advance automatically</i></span><button type="button" class="ph-toggle" id="ph-set-autoplay" aria-label="Toggle autoplay"></button></div>' +
+            '<div class="ph-set-row"><span class="ph-set-ic">🎵</span><span class="ph-set-tx"><b>Soft music</b><i>Gentle ambient loop, on or off</i></span><button type="button" class="ph-toggle" id="ph-settings-music-toggle" aria-label="Toggle music"></button></div>' +
+          '</div>' +
+          '<div class="ph-set-group">' +
+            '<a class="ph-set-row" href="about.html" target="_blank" rel="noopener"><span class="ph-set-ic">ℹ️</span><span class="ph-set-tx"><b>About InveSim</b><i>What the game is</i></span><span class="ph-set-chev">›</span></a>' +
+            '<a class="ph-set-row" href="contact.html" target="_blank" rel="noopener"><span class="ph-set-ic">✉️</span><span class="ph-set-tx"><b>Contact</b><i>Reach JMF Games</i></span><span class="ph-set-chev">›</span></a>' +
+          '</div>' +
+          '<p class="ph-about-line">About: InveSim is built and owned by JMF Games.</p>' +
+          '<p class="ph-set-foot"><span id="ph-set-day">Day 1</span> &middot; Saves automatically on this device</p>' +
           '</div></div>';
       }
       win.innerHTML = top + body;
@@ -31727,6 +31809,13 @@ body.ph-locked #ph-home-indicator { display: none; }
     });
     var st = $('ph-settings-music-toggle');
     if (st) st.addEventListener('click', function () { setMusic(!prefs.music); });
+    var sv = $('ph-set-save'); if (sv) sv.addEventListener('click', function () { var b = $('btnSaveGame'); if (b) b.click(); });
+    var ng = $('ph-set-newgame'); if (ng) ng.addEventListener('click', function () { var b = $('btnNewGame'); if (b) b.click(); });
+    var th = $('ph-set-theme'); if (th) th.addEventListener('click', function () { try { if (typeof window.toggleAppTheme === 'function') window.toggleAppTheme(); } catch (e) {} setTimeout(renderSettingsState, 200); });
+    var ap = $('ph-set-autoplay'); if (ap) ap.addEventListener('click', function () { var b = $('btnAutoPlay'); if (b) b.click(); setTimeout(function () { renderSettingsState(); refreshHUD(); }, 200); });
+    var stb = $('ph-stocks-subtabs');
+    if (stb) stb.addEventListener('click', function (e) { var b = e.target.closest ? e.target.closest('[data-stab]') : null; if (b) stocksSubTab(b.getAttribute('data-stab')); });
+    syncStocksSubtabs();
   }
 
   /* ---------- arrange mode: long-press, drag, tap-to-move, A–Z ---------- */
@@ -31907,13 +31996,19 @@ body.ph-locked #ph-home-indicator { display: none; }
       win.style.transformOrigin = Math.max(0, r.left + r.width / 2 - s.left) + 'px ' + Math.max(0, r.top + r.height / 2 - s.top) + 'px';
     } else { win.style.transformOrigin = '50% 60%'; }
     win.classList.remove('ph-closing'); win.classList.add('ph-open');
-    if (id === 'bank') {
-      reparent(); insertLoansCard();
-      try { if (typeof window.switchMainTab === 'function') window.switchMainTab('finance'); } catch (e) {}
-      renderBankHero(); renderLoans(true);
-      var sc = $('ph-bank-scroll'); if (sc) sc.scrollTop = 0;
+    reparent();
+    var tab = (id === 'stocks') ? prefs.stocksTab : APP_TAB[id];
+    if (id === 'stocks') syncStocksSubtabs();
+    if (tab) {
+      try { if (typeof window.switchMainTab === 'function') window.switchMainTab(tab); } catch (e) {}
+      try { if (typeof window.renderAll === 'function') window.renderAll(); } catch (e) {}
     }
+    if (id === 'job') { try { if (typeof window.renderAll === 'function') window.renderAll(); } catch (e) {} }
+    if (id === 'bank') { insertLoansCard(); renderLoans(true); renderBankHero(); }
     if (id === 'news') { renderNewsTeaser(); markAllRead(); }
+    if (id === 'settings') renderSettingsState();
+    renderHero(id);
+    var sc = win.querySelector('.ph-scroll'); if (sc) sc.scrollTop = 0;
   }
   function goHome() {
     if (editing && !currentApp) { exitEditMode(); return; }
@@ -32032,6 +32127,71 @@ body.ph-locked #ph-home-indicator { display: none; }
     $('ph-bank-debt').textContent = fmtMoney(Number(h.marginDebt) || 0);
   }
 
+  /* ---------- Phase 2 app heroes: live values from window.G + the game's own labels ---------- */
+  function elText(id) { var e = $(id); return e ? e.textContent.trim() : ''; }
+  function heroStat(label, val) { return '<div><span>' + esc(label) + '</span><b>' + esc(val == null || val === '' ? '—' : String(val)) + '</b></div>'; }
+  function fearGreedText() {
+    var fg = $('fearGreedBadge');
+    if (!fg || !fg.textContent) return '—';
+    var m = fg.textContent.match(/(\d+)\s*\(([^)]+)\)/);
+    return m ? (m[1] + ' · ' + m[2]) : fg.textContent.replace(/^[^\w]+/, '').trim();
+  }
+  function renderHero(id) {
+    if (!$('ph-hero-' + id)) return;
+    var G = window.G; if (!G || !G.human) return;
+    var h = G.human;
+    var nw = Number(h.netWorth) || 0, prev = Number(h.prevDayWorth) || nw;
+    var dayChg = fmtSigned(nw - prev, '').replace(/^([+-])/, '$1$');
+    var cash = fmtMoney(Number(h.cash) || 0);
+    var big = $('ph-hero-big-' + id), row = $('ph-hero-row-' + id);
+    if (!big || !row) return;
+    if (id === 'job') { renderJobHero(); return; }
+    var b = fmtMoney(nw), r = '';
+    if (id === 'stocks') { r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Fear & Greed', fearGreedText()); }
+    else if (id === 'realestate') { b = elText('reHeaderEquity') || b; r = heroStat('Owned', elText('pmOwnedCount')) + heroStat('Mortgage Rate', elText('reCurrentRatePreview')) + heroStat('Cash', cash); }
+    else if (id === 'ereits') { r = heroStat('Next Quarter', elText('privReNextQuarterBadge')) + heroStat('Properties', elText('ereitTotalOwnedPropsBadge')) + heroStat('Cash', cash); }
+    else if (id === 'smallbiz') { r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Status', elText('smallBizBankruptcyBadge')); }
+    else if (id === 'forex') { b = elText('forexTotalEquityLabel') || b; r = heroStat('Forex Cash', elText('forexCashBalanceLabel')) + heroStat('Cash', cash) + heroStat('Day Change', dayChg); }
+    else if (id === 'commodities') { r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Fear & Greed', fearGreedText()); }
+    else if (id === 'vc') { b = elText('vcPortfolioValBadge') || b; r = heroStat('Status', elText('vcAccreditedBadge')) + heroStat('Cash', cash) + heroStat('Day Change', dayChg); }
+    else if (id === 'casino') { b = elText('casinoCashBalanceLabel') || cash; r = heroStat('Net Profit', elText('casinoNetProfitLabel')) + heroStat('Cash', cash) + heroStat('Day Change', dayChg); }
+    else if (id === 'rivals') { r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Fear & Greed', fearGreedText()); }
+    else if (id === 'managers') { var sp = elText('starPyramidSummaryBar'); r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Pyramid', sp.length > 26 ? sp.slice(0, 26) + '…' : sp); }
+    else if (id === 'portfolio') { r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Market', elText('portfolioMarketHoursBadge')); }
+    else return;
+    big.textContent = b;
+    row.innerHTML = r;
+  }
+  function renderJobHero() {
+    var big = $('ph-hero-big-job'), row = $('ph-hero-row-job');
+    var G = window.G; if (!big || !row || !G || !G.human) return;
+    var h = G.human, exp = Number(h.workExpDays) || 0, working = !!h.isWorkingAtCasino;
+    var hr = (typeof window.getCasinoHourlyWage === 'function') ? window.getCasinoHourlyWage(exp) : 10;
+    var day = (typeof window.getCasinoDailyWage === 'function') ? window.getCasinoDailyWage(exp) : 80;
+    big.textContent = working ? (fmtMoney(day) + ' / day') : 'Off duty';
+    row.innerHTML = heroStat('Wage', fmtMoney(hr) + '/hr') + heroStat('Experience', exp + ' days') + heroStat('Status', working ? 'On shift' : 'Not working');
+  }
+  function renderSettingsState() {
+    var th = $('ph-set-theme-label');
+    if (th) th.textContent = document.body.classList.contains('light-theme') ? 'Light' : 'Black';
+    var ap = $('ph-set-autoplay');
+    if (ap) { var ic = $('autoPlayIcon'); var playing = !!(ic && ic.textContent.indexOf('⏸') !== -1); ap.className = 'ph-toggle' + (playing ? ' ph-on' : ''); }
+    var day = $('ph-set-day');
+    if (day && window.G) day.textContent = 'Day ' + (Number(window.G.day) || 1);
+  }
+  function syncStocksSubtabs() {
+    var st = $('ph-stocks-subtabs'); if (!st) return;
+    Array.prototype.forEach.call(st.querySelectorAll('[data-stab]'), function (b) { b.className = b.getAttribute('data-stab') === prefs.stocksTab ? 'ph-sub-on' : ''; });
+  }
+  function stocksSubTab(key) {
+    if (key !== 'stocks' && key !== 'etfs' && key !== 'options') key = 'stocks';
+    prefs.stocksTab = key; savePrefs(); syncStocksSubtabs();
+    try { if (typeof window.switchMainTab === 'function') window.switchMainTab(key); } catch (e) {}
+    try { if (typeof window.renderAll === 'function') window.renderAll(); } catch (e) {}
+    renderHero('stocks');
+    var win = windows['stocks']; if (win) { var sc = win.querySelector('.ph-scroll'); if (sc) sc.scrollTop = 0; }
+  }
+
   /* ---------- real-estate loans card (real state, real actions) ---------- */
   function insertLoansCard() {
     if ($('bank-loans-card')) return;
@@ -32051,7 +32211,10 @@ body.ph-locked #ph-home-indicator { display: none; }
       if (!b) return;
       var idx = Number(b.getAttribute('data-idx'));
       try {
-        if (b.getAttribute('data-act') === 'pay' && typeof window.payDownPropertyMortgage === 'function') window.payDownPropertyMortgage(idx, 'CUSTOM_INPUT');
+        if (b.getAttribute('data-act') === 'pay' && typeof window.payDownPropertyMortgage === 'function') {
+          var inp = $('phExtraPrinInput_' + idx);
+          window.payDownPropertyMortgage(idx, inp ? Math.max(1, Number(inp.value) || 100) : 100);
+        }
         else if (b.getAttribute('data-act') === 'full' && typeof window.payDownPropertyMortgage === 'function') window.payDownPropertyMortgage(idx, 'FULL_100');
         else if (b.getAttribute('data-act') === 'refi' && typeof window.refinancePropertyMortgage === 'function') window.refinancePropertyMortgage(idx);
       } catch (err) {}
@@ -32079,7 +32242,7 @@ body.ph-locked #ph-home-indicator { display: none; }
         '<div class="ph-loan-bar"><i style="width:' + paidPct.toFixed(1) + '%"></i></div>' +
         '<div class="ph-loan-amounts"><span>Owes <b>' + esc(fmtMoney(debt)) + '</b></span><span>Original <b>' + esc(fmtMoney(orig)) + '</b> &middot; ' + paidPct.toFixed(0) + '% paid</span></div>' +
         (debt > 0 ?
-          '<div class="ph-loan-actions"><input id="extraPrinInput_' + idx + '" type="number" min="1" step="1" placeholder="Extra principal ($)" inputmode="numeric" />' +
+          '<div class="ph-loan-actions"><input id="phExtraPrinInput_' + idx + '" type="number" min="1" step="1" placeholder="Extra principal ($)" inputmode="numeric" />' +
           '<button type="button" class="ph-loan-pay" data-act="pay" data-idx="' + idx + '">Pay Extra</button>' +
           '<button type="button" class="ph-loan-full" data-act="full" data-idx="' + idx + '">Pay Off 100%</button>' +
           '<button type="button" class="ph-loan-refi" data-act="refi" data-idx="' + idx + '">Refinance</button></div>'
@@ -32255,11 +32418,43 @@ body.ph-locked #ph-home-indicator { display: none; }
   }
 
   /* ---------- re-parenting + init ---------- */
+  function moveNode(node, hostId) {
+    var host = $(hostId);
+    if (node && host && node.parentNode !== host) host.appendChild(node);
+  }
+  function resolveExtras() {
+    if (!extraNodes.job) extraNodes.job = $('homeCasinoJobCard');
+    if (!extraNodes.wire) {
+      var feed = $('liveFeedContainer');
+      if (feed) { var c = feed.parentElement; while (c && !(c.classList && c.classList.contains('rh-card'))) c = c.parentElement; extraNodes.wire = c; }
+    }
+    if (!extraNodes.monitor) {
+      var badges = $('worldEconomyGlobalBadges'), sec = $('tab-finance');
+      if (badges && sec) { var top = badges, guard = 0; while (top.parentElement && top.parentElement !== sec && guard < 12) { top = top.parentElement; guard++; } if (top.parentElement === sec) extraNodes.monitor = top; }
+    }
+  }
+  function containOverlays() {
+    var tc = $('toastContainer');
+    if (tc && screenEl && tc.parentNode !== screenEl) screenEl.appendChild(tc);
+    ['modalSaveLoad', 'modalNewGame', 'modalSmallBizReport'].forEach(function (mid) {
+      var m = $(mid);
+      if (m && screenEl && m.parentNode !== screenEl) { m.classList.add('ph-contained'); screenEl.appendChild(m); }
+    });
+  }
+  function markCasinoGrid() {
+    var btn = document.querySelector('[data-casino-game]');
+    if (btn && btn.parentElement && !btn.parentElement.classList.contains('ph-casino-grid')) btn.parentElement.classList.add('ph-casino-grid');
+  }
   function reparent() {
-    var fin = $('tab-finance'), host = $('bank-host');
-    if (fin && host && fin.parentNode !== host) host.appendChild(fin);
+    for (var i = 0; i < REPARENTS.length; i++) moveNode($(REPARENTS[i][0]), REPARENTS[i][1]);
+    resolveExtras();
+    moveNode(extraNodes.job, 'job-host');
+    moveNode(extraNodes.wire, 'news-wire-host');
+    moveNode(extraNodes.monitor, 'news-monitor-host');
     var footer = document.querySelector('body > footer'), sf = $('ph-stage-footer');
     if (footer && sf && footer.parentNode !== sf) sf.appendChild(footer);
+    containOverlays();
+    markCasinoGrid();
   }
   function bindChrome() {
     $('ph-statusbar').addEventListener('click', function () {
@@ -32306,13 +32501,19 @@ body.ph-locked #ph-home-indicator { display: none; }
     if (!newsInit) { newsInit = true; reparent(); insertLoansCard(); pollNews(true); }
     else pollNews(false);
     if (currentApp === 'bank') renderLoans(false);
+    if (currentApp) renderHero(currentApp);
+    if (currentApp === 'settings') renderSettingsState();
+    if (currentApp === 'stocks') {
+      var visTab = null;
+      ['stocks', 'etfs', 'options'].forEach(function (k) { var s = $('tab-' + k); if (s && !s.classList.contains('hidden')) visTab = k; });
+      if (visTab && visTab !== prefs.stocksTab) { prefs.stocksTab = visTab; savePrefs(); syncStocksSubtabs(); }
+    }
   }, 2000);
   setInterval(bannerPump, 1200);
-  /* late safety: if the game re-renders/moves nodes, keep the Bank host intact */
+  /* late safety: if the game re-renders/moves nodes, keep every app host intact */
   setInterval(function () {
     if (!newsInit) return;
-    var fin = $('tab-finance'), host = $('bank-host');
-    if (fin && host && fin.parentNode !== host) host.appendChild(fin);
+    reparent();
   }, 5000);
 
   window.__phShell = {
