@@ -696,7 +696,8 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
   position: absolute; left: 0; right: 0; bottom: 0; height: 30px; z-index: 55;
   background: none; border: none; padding: 0; cursor: pointer; display: flex; align-items: flex-end; justify-content: center;
 }
-#ph-home-indicator i { display: block; width: 122px; height: 4.5px; border-radius: 99px; background: rgba(255,255,255,.88); margin-bottom: 8px; box-shadow: 0 1px 6px rgba(0,0,0,.5); }
+#ph-home-indicator svg { display: block; width: 22px; height: 22px; margin-bottom: 5px; filter: drop-shadow(0 1px 4px rgba(0,0,0,.6)); animation: ph-home-pulse 2.4s ease-in-out infinite; }
+@keyframes ph-home-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
 body.ph-locked #ph-home-indicator { display: none; }
 
 /* ---- notification center ---- */
@@ -888,7 +889,7 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
       <div id="ph-banners"></div>
 
       <!-- Home indicator -->
-      <button type="button" id="ph-home-indicator" aria-label="Home"><i></i></button>
+      <button type="button" id="ph-home-indicator" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg></button>
     </div>
   </div>
   <div id="ph-stage-footer"></div>
@@ -31666,7 +31667,8 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
     { id: 'managers', name: 'Managers', grad: 'linear-gradient(135deg,#0f766e,#2dd4bf)', glyph: GL('<circle cx="8" cy="8.4" r="3"/><path d="M2.8 19.5c.6-3.2 2.7-5 5.2-5s4.6 1.8 5.2 5"/><circle cx="16.6" cy="9.4" r="2.5"/><path d="M14.5 14.6c2.9-.4 5.7 1.2 6.3 4.4"/>'), desc: 'Hire wealth managers, trading firms and robot traders.' },
     { id: 'portfolio', name: 'Portfolio', grad: 'linear-gradient(135deg,#047857,#34d399)', glyph: GL('<path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5H12z"/><path d="M14.5 2.6A8.5 8.5 0 0 1 21.4 9.5H14.5z"/>'), desc: 'Everything you own, grouped by asset class.' },
     { id: 'news', name: 'News', grad: 'linear-gradient(135deg,#0369a1,#38bdf8)', glyph: GL('<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H5.5A1.5 1.5 0 0 1 4 17.5z"/><path d="M19 15.5h1.5V6.5L19 5.5"/><path d="M7 8h7M7 11h7M7 14h4.5"/>'), desc: 'The wire: markets, rivals, shocks and the world economy.' },
-    { id: 'settings', name: 'Settings', grad: 'linear-gradient(135deg,#3f3f46,#71717a)', glyph: GL('<path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2.1" fill="#0b0e11"/><circle cx="15" cy="12" r="2.1" fill="#0b0e11"/><circle cx="8" cy="17" r="2.1" fill="#0b0e11"/>'), desc: 'Save & load, new game, theme, music and About.' }
+    { id: 'settings', name: 'Settings', grad: 'linear-gradient(135deg,#3f3f46,#71717a)', glyph: GL('<path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2.1" fill="#0b0e11"/><circle cx="15" cy="12" r="2.1" fill="#0b0e11"/><circle cx="8" cy="17" r="2.1" fill="#0b0e11"/>'), desc: 'Save & load, new game, theme, music and About.' },
+    { id: 'games', name: 'Games', grad: 'linear-gradient(135deg,#312e81,#7c3aed)', glyph: GL('<path d="M7 8.5h10a5 5 0 0 1 5 5v2.6a3 3 0 0 1-5.3 1.9L15 16H9l-1.7 2A3 3 0 0 1 2 16.1v-2.6a5 5 0 0 1 5-5z"/><path d="M7.5 11v3.4M5.8 12.7h3.4"/><circle cx="16" cy="11.8" r="1" fill="#fff" stroke="none"/><circle cx="18.2" cy="13.8" r="1" fill="#fff" stroke="none"/>'), desc: 'More free games from JMF Games — jmfgames.com.', external: 'https://jmfgames.com' }
   ];
   var APP_MAP = {};
   APPS.forEach(function (a) { APP_MAP[a.id] = a; });
@@ -31684,13 +31686,21 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
     for (var i = 0; i < o.length; i++) { if (!APP_MAP[o[i]] || seen[o[i]]) return false; seen[o[i]] = true; }
     return true;
   }
-  var appOrder = validOrder(prefs.order) ? prefs.order.slice() : DEFAULT_ORDER.slice();
+  var appOrder = validOrder(prefs.order) ? prefs.order.slice() : (migrateOrder(prefs.order) || DEFAULT_ORDER.slice());
+  if (!validOrder(prefs.order)) persistOrder(); /* persist migrated orders so newly added apps keep the player's arrangement */
+  function migrateOrder(o) {
+    if (!Array.isArray(o)) return null;
+    var seen = {}, out = [];
+    for (var i = 0; i < o.length; i++) { if (APP_MAP[o[i]] && !seen[o[i]]) { seen[o[i]] = true; out.push(o[i]); } }
+    DEFAULT_ORDER.forEach(function (id) { if (!seen[id]) out.push(id); });
+    return out.length === APPS.length ? out : null;
+  }
   function orderedApps() { return appOrder.map(function (id) { return APP_MAP[id]; }); }
   function pageCount() { return Math.max(1, Math.ceil(appOrder.length / PAGE_SIZE)); }
   function persistOrder() { prefs.order = appOrder.slice(); savePrefs(); }
 
   /* ---------- state ---------- */
-  var unlocked = false, currentApp = null, currentPage = 0;
+  var unlocked = false, currentApp = null, currentPage = 0, histPushed = false;
   var editing = false, selectedId = null, suppressNextClick = false, suppressClickTimer = null, dragSession = null;
   function armClickSuppress() {
     suppressNextClick = true;
@@ -31765,6 +31775,7 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
   function buildWindows() {
     var layer = $('ph-app-layer');
     APPS.forEach(function (app) {
+      if (app.external) return; /* external apps open a link, no window */
       var win = document.createElement('div');
       win.className = 'ph-window'; win.id = 'ph-win-' + app.id; win.setAttribute('role', 'dialog'); win.setAttribute('aria-label', app.name);
       var top = '<div class="ph-topbar"><button type="button" class="ph-back" aria-label="Back to Home">&lsaquo;</button><div class="ph-title">' + esc(app.name) + '</div></div>';
@@ -31988,8 +31999,10 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
     if (!unlocked) return;
     closeNotifCenter();
     var app = APP_MAP[id]; if (!app) return;
+    if (app.external) { try { window.open(app.external, '_blank', 'noopener'); } catch (e) {} return; }
     if (currentApp && currentApp !== id) { var prev = windows[currentApp]; prev.classList.remove('ph-open', 'ph-closing'); }
     currentApp = id;
+    if (!histPushed) { try { history.pushState({ phApp: id }, ''); histPushed = true; } catch (e) {} }
     var win = windows[id];
     if (originEl && screenEl) {
       var r = originEl.getBoundingClientRect(), s = screenEl.getBoundingClientRect();
@@ -32010,16 +32023,23 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
     renderHero(id);
     var sc = win.querySelector('.ph-scroll'); if (sc) sc.scrollTop = 0;
   }
+  function closeCurrentApp() {
+    var win = windows[currentApp];
+    currentApp = null;
+    if (win) { win.classList.remove('ph-open'); win.classList.add('ph-closing'); setTimeout(function () { win.classList.remove('ph-closing'); }, 200); }
+    try { if (typeof window.switchMainTab === 'function') window.switchMainTab('home'); } catch (e) {}
+  }
   function goHome() {
     if (editing && !currentApp) { exitEditMode(); return; }
     if ($('ph-notif-center').classList.contains('ph-open')) { closeNotifCenter(); return; }
     if (!currentApp) return;
-    var win = windows[currentApp];
-    currentApp = null;
-    win.classList.remove('ph-open'); win.classList.add('ph-closing');
-    setTimeout(function () { win.classList.remove('ph-closing'); }, 200);
-    try { if (typeof window.switchMainTab === 'function') window.switchMainTab('home'); } catch (e) {}
+    if (histPushed) { histPushed = false; try { history.back(); } catch (e) { closeCurrentApp(); } return; }
+    closeCurrentApp();
   }
+  /* the phone's real Back button returns home from inside an app; from the home screen it leaves the site, as normal */
+  window.addEventListener('popstate', function () {
+    if (currentApp) { histPushed = false; closeCurrentApp(); }
+  });
 
   /* ---------- lock screen ---------- */
   function updateLockClock() {
@@ -32525,6 +32545,7 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
     get editing() { return editing; },
     get order() { return appOrder.slice(); },
     get page() { return currentPage; },
+    get histPushed() { return histPushed; },
     get audioRunning() { try { return !!(AC && AC.state === 'running' && padTimer); } catch (e) { return false; } }
   };
 })();
