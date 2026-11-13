@@ -561,15 +561,15 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
 #ph-pages { flex: 1 1 auto; min-height: 0; margin-top: 12px; overflow: hidden; touch-action: pan-y; }
 #ph-track { display: flex; height: 100%; transition: transform .32s cubic-bezier(.32,.72,.28,1); }
 .ph-page { min-width: 100%; height: 100%; }
-.ph-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px 8px; padding: 6px 18px 0; align-content: start; }
+.ph-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px 8px; padding: 8px 18px 0; align-content: start; }
 .ph-app-btn { position: relative; background: none; border: none; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-family: inherit; }
 .ph-app-btn:active .ph-icon { transform: scale(.88); }
 .ph-icon {
-  width: 58px; height: 58px; border-radius: 15px; display: flex; align-items: center; justify-content: center;
+  width: 50px; height: 50px; border-radius: 13px; display: flex; align-items: center; justify-content: center;
   box-shadow: 0 6px 16px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.25);
   transition: transform .15s ease;
 }
-.ph-icon svg { width: 31px; height: 31px; }
+.ph-icon svg { width: 27px; height: 27px; }
 .ph-app-label { font-size: 11px; font-weight: 500; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.8); max-width: 76px; text-align: center; line-height: 1.15; }
 .ph-badge {
   position: absolute; top: -4px; right: calc(50% - 34px); min-width: 19px; height: 19px; padding: 0 5px;
@@ -580,14 +580,35 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
 #ph-dots { display: flex; justify-content: center; gap: 7px; padding: 8px 0 10px; }
 #ph-dots button { width: 7px; height: 7px; border-radius: 50%; border: none; padding: 0; background: rgba(255,255,255,.35); cursor: pointer; }
 #ph-dots button.ph-active { background: #fff; }
-#ph-dock {
-  margin: 0 14px; padding: 10px 16px; border-radius: 26px;
-  background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.14);
-  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-  display: flex; justify-content: space-between;
+
+/* short viewports: shrink chrome so all 15 icons still fit on one screen */
+@media (max-height: 700px) {
+  #ph-home { padding-top: 44px; }
+  #ph-widgets { margin-top: 8px; gap: 6px; }
+  .ph-widget { padding: 6px 12px; }
+  #ph-w-nw { font-size: 22px; }
+  #ph-controls { margin-top: 6px; }
+  .ph-pill-btn { padding: 6px 4px; }
+  #ph-pages { margin-top: 6px; }
+  .ph-grid { gap: 10px 8px; padding-top: 6px; }
+  .ph-icon { width: 42px; height: 42px; border-radius: 12px; }
+  .ph-icon svg { width: 23px; height: 23px; }
 }
-#ph-dock .ph-icon { width: 54px; height: 54px; }
-#ph-dock .ph-app-label { display: none; }
+
+/* ---- arrange mode: long-press to jiggle, drag / tap-to-move, A-Z ---- */
+#ph-edit-bar { display: none; margin: 10px 16px 0; gap: 8px; }
+#ph-home.ph-editing #ph-edit-bar { display: flex; }
+.ph-edit-btn { flex: 1 1 0; border: 1px solid rgba(255,255,255,.16); background: rgba(8,12,16,.6); color: #fff; border-radius: 999px; padding: 8px 4px; font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.ph-edit-btn.ph-edit-done { background: #00c805; border-color: #00c805; color: #000; }
+#ph-home.ph-editing .ph-app-btn { touch-action: none; }
+#ph-home.ph-editing #ph-track .ph-icon { animation: ph-jiggle .28s ease-in-out infinite; }
+#ph-home.ph-editing #ph-track .ph-app-btn:nth-child(even) .ph-icon { animation-delay: -.14s; }
+@keyframes ph-jiggle { 0%,100% { transform: rotate(-1.6deg); } 50% { transform: rotate(1.6deg); } }
+#ph-track .ph-app-btn.ph-selected .ph-icon { box-shadow: 0 0 0 3px #fff, 0 6px 16px rgba(0,0,0,.45); transform: scale(1.06); }
+#ph-track .ph-app-btn.ph-drag-src { opacity: .35; }
+#ph-drag-ghost { position: absolute; z-index: 95; width: 76px; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
+#ph-drag-ghost .ph-icon { width: 64px; height: 64px; border-radius: 17px; box-shadow: 0 18px 34px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.25); }
+#ph-drag-ghost .ph-icon svg { width: 34px; height: 34px; }
 
 /* ---- app windows ---- */
 #ph-app-layer { position: absolute; inset: 0; z-index: 20; pointer-events: none; }
@@ -785,9 +806,13 @@ body.ph-locked #ph-home-indicator { display: none; }
           <button type="button" class="ph-pill-btn" id="ph-btn-stepday">+1 Day</button>
           <button type="button" class="ph-pill-btn" id="ph-btn-music">&#9834; Music: Off</button>
         </div>
+        <div id="ph-edit-bar" role="toolbar" aria-label="Arrange apps">
+          <button type="button" class="ph-edit-btn ph-edit-done" id="ph-edit-done">Done</button>
+          <button type="button" class="ph-edit-btn" id="ph-edit-az">Sort A-Z</button>
+          <button type="button" class="ph-edit-btn" id="ph-edit-reset">Reset order</button>
+        </div>
         <div id="ph-pages"><div id="ph-track"></div></div>
         <div id="ph-dots" role="tablist" aria-label="Home screen pages"></div>
-        <div id="ph-dock"></div>
       </div>
 
       <!-- App windows (built by shell JS) -->
@@ -31591,51 +31616,80 @@ body.ph-locked #ph-home-indicator { display: none; }
   ];
   var APP_MAP = {};
   APPS.forEach(function (a) { APP_MAP[a.id] = a; });
-  var DOCK_IDS = ['bank', 'stocks', 'casino', 'settings'];
-  var PAGE1 = APPS.slice(0, 12), PAGE2 = APPS.slice(12);
+  var PAGE_SIZE = APPS.length; /* single home screen: every app on one page */
+  var DEFAULT_ORDER = APPS.map(function (a) { return a.id; });
 
   /* ---------- preferences (separate key; never touches game saves) ---------- */
   var PREFS_KEY = 'INVESIM_PHONE_PREFS';
-  var prefs = { music: false };
-  try { var raw = localStorage.getItem(PREFS_KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p.music === 'boolean') prefs.music = p.music; } } catch (e) {}
+  var prefs = { music: false, order: null };
+  try { var raw = localStorage.getItem(PREFS_KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p.music === 'boolean') prefs.music = p.music; if (p && Array.isArray(p.order)) prefs.order = p.order; } } catch (e) {}
   function savePrefs() { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {} }
+  function validOrder(o) {
+    if (!Array.isArray(o) || o.length !== APPS.length) return false;
+    var seen = {};
+    for (var i = 0; i < o.length; i++) { if (!APP_MAP[o[i]] || seen[o[i]]) return false; seen[o[i]] = true; }
+    return true;
+  }
+  var appOrder = validOrder(prefs.order) ? prefs.order.slice() : DEFAULT_ORDER.slice();
+  function orderedApps() { return appOrder.map(function (id) { return APP_MAP[id]; }); }
+  function pageCount() { return Math.max(1, Math.ceil(appOrder.length / PAGE_SIZE)); }
+  function persistOrder() { prefs.order = appOrder.slice(); savePrefs(); }
 
   /* ---------- state ---------- */
   var unlocked = false, currentApp = null, currentPage = 0;
+  var editing = false, selectedId = null, suppressNextClick = false, suppressClickTimer = null, dragSession = null;
+  function armClickSuppress() {
+    suppressNextClick = true;
+    clearTimeout(suppressClickTimer);
+    suppressClickTimer = setTimeout(function () { suppressNextClick = false; }, 600);
+  }
   var notifications = [], unread = 0, seenSigs = new Set(), newsInit = false;
   var bannerQueue = [], bannerBusy = false, loansSig = '', moverCache = null, moverTick = 0;
   var windows = {}, screenEl = $('phone-screen');
 
-  /* ---------- build home grid, dock, dots, windows ---------- */
+  /* ---------- build home grid, dots, windows ---------- */
   function iconEl(app, withBadge) {
     var b = document.createElement('button');
-    b.type = 'button'; b.className = 'ph-app-btn'; b.setAttribute('aria-label', app.name);
+    b.type = 'button'; b.className = 'ph-app-btn'; b.setAttribute('aria-label', app.name); b.setAttribute('data-app-id', app.id);
     b.innerHTML = '<span class="ph-icon" style="background:' + app.grad + '">' + app.glyph + '</span>' +
       '<span class="ph-app-label">' + esc(app.name) + '</span>' +
       (withBadge ? '<span class="ph-badge ph-hidden" id="ph-badge-' + app.id + '">0</span>' : '');
-    b.addEventListener('click', function () { openApp(app.id, b); });
+    b.addEventListener('click', function (ev) {
+      if (suppressNextClick) { suppressNextClick = false; ev.preventDefault(); ev.stopPropagation(); return; }
+      if (editing) { handleEditTap(app.id); return; }
+      openApp(app.id, b);
+    });
+    bindPress(b, app.id);
     return b;
   }
-  function buildHome() {
+  function renderHomeGrid() {
     var track = $('ph-track');
-    [PAGE1, PAGE2].forEach(function (pageApps) {
+    track.innerHTML = '';
+    var apps = orderedApps();
+    for (var p = 0; p < pageCount(); p++) {
       var page = document.createElement('div'); page.className = 'ph-page';
       var grid = document.createElement('div'); grid.className = 'ph-grid';
-      pageApps.forEach(function (a) { grid.appendChild(iconEl(a, a.id === 'news')); });
+      apps.slice(p * PAGE_SIZE, p * PAGE_SIZE + PAGE_SIZE).forEach(function (a) { grid.appendChild(iconEl(a, a.id === 'news')); });
       page.appendChild(grid); track.appendChild(page);
-    });
-    var dock = $('ph-dock');
-    DOCK_IDS.forEach(function (id) { dock.appendChild(iconEl(APP_MAP[id], false)); });
+    }
     var dots = $('ph-dots');
-    [0, 1].forEach(function (i) {
-      var d = document.createElement('button'); d.type = 'button'; d.setAttribute('aria-label', 'Page ' + (i + 1));
-      if (i === 0) d.className = 'ph-active';
-      d.addEventListener('click', function () { setPage(i); });
-      dots.appendChild(d);
-    });
+    dots.innerHTML = '';
+    for (var i = 0; i < pageCount(); i++) {
+      (function (idx) {
+        var d = document.createElement('button'); d.type = 'button'; d.setAttribute('aria-label', 'Page ' + (idx + 1));
+        d.addEventListener('click', function () { setPage(idx); });
+        dots.appendChild(d);
+      })(i);
+    }
+    setPage(currentPage);
+    dots.style.display = pageCount() > 1 ? '' : 'none';
+    updateBadge();
+  }
+  function buildHome() {
+    renderHomeGrid();
   }
   function setPage(i) {
-    currentPage = Math.max(0, Math.min(1, i));
+    currentPage = Math.max(0, Math.min(pageCount() - 1, i));
     $('ph-track').style.transform = 'translateX(-' + (currentPage * 100) + '%)';
     Array.prototype.forEach.call($('ph-dots').children, function (d, j) { d.className = j === currentPage ? 'ph-active' : ''; });
   }
@@ -31675,6 +31729,171 @@ body.ph-locked #ph-home-indicator { display: none; }
     if (st) st.addEventListener('click', function () { setMusic(!prefs.music); });
   }
 
+  /* ---------- arrange mode: long-press, drag, tap-to-move, A–Z ---------- */
+  function setEditing(on) {
+    editing = !!on;
+    selectedId = null;
+    var home = $('ph-home');
+    if (home) home.classList.toggle('ph-editing', editing);
+    if (!editing) clearDragVisuals();
+  }
+  function enterEditMode() {
+    if (!unlocked || currentApp) return;
+    setEditing(true);
+    try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {}
+  }
+  function exitEditMode() { setEditing(false); }
+  function sortAZ() {
+    appOrder = orderedApps().slice().sort(function (a, b) { return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); }).map(function (a) { return a.id; });
+    persistOrder(); renderHomeGrid();
+  }
+  function resetOrder() {
+    appOrder = DEFAULT_ORDER.slice();
+    persistOrder(); renderHomeGrid();
+  }
+  function moveApp(id, toIndex) {
+    var from = appOrder.indexOf(id);
+    if (from < 0) return;
+    toIndex = Math.max(0, Math.min(appOrder.length - 1, toIndex));
+    if (from === toIndex) return;
+    appOrder.splice(from, 1);
+    appOrder.splice(toIndex, 0, id);
+  }
+  function applyOrderToDOM() {
+    var btns = {};
+    Array.prototype.forEach.call(document.querySelectorAll('#ph-track .ph-app-btn'), function (b) { btns[b.getAttribute('data-app-id')] = b; });
+    var pages = document.querySelectorAll('#ph-track .ph-page');
+    for (var p = 0; p < pages.length; p++) {
+      var grid = pages[p].querySelector('.ph-grid');
+      if (!grid) continue;
+      appOrder.slice(p * PAGE_SIZE, p * PAGE_SIZE + PAGE_SIZE).forEach(function (id) { if (btns[id]) grid.appendChild(btns[id]); });
+    }
+  }
+  function handleEditTap(id) {
+    if (dragSession) return;
+    if (!selectedId) { selectedId = id; markSelected(); return; }
+    if (selectedId === id) { selectedId = null; markSelected(); return; }
+    moveApp(selectedId, appOrder.indexOf(id));
+    selectedId = null;
+    persistOrder(); renderHomeGrid();
+  }
+  function markSelected() {
+    Array.prototype.forEach.call(document.querySelectorAll('#ph-track .ph-app-btn'), function (b) {
+      b.classList.toggle('ph-selected', b.getAttribute('data-app-id') === selectedId);
+    });
+  }
+  function markDragSrc(id) {
+    Array.prototype.forEach.call(document.querySelectorAll('#ph-track .ph-app-btn'), function (b) {
+      b.classList.toggle('ph-drag-src', b.getAttribute('data-app-id') === id);
+    });
+  }
+  function clearDragVisuals() {
+    var g = $('ph-drag-ghost'); if (g && g.parentNode) g.parentNode.removeChild(g);
+    Array.prototype.forEach.call(document.querySelectorAll('#ph-track .ph-drag-src'), function (b) { b.classList.remove('ph-drag-src'); });
+  }
+  function gridButtonsOnPage(pageIdx) {
+    var pages = document.querySelectorAll('#ph-track .ph-page');
+    var page = pages[pageIdx];
+    return page ? Array.prototype.slice.call(page.querySelectorAll('.ph-app-btn')) : [];
+  }
+  function indexFromPoint(x, y) {
+    var pagesEl = $('ph-pages');
+    if (pagesEl) {
+      var pr = pagesEl.getBoundingClientRect();
+      if (y < pr.top - 30 || y > pr.bottom + 30 || x < pr.left - 30 || x > pr.right + 30) return -1;
+    }
+    var btns = gridButtonsOnPage(currentPage);
+    var best = -1, bestD = Infinity;
+    btns.forEach(function (b, i) {
+      var r = b.getBoundingClientRect();
+      var d = Math.hypot(x - (r.left + r.width / 2), y - (r.top + r.height / 2));
+      if (d < bestD) { bestD = d; best = i; }
+    });
+    return best < 0 ? -1 : currentPage * PAGE_SIZE + best;
+  }
+  function startGhost(s, e) {
+    selectedId = null; markSelected();
+    clearDragVisuals();
+    var app = APP_MAP[s.id];
+    var g = document.createElement('div');
+    g.id = 'ph-drag-ghost';
+    g.innerHTML = '<span class="ph-icon" style="background:' + app.grad + '">' + app.glyph + '</span><span class="ph-app-label">' + esc(app.name) + '</span>';
+    screenEl.appendChild(g);
+    s.ghost = g;
+    markDragSrc(s.id);
+    moveGhost(e);
+  }
+  function moveGhost(e) {
+    var s = dragSession; if (!s || !s.ghost) return;
+    var sr = screenEl.getBoundingClientRect();
+    s.ghost.style.left = (e.clientX - sr.left - 38) + 'px';
+    s.ghost.style.top = (e.clientY - sr.top - 58) + 'px';
+  }
+  function onDragMove(e) {
+    var s = dragSession; if (!s) return;
+    if (!s.active) {
+      if (Math.hypot(e.clientX - s.startX, e.clientY - s.startY) < 8) return;
+      s.active = true;
+      armClickSuppress();
+      startGhost(s, e);
+    }
+    moveGhost(e);
+    var sr = screenEl.getBoundingClientRect();
+    var dir = 0;
+    if (e.clientX - sr.left < 28) dir = -1; else if (sr.right - e.clientX < 28) dir = 1;
+    var canTurn = (dir < 0 && currentPage > 0) || (dir > 0 && currentPage < pageCount() - 1);
+    if (dir !== 0 && canTurn) {
+      if (s.edgeDir !== dir) {
+        s.edgeDir = dir; clearTimeout(s.edgeTimer);
+        s.edgeTimer = setTimeout(function () { setPage(currentPage + dir); if (dragSession) dragSession.edgeDir = 0; }, 550);
+      }
+    } else { s.edgeDir = 0; clearTimeout(s.edgeTimer); }
+    var idx = indexFromPoint(e.clientX, e.clientY);
+    if (idx >= 0 && appOrder[idx] !== s.id) {
+      moveApp(s.id, idx);
+      applyOrderToDOM();
+      markDragSrc(s.id);
+    }
+  }
+  function onDragEnd() {
+    var s = dragSession; if (!s) return;
+    dragSession = null;
+    clearTimeout(s.edgeTimer);
+    document.removeEventListener('pointermove', onDragMove);
+    document.removeEventListener('pointerup', onDragEnd);
+    document.removeEventListener('pointercancel', onDragEnd);
+    if (s.active) { persistOrder(); armClickSuppress(); clearDragVisuals(); }
+  }
+  function attachDragListeners(id, startX, startY) {
+    if (dragSession) return;
+    dragSession = { id: id, startX: startX, startY: startY, active: false, edgeDir: 0, edgeTimer: null, ghost: null };
+    document.addEventListener('pointermove', onDragMove);
+    document.addEventListener('pointerup', onDragEnd);
+    document.addEventListener('pointercancel', onDragEnd);
+  }
+  function bindPress(el, id) {
+    var pressTimer = null, startX = 0, startY = 0;
+    el.addEventListener('pointerdown', function (e) {
+      if (!unlocked || currentApp) return;
+      if (e.button != null && e.button !== 0) return;
+      startX = e.clientX; startY = e.clientY;
+      if (editing) { attachDragListeners(id, startX, startY); return; }
+      pressTimer = setTimeout(function () {
+        pressTimer = null;
+        armClickSuppress();
+        enterEditMode();
+        selectedId = id; markSelected();
+        attachDragListeners(id, startX, startY);
+      }, 550);
+    });
+    el.addEventListener('pointermove', function (e) {
+      if (pressTimer && Math.hypot(e.clientX - startX, e.clientY - startY) > 10) { clearTimeout(pressTimer); pressTimer = null; }
+    });
+    function cancelPress() { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } }
+    el.addEventListener('pointerup', cancelPress);
+    el.addEventListener('pointercancel', cancelPress);
+  }
+
   /* ---------- navigation ---------- */
   function openApp(id, originEl) {
     if (!unlocked) return;
@@ -31697,6 +31916,7 @@ body.ph-locked #ph-home-indicator { display: none; }
     if (id === 'news') { renderNewsTeaser(); markAllRead(); }
   }
   function goHome() {
+    if (editing && !currentApp) { exitEditMode(); return; }
     if ($('ph-notif-center').classList.contains('ph-open')) { closeNotifCenter(); return; }
     if (!currentApp) return;
     var win = windows[currentApp];
@@ -32052,11 +32272,19 @@ body.ph-locked #ph-home-indicator { display: none; }
     $('ph-btn-autoplay').addEventListener('click', function () { var b = $('btnAutoPlay'); if (b) b.click(); setTimeout(refreshHUD, 150); });
     $('ph-btn-stepday').addEventListener('click', function () { var b = $('btnStepDay'); if (b) b.click(); setTimeout(refreshHUD, 300); });
     $('ph-btn-music').addEventListener('click', function () { setMusic(!prefs.music); });
+    $('ph-edit-done').addEventListener('click', exitEditMode);
+    $('ph-edit-az').addEventListener('click', sortAZ);
+    $('ph-edit-reset').addEventListener('click', resetOrder);
+    $('ph-pages').addEventListener('click', function (e) {
+      var t = e.target;
+      if (editing && !(t.closest && t.closest('.ph-app-btn'))) { selectedId = null; markSelected(); }
+    });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && unlocked) goHome(); });
     var pages = $('ph-pages'), sx = null, sy = null;
     pages.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
     pages.addEventListener('touchend', function (e) {
       if (sx == null) return;
+      if (dragSession && dragSession.active) { sx = null; sy = null; return; }
       var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
       if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.4) setPage(currentPage + (dx < 0 ? 1 : -1));
       sx = null; sy = null;
@@ -32093,6 +32321,9 @@ body.ph-locked #ph-home-indicator { display: none; }
     get unread() { return unread; },
     get notifications() { return notifications.length; },
     get musicOn() { return prefs.music; },
+    get editing() { return editing; },
+    get order() { return appOrder.slice(); },
+    get page() { return currentPage; },
     get audioRunning() { try { return !!(AC && AC.state === 'running' && padTimer); } catch (e) { return false; } }
   };
 })();
