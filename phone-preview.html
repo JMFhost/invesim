@@ -31999,7 +31999,7 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
     if (!unlocked) return;
     closeNotifCenter();
     var app = APP_MAP[id]; if (!app) return;
-    if (app.external) { try { window.open(app.external, '_blank', 'noopener'); } catch (e) {} return; }
+    if (app.external) { window.location.href = app.external; return; } /* redirect, same tab: leaving the page stops the music */
     if (currentApp && currentApp !== id) { var prev = windows[currentApp]; prev.classList.remove('ph-open', 'ph-closing'); }
     currentApp = id;
     if (!histPushed) { try { history.pushState({ phApp: id }, ''); histPushed = true; } catch (e) {} }
