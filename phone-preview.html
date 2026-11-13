@@ -779,6 +779,20 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
 .ph-set-pill { flex: 0 0 auto; background: #1e2227; border: 1px solid #2c3137; color: #fff; border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; }
 .ph-set-foot { margin: -6px 0 0; font-size: 12px; color: #7d8590; text-align: center; font-family: 'JetBrains Mono', ui-monospace, monospace; }
 
+/* ---- player name ---- */
+#ph-greeting { margin: 10px 16px 0; text-align: center; font-size: 13px; font-weight: 600; color: rgba(255,255,255,.88); text-shadow: 0 1px 8px rgba(0,0,0,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#ph-greeting[hidden] { display: none; }
+#ph-lock-name { margin: 6px auto 0; max-width: 86%; text-align: center; font-size: 13.5px; font-weight: 500; opacity: .85; text-shadow: 0 1px 8px rgba(0,0,0,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#ph-lock-name[hidden] { display: none; }
+.ph-name-edit { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.ph-name-edit[hidden] { display: none; }
+#ph-name-input { width: 100%; box-sizing: border-box; background: #1e2227; border: 1px solid #2c3137; border-radius: 10px; color: #fff; font-family: inherit; font-size: 15px; padding: 10px 12px; outline: none; }
+#ph-name-input:focus { border-color: #00c805; }
+.ph-name-btns { display: flex; gap: 8px; }
+.ph-name-btns button { flex: 1 1 0; border-radius: 999px; padding: 8px 4px; font-size: 13.5px; font-weight: 700; font-family: inherit; cursor: pointer; }
+#ph-name-save { background: #00c805; border: 1px solid #00c805; color: #000; }
+#ph-name-cancel { background: #1e2227; border: 1px solid #2c3137; color: #fff; }
+
 /* toasts + modals contained inside the phone frame */
 #phone-screen > #toastContainer { position: absolute !important; top: auto !important; bottom: 56px !important; left: 12px !important; right: 12px !important; max-width: none !important; align-items: flex-end; }
 #phone-screen > #toastContainer > * { max-width: 100%; }
@@ -791,6 +805,62 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
 /* news wire flows with the app scroll; economy monitor below it */
 #news-wire-host #liveFeedContainer { max-height: none !important; overflow-y: visible !important; }
 #news-monitor-host { margin-top: 16px; }
+
+/* ---------- Phase 4 slice 1: dataset profiles + deep charts ---------- */
+/* Dark defaults; body.light-theme overrides below (light is the game default). */
+.ph-data-card { gap: 10px !important; }
+.ph-data-title { font-size: 15px; font-weight: 800; color: #fff; margin: 0; }
+.ph-data-tag { font-size: 10px; font-weight: 700; color: #00C805; background: rgba(0,200,5,.12); border: 1px solid rgba(0,200,5,.35); border-radius: 999px; padding: 1px 7px; margin-left: 6px; vertical-align: 2px; }
+.ph-data-para { font-size: 12px; line-height: 1.65; color: #C7CDD6; margin: 0; }
+.ph-data-sub { color: #8A919E; font-size: 11px; }
+.ph-data-risk { color: #FBBF24; font-size: 11px; }
+.ph-data-caption { font-size: 10px; color: #8A919E; margin: 0; font-family: ui-monospace, monospace; }
+.ph-deep-chart-wrap { background: #0C0E10; border: 1px solid #22262A; border-radius: 12px; padding: 6px; }
+/* !important heights: the game ships a global `canvas { height: 100% !important; }`
+   rule that would otherwise stretch every shell canvas to its container. */
+.ph-deep-chart { width: 100%; height: 150px !important; display: block; }
+.ph-skel-block { display: flex; flex-direction: column; gap: 8px; padding: 4px 0; }
+.ph-skel-line { height: 11px; border-radius: 6px; background: #22262A; animation: ph-skel-pulse 1.1s ease-in-out infinite; }
+.ph-skel-note { font-size: 10px; color: #8A919E; font-family: ui-monospace, monospace; }
+@keyframes ph-skel-pulse { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+.ph-grid-note { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: #0C0E10; border: 1px solid #22262A; display: flex; flex-direction: column; gap: 6px; }
+.ph-grid-title { font-size: 11px; font-weight: 800; color: #fff; }
+.ph-grid-text { font-size: 11px; line-height: 1.6; color: #C7CDD6; margin: 0; }
+.ph-grid-dim { color: #8A919E; }
+.ph-spark { width: 100%; height: 40px !important; display: block; }
+.ph-briefing { display: flex; flex-direction: column; gap: 10px; padding: 14px 14px 4px; }
+/* Briefing header sits on the dark phone chrome (#0b0e11) in BOTH themes:
+   unconditional light text, never the theme-flipping .ph-data-title. */
+.ph-briefing-title { font-size: 15px; font-weight: 800; color: #F5F7FA; margin: 0; }
+.ph-brief-item { background: #16191D; border: 1px solid #24282D; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 5px; }
+.ph-brief-cat { font-size: 9px; font-weight: 800; letter-spacing: .12em; color: #38BDF8; }
+.ph-brief-head { font-size: 13px; font-weight: 800; color: #fff; line-height: 1.4; }
+.ph-brief-body { font-size: 11px; line-height: 1.6; color: #C7CDD6; }
+.ph-index-chart { background: #16191D; border: 1px solid #24282D; border-radius: 14px; padding: 14px; margin: 0 0 12px; display: flex; flex-direction: column; gap: 10px; }
+.ph-index-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ph-index-chip { font-size: 10px; font-weight: 700; color: #C7CDD6; background: #1E2227; border: 1px solid #2E343B; border-radius: 999px; padding: 4px 9px; cursor: pointer; }
+.ph-index-chip-on { color: #000; background: #00C805; border-color: #00C805; }
+/* Light theme (game default): reuse the game's own surface/text variables. */
+body.light-theme .ph-data-title { color: var(--text-main); }
+body.light-theme .ph-data-tag { color: #007A03; background: #F0FDF4; border-color: #86EFAC; }
+body.light-theme .ph-data-para { color: var(--text-muted); }
+body.light-theme .ph-data-sub { color: #64748B; }
+body.light-theme .ph-data-risk { color: #B45309; }
+body.light-theme .ph-data-caption { color: #64748B; }
+body.light-theme .ph-deep-chart-wrap { background: var(--bg-sub); border-color: var(--border-col); }
+body.light-theme .ph-skel-line { background: #E2E8F0; }
+body.light-theme .ph-skel-note { color: #64748B; }
+body.light-theme .ph-grid-note { background: var(--bg-sub); border-color: var(--border-col); }
+body.light-theme .ph-grid-title { color: var(--text-main); }
+body.light-theme .ph-grid-text { color: var(--text-muted); }
+body.light-theme .ph-grid-dim { color: #64748B; }
+body.light-theme .ph-brief-item { background: var(--bg-card); border-color: var(--border-col); }
+body.light-theme .ph-brief-cat { color: #0284C7; }
+body.light-theme .ph-brief-head { color: var(--text-main); }
+body.light-theme .ph-brief-body { color: var(--text-muted); }
+body.light-theme .ph-index-chart { background: var(--bg-card); border-color: var(--border-col); }
+body.light-theme .ph-index-chip { color: var(--text-muted); background: var(--bg-chip); border-color: var(--border-col); }
+body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-color: #007A03; }
 
 </style>
 </head>
@@ -820,6 +890,7 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
         <div class="ph-lock-top">
           <div id="ph-lock-clock">9:41</div>
           <div id="ph-lock-date">Thursday, November 12</div>
+          <div id="ph-lock-name" hidden></div>
           <div id="ph-lock-brand">JMF Games Phone</div>
           <div id="ph-lock-gameday">Day 1 &bull; 08:30 AM in-game</div>
         </div>
@@ -837,6 +908,7 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
           <svg class="ph-chartline" viewBox="0 0 430 120" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,96 42,84 84,92 126,66 168,74 210,46 252,58 294,30 336,42 378,18 430,26" fill="none" stroke="#7dff8a" stroke-width="2.5" stroke-linejoin="round"/><polyline points="0,108 52,100 104,106 156,88 208,94 260,74 312,82 364,58 430,66" fill="none" stroke="#ffffff" stroke-width="1.5" opacity=".5"/></svg>
         </div>
         <div id="ph-ticker"><span class="ph-tk-nw" id="ph-tk-nw">$10,000.00</span><span id="ph-tk-day" class="ph-up">+0.00% today</span><span class="ph-tk-dim" id="ph-tk-cash">Cash $10,000.00</span></div>
+        <div id="ph-greeting" hidden></div>
         <div id="ph-widgets">
           <div class="ph-widget">
             <div class="ph-w-label">Net Worth</div>
@@ -31676,9 +31748,15 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
   var DEFAULT_ORDER = APPS.map(function (a) { return a.id; });
 
   /* ---------- preferences (separate key; never touches game saves) ---------- */
+  /* Player name: trimmed, max 20 characters counted as code points (emoji = 1). */
+  function normalizeName(v) {
+    var s = String(v == null ? '' : v).trim();
+    var chars = Array.from(s);
+    return chars.length > 20 ? chars.slice(0, 20).join('') : s;
+  }
   var PREFS_KEY = 'INVESIM_PHONE_PREFS';
-  var prefs = { music: false, order: null, stocksTab: 'stocks' };
-  try { var raw = localStorage.getItem(PREFS_KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p.music === 'boolean') prefs.music = p.music; if (p && Array.isArray(p.order)) prefs.order = p.order; if (p && (p.stocksTab === 'stocks' || p.stocksTab === 'etfs' || p.stocksTab === 'options')) prefs.stocksTab = p.stocksTab; } } catch (e) {}
+  var prefs = { music: false, order: null, stocksTab: 'stocks', playerName: '' };
+  try { var raw = localStorage.getItem(PREFS_KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p.music === 'boolean') prefs.music = p.music; if (p && Array.isArray(p.order)) prefs.order = p.order; if (p && (p.stocksTab === 'stocks' || p.stocksTab === 'etfs' || p.stocksTab === 'options')) prefs.stocksTab = p.stocksTab; if (p && typeof p.playerName === 'string') prefs.playerName = normalizeName(p.playerName); } } catch (e) {}
   function savePrefs() { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {} }
   function validOrder(o) {
     if (!Array.isArray(o) || o.length !== APPS.length) return false;
@@ -31796,6 +31874,10 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
       } else if (app.id === 'settings') {
         body = '<div class="ph-scroll"><div class="ph-settings">' +
           '<div class="ph-set-group">' +
+            '<button type="button" class="ph-set-row" id="ph-set-name"><span class="ph-set-ic">👤</span><span class="ph-set-tx"><b>Player name</b><i id="ph-set-name-sub">Set your name</i></span><span class="ph-set-chev">›</span></button>' +
+            '<div class="ph-name-edit" id="ph-name-edit" hidden><input type="text" id="ph-name-input" placeholder="Your name" autocomplete="off" autocapitalize="words" enterkeyhint="done" aria-label="Player name"><div class="ph-name-btns"><button type="button" id="ph-name-save">Save</button><button type="button" id="ph-name-cancel">Cancel</button></div></div>' +
+          '</div>' +
+          '<div class="ph-set-group">' +
             '<button type="button" class="ph-set-row" id="ph-set-save"><span class="ph-set-ic">💾</span><span class="ph-set-tx"><b>Save &amp; Load</b><i>Slots, export &amp; import</i></span><span class="ph-set-chev">›</span></button>' +
             '<button type="button" class="ph-set-row" id="ph-set-newgame"><span class="ph-set-ic">🆕</span><span class="ph-set-tx"><b>Start New Game</b><i>Fresh $10,000 run, new world seed</i></span><span class="ph-set-chev">›</span></button>' +
           '</div>' +
@@ -31805,6 +31887,9 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
             '<div class="ph-set-row"><span class="ph-set-ic">🎵</span><span class="ph-set-tx"><b>Soft music</b><i>Gentle ambient loop, on or off</i></span><button type="button" class="ph-toggle" id="ph-settings-music-toggle" aria-label="Toggle music"></button></div>' +
           '</div>' +
           '<div class="ph-set-group">' +
+            '<a class="ph-set-row" href="guide.html" target="_blank" rel="noopener"><span class="ph-set-ic">📖</span><span class="ph-set-tx"><b>Investing Guides</b><i>Learn to invest for real</i></span><span class="ph-set-chev">›</span></a>' +
+            '<a class="ph-set-row" href="tutorial.html" target="_blank" rel="noopener"><span class="ph-set-ic">🎓</span><span class="ph-set-tx"><b>Tutorial</b><i>Your first day, step by step</i></span><span class="ph-set-chev">›</span></a>' +
+            '<a class="ph-set-row" href="faq.html" target="_blank" rel="noopener"><span class="ph-set-ic">❓</span><span class="ph-set-tx"><b>FAQ</b><i>How every system works</i></span><span class="ph-set-chev">›</span></a>' +
             '<a class="ph-set-row" href="about.html" target="_blank" rel="noopener"><span class="ph-set-ic">ℹ️</span><span class="ph-set-tx"><b>About InveSim</b><i>What the game is</i></span><span class="ph-set-chev">›</span></a>' +
             '<a class="ph-set-row" href="contact.html" target="_blank" rel="noopener"><span class="ph-set-ic">✉️</span><span class="ph-set-tx"><b>Contact</b><i>Reach JMF Games</i></span><span class="ph-set-chev">›</span></a>' +
           '</div>' +
@@ -31824,6 +31909,14 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
     var ng = $('ph-set-newgame'); if (ng) ng.addEventListener('click', function () { var b = $('btnNewGame'); if (b) b.click(); });
     var th = $('ph-set-theme'); if (th) th.addEventListener('click', function () { try { if (typeof window.toggleAppTheme === 'function') window.toggleAppTheme(); } catch (e) {} setTimeout(renderSettingsState, 200); });
     var ap = $('ph-set-autoplay'); if (ap) ap.addEventListener('click', function () { var b = $('btnAutoPlay'); if (b) b.click(); setTimeout(function () { renderSettingsState(); refreshHUD(); }, 200); });
+    var nm = $('ph-set-name'); if (nm) nm.addEventListener('click', function () { var ed = $('ph-name-edit'); if (ed && ed.hidden) openNameEdit(); else closeNameEdit(); });
+    var nsv = $('ph-name-save'); if (nsv) nsv.addEventListener('click', saveNameEdit);
+    var ncl = $('ph-name-cancel'); if (ncl) ncl.addEventListener('click', function () { closeNameEdit(); });
+    var nin = $('ph-name-input'); if (nin) {
+      nin.addEventListener('input', function () { var v = normalizeName(nin.value); if (v !== nin.value) nin.value = v; });
+      nin.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); saveNameEdit(); } else if (e.key === 'Escape') { closeNameEdit(); } });
+    }
+    renderPlayerName();
     var stb = $('ph-stocks-subtabs');
     if (stb) stb.addEventListener('click', function (e) { var b = e.target.closest ? e.target.closest('[data-stab]') : null; if (b) stocksSubTab(b.getAttribute('data-stab')); });
     syncStocksSubtabs();
@@ -32229,6 +32322,32 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
     big.textContent = working ? (fmtMoney(day) + ' / day') : 'Off duty';
     row.innerHTML = heroStat('Wage', fmtMoney(hr) + '/hr') + heroStat('Experience', exp + ' days') + heroStat('Status', working ? 'On shift' : 'Not working');
   }
+  /* ---------- player name (shell-only; never touches game state/saves) ---------- */
+  /* All name rendering uses textContent only — never innerHTML with the name. */
+  function renderPlayerName() {
+    var name = prefs.playerName || '';
+    var sub = $('ph-set-name-sub');
+    if (sub) sub.textContent = name || 'Set your name';
+    var g = $('ph-greeting');
+    if (g) { g.textContent = name ? 'Welcome back, ' + name : ''; g.hidden = !name; }
+    var l = $('ph-lock-name');
+    if (l) { l.textContent = name ? 'Welcome back, ' + name : ''; l.hidden = !name; }
+  }
+  function openNameEdit() {
+    var ed = $('ph-name-edit'), inp = $('ph-name-input');
+    if (!ed || !inp) return;
+    inp.value = prefs.playerName || '';
+    ed.hidden = false;
+    setTimeout(function () { try { inp.focus(); } catch (e) {} }, 60);
+  }
+  function closeNameEdit() { var ed = $('ph-name-edit'); if (ed) ed.hidden = true; }
+  function saveNameEdit() {
+    var inp = $('ph-name-input');
+    prefs.playerName = inp ? normalizeName(inp.value) : '';
+    savePrefs();
+    renderPlayerName();
+    closeNameEdit();
+  }
   function renderSettingsState() {
     var th = $('ph-set-theme-label');
     if (th) th.textContent = document.body.classList.contains('light-theme') ? 'Light' : 'Black';
@@ -32580,11 +32699,1113 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
     get unread() { return unread; },
     get notifications() { return notifications.length; },
     get musicOn() { return prefs.music; },
+    get playerName() { return prefs.playerName; },
     get editing() { return editing; },
     get order() { return appOrder.slice(); },
     get page() { return currentPage; },
     get histPushed() { return histPushed; },
     get audioRunning() { try { return !!(AC && AC.state === 'running' && padTimer); } catch (e) { return false; } }
+  };
+})();
+
+</script>
+<script>
+/* ============================================================================
+   InveSim Phone — Phase 4 slice 1: richer datasets + chart history (lazy).
+   Separate IIFE: observes app windows + game DOM, never touches game state.
+   - Datasets/chart files live under assets/data/, fetched on FIRST OPEN of
+     the relevant app only. In-memory cache; never localStorage. Fetch
+     failure -> current behavior, no error surfaced.
+   - All display text is pre-composed and stored in the dataset files.
+     Runtime does deterministic variant selection (game's own SeededRNG
+     pattern) + placeholder substitution from live G fields only.
+   - Chart history is seed-gated (file seed must equal G.seed) + anchor
+     checked against live history. The shell NEVER mutates G history/saves.
+   ========================================================================== */
+(function () {
+  if (window.__phDataLoaded) return;
+  window.__phDataLoaded = true;
+
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>\"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function fmtCompact(n) {
+    n = Number(n) || 0;
+    var a = Math.abs(n);
+    if (a >= 1e12) return '$' + (n / 1e12).toFixed(2) + 'T';
+    if (a >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
+    if (a >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+    if (a >= 1e3) return '$' + (n / 1e3).toFixed(1) + 'K';
+    return '$' + n.toFixed(2);
+  }
+  function fmtMoney(n) {
+    n = Number(n) || 0;
+    return (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  var DATA_BASE = 'assets/data/';
+  // Sharded files: the GitHub MCP transport rejects single requests over ~2MB
+  // (HTTP 413), so files over ~2MB ship as <=1.95MB shards, fetched in
+  // parallel and merged in order. Merge rule mirrors split-datasets.py:
+  // list-valued keys concatenate in shard order, scalars/dicts take the
+  // first shard's copy (identical across shards by construction).
+  var FILES = {
+    stocks: ['stocks-v1-p1.json', 'stocks-v1-p2.json', 'stocks-v1-p3.json', 'stocks-v1-p4.json'],
+    etfs: ['etfs-v1-p1.json', 'etfs-v1-p2.json'],
+    properties: ['properties-v1-p1.json', 'properties-v1-p2.json', 'properties-v1-p3.json'],
+    businesses: ['businesses-v1-p1.json', 'businesses-v1-p2.json', 'businesses-v1-p3.json'],
+    rivals: ['rivals-v1.json'], news: ['news-v1.json'],
+    chartsStocks: ['charts-stocks-v1-p1.json', 'charts-stocks-v1-p2.json', 'charts-stocks-v1-p3.json'],
+    chartsEtfs: ['charts-etfs-v1.json'],
+    chartsFx: ['charts-fx-v1.json'], chartsComm: ['charts-commodities-v1.json'],
+    chartsIndex: ['charts-index-v1.json']
+  };
+  var APP_FILES = {
+    stocks: ['stocks', 'etfs', 'chartsStocks', 'chartsEtfs'],
+    realestate: ['properties'], smallbiz: ['businesses'], vc: ['businesses'],
+    rivals: ['rivals'], news: ['news'], forex: ['chartsFx'],
+    commodities: ['chartsComm'], portfolio: ['chartsIndex']
+  };
+  var cache = {}, pending = {}, loadState = {}, fetchCount = {};
+  Object.keys(FILES).forEach(function (k) { loadState[k] = 'idle'; fetchCount[k] = 0; });
+
+  function mergeShards(parts) {
+    var out = {};
+    parts.forEach(function (p) {
+      Object.keys(p).forEach(function (k) {
+        var v = p[k];
+        if (Array.isArray(v)) { out[k] = (out[k] || []).concat(v); }
+        else if (!(k in out)) { out[k] = v; }
+      });
+    });
+    return out;
+  }
+  function loadData(key) {
+    if (cache[key]) return Promise.resolve(cache[key]);
+    if (pending[key]) return pending[key];
+    loadState[key] = 'loading';
+    fetchCount[key]++;
+    pending[key] = Promise.all(FILES[key].map(function (f) {
+        return fetch(DATA_BASE + f, { cache: 'default' })
+          .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+      }))
+      .then(function (parts) {
+        var j = mergeShards(parts);
+        cache[key] = indexData(key, j);
+        loadState[key] = 'ready';
+        onDataReady(key);
+        return cache[key];
+      })
+      .catch(function () {
+        loadState[key] = 'failed';
+        cache[key] = null;
+        return null;
+      });
+    return pending[key];
+  }
+  function indexData(key, j) {
+    // Build lookup Maps from arrays-of-arrays rows.
+    var out = { v: j.v, seed: j.seed, n: j.n, raw: j };
+    if (j.d) {
+      var m = new Map();
+      j.d.forEach(function (row) { m.set(row[0], row.slice(1)); });
+      out.map = m;
+    }
+    if (j.s) {
+      var sm = new Map();
+      j.s.forEach(function (row) { sm.set(row[0], row.slice(1)); });
+      out.series = sm;
+    }
+    if (j.nb) out.nb = j.nb;
+    if (j.nbf) out.nbf = j.nbf;
+    if (j.am) { var am = new Map(); j.am.forEach(function (row) { am.set(row[0], row[1]); }); out.am = am; }
+    if (j.bd) out.bd = j.bd;
+    if (j.ac) out.ac = j.ac;
+    if (j.ob) { var ob = new Map(); j.ob.forEach(function (row) { ob.set(row[0], row[1]); }); out.ob = ob; }
+    if (j.bg) { var bg = new Map(); j.bg.forEach(function (row) { bg.set(row[0], row[1]); }); out.bg = bg; }
+    if (j.vc) { var vc = new Map(); j.vc.forEach(function (row) { vc.set(row[0], row[1]); }); out.vc = vc; }
+    if (j.fn) out.fn = j.fn;
+    if (j.first) out.first = j.first;
+    if (j.last) out.last = j.last;
+    return out;
+  }
+  function ensureForApp(appId) {
+    (APP_FILES[appId] || []).forEach(function (k) { loadData(k); });
+  }
+
+  /* ---------- deterministic selection (game's own SeededRNG pattern) ----- */
+  function hashStr(s) {
+    var h = 0;
+    s = String(s);
+    for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 2147483647;
+    return h;
+  }
+  function numId(id) {
+    if (typeof id === 'number') return id;
+    var m = String(id).match(/(\d+)/);
+    return m ? parseInt(m[1], 10) : hashStr(id);
+  }
+  function derivedRng(seed, idNum, salt) {
+    var R = window.SeededRNG;
+    if (typeof R !== 'function') {
+      // Fallback LCG with identical parameters if the game class is absent.
+      var st = ((Number(seed) || 849201) + idNum * 104729 + salt) % 2147483647;
+      if (st <= 0) st += 2147483646;
+      return { int: function (a, b) { st = (st * 16807) % 2147483647; return a + Math.floor(((st - 1) / 2147483646) * (b - a + 1)); } };
+    }
+    return new R((Number(seed) || 849201) + idNum * 104729 + salt);
+  }
+  function pick(rng, arr) {
+    if (!arr || !arr.length) return '';
+    return arr[rng.int(0, arr.length - 1)];
+  }
+  function sentencesOf(t) {
+    return String(t).split('. ').map(function (s) { return s.trim().replace(/\.$/, ''); }).filter(Boolean);
+  }
+  // Pick + fill a variant sharing no sentence with `used` (prevents the same
+  // stored sentence appearing twice on one card when pools overlap). Scans
+  // the pool exhaustively from a deterministic start offset, so a
+  // clash-free variant is always found when one exists; falls back to the
+  // first scanned candidate only when every variant clashes. Selection
+  // stays a pure deterministic lookup.
+  function pickDistinct(rng, arr, vals, used) {
+    if (!arr || !arr.length) return '';
+    var start = rng.int(0, arr.length - 1);
+    var first = null;
+    for (var k = 0; k < arr.length; k++) {
+      var filled = fill(arr[(start + k) % arr.length], vals);
+      if (k === 0) first = filled;
+      var ss = sentencesOf(filled);
+      var clash = false;
+      for (var j = 0; j < ss.length; j++) { if (used.has(ss[j])) { clash = true; break; } }
+      if (!clash) { ss.forEach(function (s) { used.add(s); }); return filled; }
+    }
+    sentencesOf(first).forEach(function (s) { used.add(s); });
+    return first;
+  }
+  // Placeholder fill with article agreement: "a {U}" becomes "an AI ..." when
+  // the substituted value starts with a vowel, and vice versa. Values are
+  // HTML-escaped; templates are our own stored text.
+  function fill(tpl, vals) {
+    var s = String(tpl).replace(/\b(A|An|a|an) \{([A-Z]+)\}/g, function (_, art, k) {
+      var v = vals[k];
+      if (v == null) return '';
+      var val = String(v);
+      var vowel = /^[AEIOU]/.test(val);
+      var a;
+      if (art === 'A') a = vowel ? 'An' : 'A';
+      else if (art === 'An') a = vowel ? 'An' : 'A';
+      else if (art === 'a') a = vowel ? 'an' : 'a';
+      else a = vowel ? 'an' : 'a';
+      return a + ' ' + esc(val);
+    });
+    return s.replace(/\{([A-Z]+)\}/g, function (_, k) {
+      var v = vals[k];
+      return v == null ? '' : esc(v);
+    });
+  }
+
+  /* ---------- chart decoders (mirror of gen-charts.py encoding) --------- */
+  function b64ToBytes(s) {
+    var bin = atob(s);
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes;
+  }
+  function makeReader(bytes) {
+    var p = 0;
+    function dv() {
+      var r = 0, s = 0;
+      for (;;) {
+        var by = bytes[p++];
+        r += (by & 0x7F) * Math.pow(2, s);
+        if (!(by & 0x80)) break;
+        s += 7;
+      }
+      return r;
+    }
+    function dz(v) { return (v % 2 === 0) ? v / 2 : -(v + 1) / 2; }
+    return { dv: dv, dz: dz };
+  }
+  // Stock series reproduce the game's own day-numbering quirk: ensureFullStockHistory
+  // numbers pre-bars from (firstBar.day || 1), so day 0 appears TWICE (last pre-bar
+  // and first original bar). dupDay0=true shifts the last two bars' days down by
+  // one to match the live history exactly (gate + merge depend on it).
+  function decodeOHLC(payload, firstDay, count, dupDay0) {
+    var r = makeReader(b64ToBytes(payload));
+    var o0 = r.dv(), c0 = r.dv();
+    var bars = [];
+    var prev = c0;
+    for (var i = 0; i < count; i++) {
+      var c = (i === 0) ? c0 : prev + r.dz(r.dv());
+      var o = (i === 0) ? o0 : prev;
+      var mx = Math.max(o, c), mn = Math.min(o, c);
+      var hi = r.dv(), lo = r.dv(), vol = r.dv();
+      bars.push({ day: firstDay + i, open: o / 100, high: (mx + hi) / 100, low: (mn - lo) / 100, close: c / 100, vol: vol });
+      prev = c;
+    }
+    if (dupDay0 && bars.length >= 2) {
+      bars[bars.length - 2].day -= 1;
+      bars[bars.length - 1].day -= 1;
+    }
+    return bars;
+  }
+  function decodeCloses(payload, scale, firstDay, count) {
+    var r = makeReader(b64ToBytes(payload));
+    var prev = r.dv();
+    var out = [{ day: firstDay, close: prev / scale }];
+    for (var i = 1; i < count; i++) {
+      prev = prev + r.dz(r.dv());
+      out.push({ day: firstDay + i, close: prev / scale });
+    }
+    return out;
+  }
+
+  /* ---------- chart gate: seed + anchor against live history ----------- */
+  function chartGate(fileSeed, shippedBars, liveHistory) {
+    var G = window.G;
+    if (!G || Number(G.seed) !== Number(fileSeed)) return false;
+    if (!shippedBars || !shippedBars.length || !liveHistory || !liveHistory.length) return false;
+    // Last 5 shipped bars must each find a live bar with the same day + close.
+    var tail = shippedBars.slice(-5);
+    for (var i = 0; i < tail.length; i++) {
+      var b = tail[i], found = false;
+      for (var j = 0; j < liveHistory.length; j++) {
+        var lb = liveHistory[j];
+        if (Number(lb.day) === Number(b.day) && Math.abs(Number(lb.close) - Number(b.close)) < 0.005) { found = true; break; }
+      }
+      if (!found) return false;
+    }
+    return true;
+  }
+  function mergeLiveTail(shippedBars, liveHistory) {
+    var lastDay = shippedBars[shippedBars.length - 1].day;
+    var tail = (liveHistory || []).filter(function (b) { return Number(b.day) > lastDay; });
+    tail.sort(function (a, b) { return a.day - b.day; });
+    return shippedBars.concat(tail.map(function (b) {
+      return { day: b.day, open: b.open, high: b.high, low: b.low, close: b.close, vol: b.vol || 0 };
+    }));
+  }
+  function mergeFxCloses(shippedCloses, liveHistory) {
+    // liveHistory: array of close numbers (last <=30). Find the longest suffix
+    // of shipped closes matching a prefix of liveHistory, append the rest.
+    if (!liveHistory || !liveHistory.length) return shippedCloses;
+    var maxOverlap = Math.min(shippedCloses.length, liveHistory.length);
+    var best = 0;
+    for (var k = maxOverlap; k >= 3; k--) {
+      var ok = true;
+      for (var i = 0; i < k; i++) {
+        if (Math.abs(shippedCloses[shippedCloses.length - k + i].close - Number(liveHistory[i])) > 1e-9) { ok = false; break; }
+      }
+      if (ok) { best = k; break; }
+    }
+    if (best === 0) return null; // no overlap: cannot merge safely
+    var out = shippedCloses.slice();
+    var lastDay = out[out.length - 1].day;
+    for (var j = best; j < liveHistory.length; j++) out.push({ day: lastDay + (j - best) + 1, close: Number(liveHistory[j]) });
+    return out;
+  }
+
+  /* ---------- profile builders (pure lookup + fill from live G) -------- */
+  function stockProfile(st) {
+    var d = cache.stocks;
+    if (!d || !d.map) return null;
+    var G = window.G;
+    var row = d.map.get(st.sector + '|' + st.tier);
+    if (!row) return null;
+    var vals = {
+      N: st.name, T: st.ticker, C: st.hqCity || '', CEO: st.ceoName || '',
+      E: (st.employees || 0).toLocaleString('en-US'), F: st.foundedYear,
+      S: st.sector, U: st.subIndustry, M: ((st.grossMargin || 0) * 100).toFixed(1),
+      G: (st.revGrowth || 0).toFixed(1), Y: st.yearsInBusiness,
+      P: (st.price || 0).toFixed(2), MC: fmtCompact(st.mktCap)
+    };
+    var used = new Set();
+    var desc = pickDistinct(derivedRng(G.seed, numId(st.id), 11), row[0], vals, used);
+    var strat = pickDistinct(derivedRng(G.seed, numId(st.id), 12), row[1], vals, used);
+    var risk = pickDistinct(derivedRng(G.seed, numId(st.id), 13), row[2], vals, used);
+    var sub = '';
+    if (d.series) {
+      var srow = d.series.get(st.subIndustry);
+      if (srow) sub = pickDistinct(derivedRng(G.seed, numId(st.id), 14), srow[0], vals, used);
+    }
+    return { desc: desc, strat: strat, risk: risk, sub: sub };
+  }
+  function etfProfile(etf) {
+    var d = cache.etfs;
+    if (!d || !d.map) return null;
+    var G = window.G;
+    var row = d.map.get(etf.theme);
+    if (!row) return null;
+    var vals = {
+      N: etf.name, S: etf.sym, I: etf.issuer, M: etf.managerName, TH: etf.theme,
+      ER: (etf.expenseRatio || 0).toFixed(2), DY: (etf.divYield || 0).toFixed(2),
+      PE: (etf.pe || 0).toFixed(1), AUM: fmtCompact((etf.aumMillions || 0) * 1e6)
+    };
+    var idn = hashStr(etf.sym);
+    var used = new Set();
+    return {
+      desc: pickDistinct(derivedRng(G.seed, idn, 15), row[0], vals, used),
+      strat: pickDistinct(derivedRng(G.seed, idn, 16), row[1], vals, used),
+      risk: pickDistinct(derivedRng(G.seed, idn, 17), row[2], vals, used)
+    };
+  }
+  function propertyProfile(p) {
+    var d = cache.properties;
+    if (!d || !d.map) return null;
+    var G = window.G;
+    var row = d.map.get(p.tier + '|' + p.subtype);
+    if (!row) return null;
+    var nb = '';
+    if (d.nb && d.nb.length) nb = d.nb[derivedRng(G.seed, hashStr(p.city || ''), 22).int(0, d.nb.length - 1)];
+    var band = (d.bd && d.bd[p.tier]) || [1000, 2000, 2, 4, 1, 2, 1, 1];
+    var brng = derivedRng(G.seed, numId(p.id), 23);
+    var sqft = brng.int(band[0], band[1]);
+    var beds = band[2] === 0 && band[3] === 0 ? 0 : brng.int(band[2], band[3]);
+    var baths = brng.int(band[4], band[5]);
+    var units = brng.int(band[6], band[7]);
+    // Subtype labels embed counts ("2BR Townhome Rental", "180-Unit ...",
+    // "Metro Studio Loft Condo") — the title must agree with the label the
+    // game itself prints, so override the band draws (draws stay consumed
+    // in the same order, keeping the stream deterministic).
+    var brM = /(\d+)BR/.exec(p.subtype || '');
+    var unM = /(\d+)-Unit/.exec(p.subtype || '');
+    var isStudio = !brM && /studio/i.test(p.subtype || '');
+    if (brM) beds = Number(brM[1]);
+    if (unM) units = Number(unM[1]);
+    if (isStudio) beds = 0;
+    var vals = {
+      N: p.name, C: p.city, ST: p.subtype, YB: p.yearBuilt, PR: fmtCompact(p.price),
+      CAP: (p.capRate || 0).toFixed(1), OCC: (p.occupancy == null ? 'No Data' : p.occupancy.toFixed(1) + '%'),
+      NB: nb, SQ: sqft.toLocaleString('en-US'), BD: beds, BA: baths, UN: units
+    };
+    var artCat = (d.ac && d.ac[p.tier]) || '';
+    var used = new Set();
+    var desc = pickDistinct(derivedRng(G.seed, numId(p.id), 21), row[0], vals, used);
+    var amen = '';
+    if (d.am) {
+      var arow = d.am.get(artCat);
+      if (arow) amen = pickDistinct(derivedRng(G.seed, numId(p.id), 24), arow, vals, used);
+    }
+    return {
+      desc: desc,
+      amen: amen, nb: nb, sqft: sqft, beds: beds, baths: baths, units: units, artCat: artCat, studio: isStudio
+    };
+  }
+  function bizProfile(biz) {
+    var d = cache.businesses;
+    if (!d || !d.map) return null;
+    var G = window.G;
+    var row = d.map.get(biz.cat + '|' + biz.sub);
+    if (!row) return null;
+    var info = null;
+    try { if (typeof window.getSmallBizDisplayInfo === 'function') info = window.getSmallBizDisplayInfo(biz); } catch (e) {}
+    var orng = derivedRng(G.seed, numId(biz.id), 32);
+    var own = '';
+    if (d.first && d.last) own = d.first[orng.int(0, d.first.length - 1)] + ' ' + d.last[orng.int(0, d.last.length - 1)];
+    var vals = {
+      N: (info && info.name) || ('Business #' + biz.id),
+      CAT: (info && info.categoryName) || '',
+      SUB: (info && info.subtype) || '',
+      Y: biz.yearsOpen, PR: fmtCompact(biz.price), YLD: (biz.netYieldPct || 0).toFixed(2),
+      STF: biz.staff, OWN: own
+    };
+    var used = new Set();
+    var pitch = pickDistinct(derivedRng(G.seed, numId(biz.id), 31), row[0], vals, used);
+    var bg = '';
+    if (d.bg) {
+      var brow = d.bg.get(biz.cat);
+      if (brow) bg = pickDistinct(derivedRng(G.seed, numId(biz.id), 33), brow, vals, used);
+    }
+    return { pitch: pitch, bg: bg, own: own };
+  }
+  function vcProfile(vc) {
+    var d = cache.businesses;
+    if (!d || !d.vc) return null;
+    var G = window.G;
+    // d.vc maps key -> bios ARRAY directly (see normalize); do not index [0]
+    // or selection walks characters of the first bio string.
+    var bios = d.vc.get(vc.stage + '|' + vc.sector);
+    if (!bios) return null;
+    var frng = derivedRng(G.seed, hashStr(vc.id), 34);
+    var founder = '';
+    if (d.first && d.last) founder = d.first[frng.int(0, d.first.length - 1)] + ' ' + d.last[frng.int(0, d.last.length - 1)];
+    var vals = {
+      N: vc.name, ST: vc.stage, S: vc.sector, U: vc.subIndustry, C: vc.city,
+      F: founder, PED: vc.founderPedigree, SYN: vc.leadSyndicate,
+      V: fmtCompact(vc.valuation), ARR: vc.arrMillions, RUN: vc.runwayMonths
+    };
+    var used = new Set();
+    var bio = pickDistinct(derivedRng(G.seed, hashStr(vc.id), 35), bios, vals, used);
+    var fundNote = '';
+    if (vc.isVcFund && d.fn && d.fn.length) fundNote = pickDistinct(derivedRng(G.seed, hashStr(vc.id), 36), d.fn, vals, used);
+    return { bio: bio, fundNote: fundNote, founder: founder };
+  }
+  function rivalProfile(ai) {
+    var d = cache.rivals;
+    if (!d || !d.map) return null;
+    var G = window.G;
+    var row = d.map.get(ai.shortTag);
+    if (!row) return null;
+    var vals = { N: ai.name, F: ai.fundName || ai.shortTag, A: ai.archetype, TAG: ai.shortTag };
+    var idn = numId(ai.id);
+    var used = new Set();
+    return {
+      bio: pickDistinct(derivedRng(G.seed, idn, 41), row[0], vals, used),
+      strat: pickDistinct(derivedRng(G.seed, idn, 42), row[1], vals, used),
+      track: pickDistinct(derivedRng(G.seed, idn, 43), row[2], vals, used),
+      risk: pickDistinct(derivedRng(G.seed, idn, 44), row[3], vals, used)
+    };
+  }
+  function newsBriefingItems() {
+    var d = cache.news;
+    var G = window.G;
+    if (!d || !d.map || !G) return null;
+    // Live context: top movers + a deterministic rival pick. Numbers in the
+    // briefing come from live G state only (no invented figures).
+    var movers = (G.stocks || []).slice().sort(function (a, b) { return Math.abs(b.changePct || 0) - Math.abs(a.changePct || 0); }).slice(0, 5);
+    var sectors = ['Technology', 'Healthcare', 'Financials', 'Energy', 'Consumer Discretionary', 'Industrials'];
+    var cats = ['MARKETS', 'RIVALS', 'SHOCKS', 'WORLD', 'COUNTRY', 'COMPANY'];
+    var items = [];
+    cats.forEach(function (cat, ci) {
+      var row = d.map.get(cat);
+      if (!row) return;
+      var rng = derivedRng(G.seed, (G.day || 1) * 100 + ci, 51);
+      var pair = pick(rng, row[0]);
+      if (!pair) return;
+      var mv = movers[rng.int(0, Math.max(0, movers.length - 1))] || {};
+      var rivals = G.aiPlayers || [];
+      var rv = rivals.length ? rivals[rng.int(0, rivals.length - 1)] : {};
+      var vals = {
+        T: mv.ticker || '', N: mv.name || '', S: sectors[rng.int(0, sectors.length - 1)],
+        R: rv.name || '', F: rv.fundName || rv.shortTag || '', C: mv.hqCity || '',
+        P: (mv.changePct || 0).toFixed(2)
+      };
+      items.push({ cat: cat, head: fill(pair[0], vals), body: fill(pair[1], vals) });
+    });
+    return items;
+  }
+
+  /* ---------- chart rendering (additive canvases, never game canvases) -- */
+  function drawLineChart(canvas, closes, opts) {
+    opts = opts || {};
+    var dpr = window.devicePixelRatio || 1;
+    var w = canvas.clientWidth || 300, h = canvas.clientHeight || 140;
+    canvas.width = Math.max(50, w) * dpr;
+    canvas.height = Math.max(40, h) * dpr;
+    var ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, w, h);
+    if (!closes || closes.length < 2) return;
+    var min = Infinity, max = -Infinity;
+    closes.forEach(function (c) { if (c < min) min = c; if (c > max) max = c; });
+    if (max - min < 1e-9) { max = min + 1; }
+    var pad = (max - min) * 0.08;
+    min -= pad; max += pad;
+    var up = closes[closes.length - 1] >= closes[0];
+    var col = up ? '#00C805' : '#FF5000';
+    var xOf = function (i) { return 4 + (i / (closes.length - 1)) * (w - 8); };
+    var yOf = function (v) { return 8 + (1 - (v - min) / (max - min)) * (h - 16); };
+    ctx.beginPath();
+    closes.forEach(function (c, i) { if (i === 0) ctx.moveTo(xOf(i), yOf(c)); else ctx.lineTo(xOf(i), yOf(c)); });
+    ctx.strokeStyle = col; ctx.lineWidth = 1.8; ctx.stroke();
+    ctx.lineTo(xOf(closes.length - 1), h - 4);
+    ctx.lineTo(xOf(0), h - 4);
+    ctx.closePath();
+    var grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, col + '2e'); grad.addColorStop(1, col + '05');
+    ctx.fillStyle = grad; ctx.fill();
+    if (opts.labels !== false) {
+      var light = document.body.classList.contains('light-theme');
+      ctx.fillStyle = light ? '#64748B' : '#8A919E'; ctx.font = '10px ui-monospace, monospace';
+      ctx.fillText(max.toFixed(2), 6, 12);
+      ctx.fillText(min.toFixed(2), 6, h - 6);
+      ctx.fillStyle = col;
+      var lbl = closes[closes.length - 1].toFixed(2);
+      ctx.fillText(lbl, Math.max(6, w - ctx.measureText(lbl).width - 6), 12);
+    }
+  }
+  function drawSpark(canvas, closes) {
+    drawLineChart(canvas, closes, { labels: false });
+  }
+
+  /* ---------- injection helpers ----------------------------------------- */
+  var CANONICAL_SEED = 849201;
+  function skelHtml(label) {
+    return '<div class="ph-skel-block" role="status" aria-label="' + esc(label || 'Loading') + '">' +
+      '<div class="ph-skel-line" style="width:92%"></div>' +
+      '<div class="ph-skel-line" style="width:78%"></div>' +
+      '<div class="ph-skel-line" style="width:85%"></div>' +
+      '<div class="ph-skel-note">' + esc(label || 'Loading…') + '</div></div>';
+  }
+  function closestCard(el) {
+    while (el && !(el.classList && el.classList.contains('rh-card'))) el = el.parentElement;
+    return el;
+  }
+  function ensureCardAfter(anchorEl, cardId) {
+    var existing = $(cardId);
+    if (existing) return existing;
+    var anchorCard = closestCard(anchorEl);
+    if (!anchorCard || !anchorCard.parentNode) return null;
+    var card = document.createElement('div');
+    card.id = cardId;
+    card.className = anchorCard.className + ' ph-data-card';
+    anchorCard.parentNode.insertBefore(card, anchorCard.nextSibling);
+    return card;
+  }
+  function removeCard(cardId) {
+    var c = $(cardId);
+    if (c && c.parentNode) c.parentNode.removeChild(c);
+  }
+  function profileCardHtml(title, icon, bodyHtml) {
+    return '<h3 class="ph-data-title">' + icon + ' ' + esc(title) + '</h3>' + bodyHtml;
+  }
+  function paraHtml(text, cls) {
+    return '<p class="ph-data-para' + (cls ? ' ' + cls : '') + '">' + text + '</p>';
+  }
+
+  /* ---------- stock + ETF detail surfaces ------------------------------- */
+  var lastStockSig = '', lastEtfSig = '';
+  function currentStock() {
+    var G = window.G;
+    if (!G || !G.stocks) return null;
+    return G.stocks.find(function (s) { return s.ticker === G.activeTicker; }) || G.stocks[0] || null;
+  }
+  function currentEtf() {
+    var G = window.G;
+    if (!G || !G.etfs) return null;
+    var etf = G.etfs.find(function (e) { return e.sym === G.activeEtfSym; });
+    if (etf) return etf;
+    var t = $('etfPageTitle');
+    if (t) {
+      var m = /\(([^)]+)\)\s*$/.exec(t.textContent || '');
+      if (m) etf = G.etfs.find(function (e) { return e.sym === m[1]; });
+    }
+    return etf || G.etfs[0] || null;
+  }
+  function stockChartSeries(st) {
+    var d = cache.chartsStocks;
+    if (!d || !d.series) return null;
+    var row = d.series.get(st.id);
+    if (!row) return null;
+    var bars = decodeOHLC(row[2], row[1], d.n || 500, true);
+    if (!chartGate(d.seed, bars, st.history)) return null;
+    return mergeLiveTail(bars, st.history);
+  }
+  function etfChartSeries(etf) {
+    var d = cache.chartsEtfs;
+    if (!d || !d.series) return null;
+    var row = d.series.get(etf.theme);
+    if (!row) return null;
+    var bars = decodeOHLC(row[2], row[1], d.n || 500);
+    if (!chartGate(d.seed, bars, etf.history)) return null;
+    return mergeLiveTail(bars, etf.history);
+  }
+  function deepChartHtml(title, caption) {
+    return '<h3 class="ph-data-title">📈 ' + esc(title) + '</h3>' +
+      '<div class="ph-deep-chart-wrap"><canvas class="ph-deep-chart"></canvas></div>' +
+      '<p class="ph-data-caption">' + esc(caption) + '</p>';
+  }
+  function refreshStockDetail() {
+    var anchor = $('aboutStockDescription');
+    if (!anchor) return;
+    var st = currentStock();
+    if (!st) return;
+    var sig = st.ticker + '|' + loadState.stocks + '|' + loadState.chartsStocks + '|' + (window.G && window.G.seed);
+    // Profile card
+    if (loadState.stocks === 'ready') {
+      var prof = stockProfile(st);
+      if (prof) {
+        var card = ensureCardAfter(anchor, 'phStockProfile');
+        if (card && sig !== lastStockSig) {
+          card.innerHTML = profileCardHtml('Company Profile', '🏢',
+            paraHtml(prof.desc) + paraHtml(prof.strat) +
+            (prof.sub ? paraHtml(prof.sub, 'ph-data-sub') : '') +
+            paraHtml('⚠ ' + prof.risk, 'ph-data-risk'));
+        }
+      }
+    } else if (loadState.stocks === 'loading') {
+      var cardL = ensureCardAfter(anchor, 'phStockProfile');
+      if (cardL && !cardL.getAttribute('data-ph-skel')) {
+        cardL.innerHTML = profileCardHtml('Company Profile', '🏢', skelHtml('Loading company profile…'));
+        cardL.setAttribute('data-ph-skel', '1');
+      }
+    } else if (loadState.stocks === 'failed' || loadState.stocks === 'idle') {
+      removeCard('phStockProfile');
+    }
+    // Deep chart card (seed-gated; skeleton only on the canonical seed)
+    var chartAnchor = $('stockPriceCanvas');
+    if (chartAnchor) {
+      if (loadState.chartsStocks === 'ready') {
+        var series = stockChartSeries(st);
+        if (series) {
+          var cc = ensureCardAfter(chartAnchor, 'phStockDeepChart');
+          if (cc && sig !== lastStockSig) {
+            cc.removeAttribute('data-ph-skel');
+            cc.innerHTML = deepChartHtml('Extended History — ' + series.length + ' Days',
+              'Deep history from the game\'s own price engine, merged with the live tail. Last close $' + series[series.length - 1].close.toFixed(2) + '.');
+            var cv = cc.querySelector('canvas');
+            if (cv) drawLineChart(cv, series.map(function (b) { return b.close; }));
+          }
+        } else {
+          removeCard('phStockDeepChart');
+        }
+      } else if (loadState.chartsStocks === 'loading' && window.G && Number(window.G.seed) === CANONICAL_SEED) {
+        var ccL = ensureCardAfter(chartAnchor, 'phStockDeepChart');
+        if (ccL && !ccL.getAttribute('data-ph-skel')) {
+          ccL.innerHTML = deepChartHtml('Extended History', 'Loading extended history…');
+          ccL.setAttribute('data-ph-skel', '1');
+        }
+      } else {
+        removeCard('phStockDeepChart');
+      }
+    }
+    lastStockSig = sig;
+  }
+  function refreshEtfDetail() {
+    var anchor = $('aboutEtfDescription');
+    if (!anchor) return;
+    var etf = currentEtf();
+    if (!etf) return;
+    var sig = etf.sym + '|' + loadState.etfs + '|' + loadState.chartsEtfs + '|' + (window.G && window.G.seed);
+    if (loadState.etfs === 'ready') {
+      var prof = etfProfile(etf);
+      if (prof) {
+        var card = ensureCardAfter(anchor, 'phEtfProfile');
+        if (card && sig !== lastEtfSig) {
+          card.innerHTML = profileCardHtml('Fund Profile', '📦',
+            paraHtml(prof.desc) + paraHtml(prof.strat) + paraHtml('⚠ ' + prof.risk, 'ph-data-risk'));
+        }
+      }
+    } else if (loadState.etfs === 'loading') {
+      var cardL = ensureCardAfter(anchor, 'phEtfProfile');
+      if (cardL && !cardL.getAttribute('data-ph-skel')) {
+        cardL.innerHTML = profileCardHtml('Fund Profile', '📦', skelHtml('Loading fund profile…'));
+        cardL.setAttribute('data-ph-skel', '1');
+      }
+    } else if (loadState.etfs === 'failed' || loadState.etfs === 'idle') {
+      removeCard('phEtfProfile');
+    }
+    var chartAnchor = $('etfPriceCanvas');
+    if (chartAnchor) {
+      if (loadState.chartsEtfs === 'ready') {
+        var series = etfChartSeries(etf);
+        if (series) {
+          var cc = ensureCardAfter(chartAnchor, 'phEtfDeepChart');
+          if (cc && sig !== lastEtfSig) {
+            cc.removeAttribute('data-ph-skel');
+            cc.innerHTML = deepChartHtml('Extended History — ' + series.length + ' Days',
+              'Deep history from the game\'s own price engine, merged with the live tail. Last close $' + series[series.length - 1].close.toFixed(2) + '.');
+            var cv = cc.querySelector('canvas');
+            if (cv) drawLineChart(cv, series.map(function (b) { return b.close; }));
+          }
+        } else {
+          removeCard('phEtfDeepChart');
+        }
+      } else if (loadState.chartsEtfs === 'loading' && window.G && Number(window.G.seed) === CANONICAL_SEED) {
+        var ccL = ensureCardAfter(chartAnchor, 'phEtfDeepChart');
+        if (ccL && !ccL.getAttribute('data-ph-skel')) {
+          ccL.innerHTML = deepChartHtml('Extended History', 'Loading extended history…');
+          ccL.setAttribute('data-ph-skel', '1');
+        }
+      } else {
+        removeCard('phEtfDeepChart');
+      }
+    }
+    lastEtfSig = sig;
+  }
+
+  /* ---------- rival dossier --------------------------------------------- */
+  var lastDossierSig = '';
+  function refreshDossier() {
+    var bio = $('aiDossierBio');
+    var nameEl = $('aiDossierName');
+    if (!bio || !nameEl) return;
+    var G = window.G;
+    if (!G || !G.aiPlayers) return;
+    var sig = (nameEl.textContent || '') + '|' + loadState.rivals;
+    if (sig === lastDossierSig) return;
+    lastDossierSig = sig;
+    if (loadState.rivals !== 'ready') {
+      if (loadState.rivals === 'loading') {
+        var cardL = ensureCardAfter(bio, 'phRivalProfile');
+        if (cardL && !cardL.getAttribute('data-ph-skel')) {
+          cardL.innerHTML = profileCardHtml('Rival Dossier', '🕵️', skelHtml('Loading rival dossier…'));
+          cardL.setAttribute('data-ph-skel', '1');
+        }
+      } else {
+        removeCard('phRivalProfile');
+      }
+      return;
+    }
+    // Match the inspected rival by the name shown in the dossier header.
+    var header = nameEl.textContent || '';
+    var ai = G.aiPlayers.find(function (a) { return header.indexOf(a.name) === 0; });
+    if (!ai) { removeCard('phRivalProfile'); return; }
+    var prof = rivalProfile(ai);
+    if (!prof) { removeCard('phRivalProfile'); return; }
+    var card = ensureCardAfter(bio, 'phRivalProfile');
+    if (!card) return;
+    card.removeAttribute('data-ph-skel');
+    card.innerHTML = profileCardHtml('Rival Dossier — ' + ai.shortTag, '🕵️',
+      paraHtml(prof.bio) + paraHtml(prof.strat) + paraHtml(prof.track) + paraHtml(prof.risk, 'ph-data-risk'));
+  }
+
+  /* ---------- grid injection (properties / businesses / VC / FX / comm) - */
+  function parseOnclickId(card, patterns) {
+    var btns = card.querySelectorAll('[onclick]');
+    for (var i = 0; i < btns.length; i++) {
+      var oc = btns[i].getAttribute('onclick') || '';
+      for (var j = 0; j < patterns.length; j++) {
+        var m = patterns[j].exec(oc);
+        if (m) return m[1];
+      }
+    }
+    return null;
+  }
+  function injectGridNote(card, html, pendingFlag) {
+    var note = card.querySelector(':scope > .ph-grid-note');
+    if (!note) {
+      note = document.createElement('div');
+      note.className = 'ph-grid-note';
+      card.appendChild(note);
+    }
+    note.innerHTML = html;
+    if (pendingFlag) card.setAttribute('data-ph-pending', '1');
+    else card.removeAttribute('data-ph-pending');
+    card.setAttribute('data-ph-done', '1');
+  }
+  function processGrid(gridId, handler) {
+    var grid = $(gridId);
+    if (!grid) return;
+    var cards = grid.querySelectorAll(':scope > div');
+    for (var i = 0; i < cards.length; i++) {
+      var card = cards[i];
+      if (card.getAttribute('data-ph-done') && !card.getAttribute('data-ph-pending')) continue;
+      handler(card);
+    }
+  }
+  function watchGrid(gridId, handler) {
+    var grid = $(gridId);
+    if (!grid || grid.getAttribute('data-ph-watched')) return;
+    grid.setAttribute('data-ph-watched', '1');
+    // Synchronous re-injection: the game's 1s clock tick rebuilds grid innerHTML,
+    // wiping injected notes. A MutationObserver callback runs as a microtask, so
+    // processing here puts notes back BEFORE the next paint — no visible flicker.
+    // (A 150ms debounce left notes absent ~15% of the time; probe Nov 13 showed
+    // 24 -> 0 -> 24 oscillation on the RE grid.) Cards already processed carry
+    // data-ph-done, so re-scans are cheap; unprocessed cards are retried on the
+    // next scan, and the 5s re-arm + data-ready fan-out remain as backstops.
+    new MutationObserver(function () {
+      processGrid(gridId, handler);
+    }).observe(grid, { childList: true, subtree: false });
+    processGrid(gridId, handler);
+  }
+  function propertyCardHandler(card) {
+    var G = window.G;
+    if (!G || !G.properties) return;
+    var idStr = parseOnclickId(card, [/buyPropertyWithMortgage\((\d+)/]);
+    var p = null;
+    if (idStr != null) p = G.properties.find(function (x) { return x.id === Number(idStr); });
+    if (!p) {
+      var h3 = card.querySelector('h3');
+      var nm = h3 ? h3.textContent.trim() : '';
+      if (nm) p = G.properties.find(function (x) { return x.name === nm; });
+    }
+    if (!p) return;
+    if (loadState.properties === 'loading') { injectGridNote(card, skelHtml('Loading property details…'), true); return; }
+    if (loadState.properties !== 'ready') return;
+    var prof = propertyProfile(p);
+    if (!prof) return;
+    var specs = prof.beds > 0
+      ? esc(prof.sqft.toLocaleString('en-US')) + ' sqft • ' + prof.beds + ' bd • ' + prof.baths + ' ba'
+      : prof.studio
+        ? esc(prof.sqft.toLocaleString('en-US')) + ' sqft • studio • ' + prof.baths + ' ba'
+        : esc(prof.sqft.toLocaleString('en-US')) + ' sqft • ' + prof.units + ' units';
+    injectGridNote(card,
+      '<div class="ph-grid-title">📍 ' + esc(prof.nb || p.city) + ' • ' + specs + '</div>' +
+      '<p class="ph-grid-text">' + prof.desc + '</p>' +
+      (prof.amen ? '<p class="ph-grid-text ph-grid-dim">' + prof.amen + '</p>' : ''), false);
+  }
+  function bizCardHandler(card) {
+    var G = window.G;
+    if (!G || !G.smallBusinesses) return;
+    var idStr = parseOnclickId(card, [/buySmallBusinessCash\((\d+)/, /obtainOrViewSmallBizReport\((\d+)/, /listSmallBusinessForSale\((\d+)/, /unlistSmallBusiness\((\d+)/]);
+    if (idStr == null) return;
+    var biz = G.smallBusinesses.find(function (x) { return x.id === Number(idStr); });
+    if (!biz) return;
+    if (loadState.businesses === 'loading') { injectGridNote(card, skelHtml('Loading business profile…'), true); return; }
+    if (loadState.businesses !== 'ready') return;
+    var prof = bizProfile(biz);
+    if (!prof) return;
+    injectGridNote(card,
+      '<div class="ph-grid-title">🏪 Owner: ' + esc(prof.own) + '</div>' +
+      '<p class="ph-grid-text">' + prof.pitch + '</p>' +
+      (prof.bg ? '<p class="ph-grid-text ph-grid-dim">' + prof.bg + '</p>' : ''), false);
+  }
+  function vcCardHandler(card) {
+    var G = window.G;
+    if (!G || !G.vcStartups) return;
+    var idStr = parseOnclickId(card, [/investInVcStartup\('([^']+)'\)/]);
+    if (idStr == null) return;
+    var vc = G.vcStartups.find(function (x) { return x.id === idStr; });
+    if (!vc) return;
+    if (loadState.businesses === 'loading') { injectGridNote(card, skelHtml('Loading founder bio…'), true); return; }
+    if (loadState.businesses !== 'ready') return;
+    var prof = vcProfile(vc);
+    if (!prof) return;
+    injectGridNote(card,
+      '<div class="ph-grid-title">👤 Founder: ' + esc(prof.founder) + '</div>' +
+      '<p class="ph-grid-text">' + prof.bio + '</p>' +
+      (prof.fundNote ? '<p class="ph-grid-text ph-grid-dim">' + prof.fundNote + '</p>' : ''), false);
+  }
+  function fxCardHandler(card) {
+    var G = window.G;
+    if (!G || !G.forexPairs) return;
+    var hdr = card.textContent || '';
+    var fx = G.forexPairs.find(function (f) { return hdr.indexOf(f.pair) !== -1; });
+    if (!fx) return;
+    if (loadState.chartsFx === 'loading') { injectGridNote(card, skelHtml('Loading chart history…'), true); return; }
+    if (loadState.chartsFx !== 'ready') return;
+    var d = cache.chartsFx;
+    if (!d || !d.series) return;
+    var row = d.series.get(fx.pair);
+    if (!row) return;
+    if (Number(G.seed) !== Number(d.seed)) return;
+    var closes = decodeCloses(row[2], Math.pow(10, row[0]), row[1], d.n || 500);
+    var merged = mergeFxCloses(closes, fx.history);
+    if (!merged) return;
+    var pts = merged.slice(-160).map(function (b) { return b.close; });
+    injectGridNote(card, '<div class="ph-grid-title">📈 500-day history</div><canvas class="ph-spark"></canvas>', false);
+    var cv = card.querySelector('canvas.ph-spark');
+    if (cv) drawSpark(cv, pts);
+  }
+  function commCardHandler(card) {
+    var G = window.G;
+    if (!G || !G.commodities) return;
+    var hdr = card.textContent || '';
+    var c = G.commodities.find(function (x) { return hdr.indexOf(x.sym) !== -1; });
+    if (!c) return;
+    if (loadState.chartsComm === 'loading') { injectGridNote(card, skelHtml('Loading chart history…'), true); return; }
+    if (loadState.chartsComm !== 'ready') return;
+    var d = cache.chartsComm;
+    if (!d || !d.series) return;
+    var row = d.series.get(c.sym);
+    if (!row) return;
+    if (Number(G.seed) !== Number(d.seed)) return;
+    var bars = decodeOHLC(row[1], row[0], d.n || 500);
+    var closes = bars.map(function (b) { return b.close; });
+    closes.push(Number(c.price)); // live price point appended to shipped history
+    var pts = closes.slice(-160);
+    injectGridNote(card, '<div class="ph-grid-title">📈 500-day history + live</div><canvas class="ph-spark"></canvas>', false);
+    var cv = card.querySelector('canvas.ph-spark');
+    if (cv) drawSpark(cv, pts);
+  }
+
+  /* ---------- news briefing ---------------------------------------------- */
+  var lastBriefSig = '';
+  function refreshBriefing() {
+    var scroll = $('ph-news-scroll');
+    if (!scroll) return;
+    var G = window.G;
+    if (!G) return;
+    var sig = (G.seed || '') + '|' + (G.day || 1) + '|' + loadState.news;
+    if (sig === lastBriefSig) return;
+    lastBriefSig = sig;
+    var box = $('phNewsBriefing');
+    if (loadState.news === 'loading') {
+      if (!box) {
+        box = document.createElement('div');
+        box.id = 'phNewsBriefing';
+        box.className = 'ph-briefing';
+        scroll.insertBefore(box, scroll.firstChild);
+      }
+      box.innerHTML = '<h3 class="ph-briefing-title">📰 Market Briefing</h3>' + skelHtml('Loading market briefing…');
+      return;
+    }
+    if (loadState.news !== 'ready') {
+      if (box && box.parentNode) box.parentNode.removeChild(box);
+      return;
+    }
+    var items = newsBriefingItems();
+    if (!items || !items.length) {
+      if (box && box.parentNode) box.parentNode.removeChild(box);
+      return;
+    }
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'phNewsBriefing';
+      box.className = 'ph-briefing';
+      scroll.insertBefore(box, scroll.firstChild);
+    }
+    var html = '<h3 class="ph-briefing-title">📰 Market Briefing <span class="ph-data-tag">Day ' + esc(G.day || 1) + '</span></h3>';
+    items.forEach(function (it) {
+      html += '<div class="ph-brief-item"><div class="ph-brief-cat">' + esc(it.cat) + '</div>' +
+        '<div class="ph-brief-head">' + it.head + '</div>' +
+        '<div class="ph-brief-body">' + it.body + '</div></div>';
+    });
+    box.innerHTML = html;
+  }
+
+  /* ---------- portfolio index chart ------------------------------------- */
+  var lastIndexSig = '';
+  var indexDecoded = null;
+  function refreshIndexChart() {
+    var host = $('portfolio-host');
+    if (!host || !host.parentNode) return;
+    var G = window.G;
+    if (!G) return;
+    var sig = (G.seed || '') + '|' + loadState.chartsIndex;
+    var box = $('phIndexChart');
+    if (loadState.chartsIndex === 'loading' && Number(G.seed) === CANONICAL_SEED) {
+      if (!box) {
+        box = document.createElement('div');
+        box.id = 'phIndexChart';
+        box.className = 'ph-index-chart';
+        host.parentNode.insertBefore(box, host);
+      }
+      if (!box.getAttribute('data-ph-skel')) {
+        box.innerHTML = '<h3 class="ph-data-title">📊 Market Index — Extended History</h3>' + skelHtml('Loading index history…');
+        box.setAttribute('data-ph-skel', '1');
+      }
+      return;
+    }
+    if (loadState.chartsIndex !== 'ready') {
+      if (box && box.parentNode) box.parentNode.removeChild(box);
+      lastIndexSig = sig;
+      return;
+    }
+    var d = cache.chartsIndex;
+    if (!d || !d.series || Number(G.seed) !== Number(d.seed)) {
+      if (box && box.parentNode) box.parentNode.removeChild(box);
+      lastIndexSig = sig;
+      return;
+    }
+    if (sig === lastIndexSig && box) return;
+    lastIndexSig = sig;
+    if (!indexDecoded) {
+      indexDecoded = {};
+      d.series.forEach(function (row, name) {
+        indexDecoded[name] = decodeCloses(row[1], 100, row[0], d.n || 500).map(function (b) { return b.close; });
+      });
+    }
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'phIndexChart';
+      box.className = 'ph-index-chart';
+      host.parentNode.insertBefore(box, host);
+    }
+    box.removeAttribute('data-ph-skel');
+    var names = Object.keys(indexDecoded);
+    var html = '<h3 class="ph-data-title">📊 Market Index — Extended History</h3>' +
+      '<div class="ph-index-chips">' + names.map(function (n, i) {
+        return '<button type="button" class="ph-index-chip' + (i === 0 ? ' ph-index-chip-on' : '') + '" data-idx="' + esc(n) + '">' + esc(n === 'TOTAL' ? 'Total Market' : n) + '</button>';
+      }).join('') + '</div>' +
+      '<div class="ph-deep-chart-wrap"><canvas class="ph-deep-chart"></canvas></div>' +
+      '<p class="ph-data-caption">Cap-weighted index from the top 1,000 stocks at the world seed. Baseline Day 1.</p>';
+    box.innerHTML = html;
+    var cv = box.querySelector('canvas');
+    var drawFor = function (name) { if (cv) drawLineChart(cv, indexDecoded[name]); };
+    drawFor('TOTAL');
+    Array.prototype.forEach.call(box.querySelectorAll('.ph-index-chip'), function (chip) {
+      chip.addEventListener('click', function () {
+        Array.prototype.forEach.call(box.querySelectorAll('.ph-index-chip'), function (c) { c.classList.remove('ph-index-chip-on'); });
+        chip.classList.add('ph-index-chip-on');
+        drawFor(chip.getAttribute('data-idx'));
+      });
+    });
+  }
+
+  /* ---------- data-ready fan-out ---------------------------------------- */
+  function onDataReady(key) {
+    lastStockSig = ''; lastEtfSig = ''; lastDossierSig = ''; lastBriefSig = '';
+    if (key === 'chartsIndex') { indexDecoded = null; lastIndexSig = ''; }
+    refreshAll();
+    // Re-process grid cards that rendered skeletons while loading.
+    ['realEstateGrid', 'smallBizMarketplaceGrid', 'vcStartupsGrid', 'forexPairsGrid', 'commoditiesGrid'].forEach(function (gid) {
+      var grid = $(gid);
+      if (!grid) return;
+      Array.prototype.forEach.call(grid.querySelectorAll('[data-ph-pending]'), function (card) {
+        card.removeAttribute('data-ph-done');
+        card.removeAttribute('data-ph-pending');
+      });
+    });
+    processGrid('realEstateGrid', propertyCardHandler);
+    processGrid('smallBizMarketplaceGrid', bizCardHandler);
+    processGrid('vcStartupsGrid', vcCardHandler);
+    processGrid('forexPairsGrid', fxCardHandler);
+    processGrid('commoditiesGrid', commCardHandler);
+  }
+  function refreshAll() {
+    try { refreshStockDetail(); } catch (e) {}
+    try { refreshEtfDetail(); } catch (e) {}
+    try { refreshDossier(); } catch (e) {}
+    try { refreshBriefing(); } catch (e) {}
+    try { refreshIndexChart(); } catch (e) {}
+  }
+
+  /* ---------- app-open observation (lazy trigger) ----------------------- */
+  function currentOpenApp() {
+    var wins = document.querySelectorAll('.ph-window.ph-open');
+    if (!wins.length) return null;
+    var id = wins[0].id || '';
+    return id.replace(/^ph-win-/, '') || null;
+  }
+  function armAppObserver() {
+    var layer = $('ph-app-layer');
+    if (!layer) return;
+    var wins = layer.querySelectorAll('.ph-window');
+    var obs = new MutationObserver(function (muts) {
+      muts.forEach(function (m) {
+        var el = m.target;
+        if (el.classList && el.classList.contains('ph-open')) {
+          var id = (el.id || '').replace(/^ph-win-/, '');
+          if (id) {
+            ensureForApp(id);
+            setTimeout(refreshAll, 60);
+          }
+        }
+      });
+    });
+    Array.prototype.forEach.call(wins, function (w) { obs.observe(w, { attributes: true, attributeFilter: ['class'] }); });
+    var open = currentOpenApp();
+    if (open) ensureForApp(open);
+  }
+  function armGridObservers() {
+    watchGrid('realEstateGrid', propertyCardHandler);
+    watchGrid('smallBizMarketplaceGrid', bizCardHandler);
+    watchGrid('vcStartupsGrid', vcCardHandler);
+    watchGrid('forexPairsGrid', fxCardHandler);
+    watchGrid('commoditiesGrid', commCardHandler);
+  }
+
+  /* ---------- init ------------------------------------------------------- */
+  var armed = false;
+  function tryArm() {
+    if (armed) return;
+    if (!window.G || !window.G.human || !$('ph-app-layer')) return;
+    armed = true;
+    armAppObserver();
+    armGridObservers();
+    refreshAll();
+    setInterval(refreshAll, 1500);
+    setInterval(armGridObservers, 5000); // grids are re-created by game renders; re-arm cheaply
+  }
+  var armTimer = setInterval(function () {
+    tryArm();
+    if (armed) clearInterval(armTimer);
+  }, 400);
+  setTimeout(function () { clearInterval(armTimer); tryArm(); }, 30000);
+
+  window.__phData = {
+    get loadState() { var o = {}; Object.keys(loadState).forEach(function (k) { o[k] = loadState[k]; }); return o; },
+    get fetchCount() { var o = {}; Object.keys(fetchCount).forEach(function (k) { o[k] = fetchCount[k]; }); return o; },
+    get cacheKeys() { return Object.keys(cache).filter(function (k) { return !!cache[k]; }); },
+    get armed() { return armed; },
+    refresh: refreshAll,
+    ensureForApp: ensureForApp,
+    decodeOHLC: decodeOHLC,
+    decodeCloses: decodeCloses,
+    chartGate: chartGate
   };
 })();
 
