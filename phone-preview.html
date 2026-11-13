@@ -32041,6 +32041,44 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
     if (currentApp) { histPushed = false; closeCurrentApp(); }
   });
 
+  /* ---------- Phase 3: cross-tab link routing ----------
+     In-tab links call the game's switchMainTab() to a DIFFERENT app's tab
+     (e.g. VC's "Switch to Private eREITs Tab"). Without routing, the current
+     window shows only its hero: the target tab lives in another (closed)
+     window. This observes tab visibility only — it never touches onclick
+     handlers, so chained actions in the game's own handlers run untouched —
+     and opens the owning app when the visible tab moves out of the current
+     window. The check runs on a short delay so the whole click handler,
+     including chained actions after the switch, settles first. */
+  var TAB_APP = { finance: 'bank', stocks: 'stocks', etfs: 'stocks', options: 'stocks', realestate: 'realestate', privatere: 'ereits', smallbiz: 'smallbiz', forex: 'forex', commodities: 'commodities', vc: 'vc', casino: 'casino', competitors: 'rivals', managers: 'managers', portfolio: 'portfolio' };
+  var APP_TABS = { bank: ['finance'], stocks: ['stocks', 'etfs', 'options'], realestate: ['realestate'], ereits: ['privatere'], smallbiz: ['smallbiz'], forex: ['forex'], commodities: ['commodities'], vc: ['vc'], casino: ['casino'], rivals: ['competitors'], managers: ['managers'], portfolio: ['portfolio'], news: ['finance'], job: [], settings: [] };
+  var routeTimer = null;
+  function scheduleRouteCheck() {
+    if (routeTimer) return;
+    routeTimer = setTimeout(function () { routeTimer = null; routeCheck(); }, 40);
+  }
+  function routeCheck() {
+    if (!unlocked || !currentApp) return;
+    var vis = null, secs = document.querySelectorAll('.tab-section');
+    for (var i = 0; i < secs.length; i++) {
+      if (!secs[i].classList.contains('hidden')) { vis = secs[i].id.replace('tab-', ''); break; }
+    }
+    if (!vis) return; /* no tab visible (legacy 'coaching' target): leave the view alone */
+    var expected = APP_TABS[currentApp] || [];
+    if (expected.indexOf(vis) !== -1) return;
+    var owner = TAB_APP[vis];
+    if (!owner) { if (vis === 'home') goHome(); return; }
+    if (owner === currentApp) return;
+    if (owner === 'stocks') { prefs.stocksTab = vis; savePrefs(); }
+    openApp(owner);
+  }
+  try {
+    var tabObs = new MutationObserver(function () { scheduleRouteCheck(); });
+    Array.prototype.forEach.call(document.querySelectorAll('.tab-section'), function (s) {
+      tabObs.observe(s, { attributes: true, attributeFilter: ['class'] });
+    });
+  } catch (e) {}
+
   /* ---------- lock screen ---------- */
   function updateLockClock() {
     var d = new Date();
