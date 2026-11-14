@@ -20377,6 +20377,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         hs.dustParticles = [];
         const pickedHorse = hs.lineup.find(h => h.lane === hs.selectedLane) || hs.lineup[0];
         casinoState.statusText = `🏇 Race #${hs.raceNumber} Underway! You bet ${fmtMoney(bet)} on #${pickedHorse.lane} ${pickedHorse.name} (${pickedHorse.winChancePct}% • ${pickedHorse.shortRewardTag})!`;
+        renderCasinoTab(); // Refresh so pick/start buttons render disabled while racing (casino-fix#11).
 
         const settleHorseRace = () => {
           hs.inRace = false;
@@ -20952,6 +20953,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         ns.inRace = true;
         const pickedCar = ns.lineup.find(c => c.car === ns.selectedCar) || ns.lineup[0];
         casinoState.statusText = `🏎️ NASCAR Race #${ns.raceNumber} Green Flag! You bet ${fmtMoney(bet)} on Car #${pickedCar.car} ${pickedCar.name} (${pickedCar.winChancePct}% • ${pickedCar.shortRewardTag})!`;
+        renderCasinoTab(); // Refresh so pick/start buttons render disabled while racing (casino-fix#11).
 
         const settleNascarRace = () => {
           ns.inRace = false;
@@ -22320,7 +22322,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           totalWagered += bet;
 
           if (h.surrendered) {
-            const refund = Number((bet * 0.5).toFixed(2));
+            // Late surrender vs a dealer natural pays NO refund (casino-fix#4): the hand was already lost.
+            const refund = dealerIsNat21 ? 0 : Number((bet * 0.5).toFixed(2));
             totalReturned += refund;
             h.outcomeText = `🏳️ Surrender (-${fmtMoney(bet - refund)})`;
             handSummaries.push(`${hLabel}: Surrendered`);
@@ -22401,6 +22404,17 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         settleAllHumanBlackjackHands(bj);
       }
 
+      // Dealer peek (casino-fix#4): if a dealer natural is pending under an Ace,
+      // any non-insurance action declines insurance and reveals it at once.
+      function revealDealerNaturalIfPending(bj) {
+        if (!bj.dealerNat21Pending) return false;
+        bj.dealerNat21Pending = false;
+        const active = syncActiveBjHandRef(bj);
+        if (active) active.stood = true;
+        settleAllHumanBlackjackHands(bj);
+        return true;
+      }
+
       window.casinoBjDeal = function() {
         ensureAllCasinoAiTables();
         const bj = casinoState.bj;
@@ -22414,6 +22428,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         bj.outcome = null;
         bj.insuranceBet = 0;
         bj.insuranceTaken = false;
+        bj.dealerNat21Pending = false;
         const initCards = [drawShoeCardWithCount(bj), drawShoeCardWithCount(bj)];
         bj.playerHands = [{
           cards: initCards,
@@ -22457,6 +22472,14 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           bj.playerHands[0].stood = true;
           settleAllHumanBlackjackHands(bj);
           return;
+        } else if (dScore === 21) {
+          // Dealer peeks on Ace upcard too (casino-fix#4): the dealer HAS a
+          // natural, but the player gets the Insurance decision first. Any other
+          // action declines insurance and reveals the natural immediately.
+          bj.dealerNat21Pending = true;
+          casinoState.statusText = `🃏 Dealer shows an Ace — Insurance? The dealer may have Blackjack! Take Insurance, or tap any action to reveal the dealer's hand.`;
+          renderCasinoTab();
+          return;
         } else {
           const softTag = isSoftBlackjackHand(bj.playerHand) ? `Soft ${pScore}` : `${pScore}`;
           const splitNote = canSplitBjHand(bj.playerHands[0], bj) ? ', Split' : '';
@@ -22469,6 +22492,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       window.casinoBjHit = function() {
         const bj = casinoState.bj;
         if (!bj.inProgress) return;
+        if (revealDealerNaturalIfPending(bj)) return;
         const active = syncActiveBjHandRef(bj);
         if (!active) return;
 
@@ -22499,6 +22523,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       window.casinoBjStand = function(fromDouble = false) {
         const bj = casinoState.bj;
         if (!bj.inProgress) return;
+        if (revealDealerNaturalIfPending(bj)) return;
         const active = syncActiveBjHandRef(bj);
         if (!active) return;
         if (!fromDouble) {
@@ -22511,6 +22536,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       window.casinoBjDouble = function() {
         const bj = casinoState.bj;
         if (!bj.inProgress) return;
+        if (revealDealerNaturalIfPending(bj)) return;
         const active = syncActiveBjHandRef(bj);
         if (!active || active.cards.length !== 2 || active.isSplitAces) return;
         if (G.human.cash < active.bet) {
@@ -22538,6 +22564,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       window.casinoBjSplit = function() {
         const bj = casinoState.bj;
         if (!bj.inProgress) return;
+        if (revealDealerNaturalIfPending(bj)) return;
         const active = syncActiveBjHandRef(bj);
         if (!canSplitBjHand(active, bj)) {
           showToast('Cannot Split Hand', 'You can Split when your active 2-card hand is a pair (or two 10-value cards) and you have enough cash to match the bet (up to 4 hands)!', false);
@@ -22607,6 +22634,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         bj.insuranceTaken = true;
         // If dealer has Natural 21 under the Ace, resolve immediately!
         if (calcBlackjackScore(bj.dealerHand) === 21) {
+          bj.dealerNat21Pending = false;
           active.stood = true;
           settleAllHumanBlackjackHands(bj);
           return;
@@ -22618,9 +22646,12 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       window.casinoBjSurrender = function() {
         const bj = casinoState.bj;
         if (!bj.inProgress) return;
+        if (revealDealerNaturalIfPending(bj)) return;
         const active = syncActiveBjHandRef(bj);
         if (!active || bj.playerHands.length !== 1 || active.isFromSplit || active.cards.length !== 2) return;
-        const refund = Number((active.bet * 0.5).toFixed(2));
+        // Late surrender vs a dealer natural pays NO refund (casino-fix#4): the hand was already lost.
+        const dealerNat21 = bj.dealerHand.length === 2 && calcBlackjackScore(bj.dealerHand) === 21;
+        const refund = dealerNat21 ? 0 : Number((active.bet * 0.5).toFixed(2));
         recordCasinoDelta(refund);
         active.surrendered = true;
         settleAllHumanBlackjackHands(bj);
@@ -24254,6 +24285,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       window.spinRouletteWheel = function() {
+        if (casinoState.anim && casinoState.anim.active && casinoState.anim.type === 'ROULETTE_SPIN') return; // Double-spin guard (casino-fix#3): a second tap must not cancel the in-flight spin's settlement.
         ensureAllCasinoAiTables();
         const bet = getValidatedCasinoBet();
         if (!bet) return;
@@ -24332,43 +24364,90 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           rotateCasinoTablePatronsIfNeeded('ROULETTE');
           renderCasinoTab();
         });
+        renderCasinoTab(); // Refresh AFTER the spin starts so the Spin button renders disabled while spinning (casino-fix#3).
       };
 
       // -----------------------------------------------------------------------
       // GAME 3: REALISTIC 2D TEXAS HOLD'EM POKER (AI BETS, RAISES, CALLS, FOLDS)
       // -----------------------------------------------------------------------
-      function evaluateHoldemBestHand(cards) {
-        if (!cards || cards.length < 2) return { score: 0, label: 'High Card' };
-        const vals = cards.map(c => c.val).sort((a, b) => b - a);
+      // --- Hold'em hand evaluation (casino-fix#2, casino-fix#6, casino-fix#7): true best-5-of-7 with
+      // full kicker tiebreaks. `key` is a lexicographic integer array
+      // [category, ...tiebreaks] so ties compare exactly; `score` keeps the
+      // legacy band scale (0/100/.../800, 900 = five of a kind) so the AI
+      // strength thresholds in computeAiHoldemStrength still work.
+      function compareHoldemKeyArrays(ka, kb) {
+        const n = Math.max(ka.length, kb.length);
+        for (let i = 0; i < n; i++) {
+          const d = (ka[i] || 0) - (kb[i] || 0);
+          if (d !== 0) return d;
+        }
+        return 0;
+      }
+
+      function compareHoldemEvals(a, b) {
+        return compareHoldemKeyArrays(a.key || [0], b.key || [0]);
+      }
+
+      function eval5HoldemHand(cards5) {
+        const vals = cards5.map(c => c.val).sort((a, b) => b - a);
+        const flush = cards5.every(c => c.suit === cards5[0].suit);
         const counts = {};
-        const suitCounts = {};
-        for (const c of cards) {
-          counts[c.val] = (counts[c.val] || 0) + 1;
-          suitCounts[c.suit] = (suitCounts[c.suit] || 0) + 1;
-        }
-        const pairs = Object.entries(counts).map(([v, cnt]) => ({ val: Number(v), cnt })).sort((a, b) => (b.cnt - a.cnt) || (b.val - a.val));
-        const isFlush = Object.values(suitCounts).some(cnt => cnt >= 5);
-
+        for (const v of vals) counts[v] = (counts[v] || 0) + 1;
+        const groups = Object.entries(counts).map(([v, cnt]) => ({ val: Number(v), cnt })).sort((a, b) => (b.cnt - a.cnt) || (b.val - a.val));
         const uniq = [...new Set(vals)].sort((a, b) => b - a);
-        if (uniq.includes(14)) uniq.push(1);
         let straightHigh = 0;
-        for (let i = 0; i <= uniq.length - 5; i++) {
-          if (uniq[i] - uniq[i + 4] === 4) {
-            straightHigh = uniq[i];
-            break;
-          }
+        if (uniq.length === 5) {
+          if (uniq[0] - uniq[4] === 4) straightHigh = uniq[0];
+          else if (uniq[0] === 14 && uniq[1] === 5) straightHigh = 5; // wheel: A-2-3-4-5
         }
+        if (groups[0].cnt === 5) return { cat: 9, tie: [groups[0].val], label: 'Five of a Kind' };
+        if (flush && straightHigh > 0) return { cat: 8, tie: [straightHigh], label: 'Straight Flush' };
+        if (groups[0].cnt === 4) return { cat: 7, tie: [groups[0].val, groups[1].val], label: 'Four of a Kind' };
+        if (groups[0].cnt === 3 && groups[1] && groups[1].cnt === 2) return { cat: 6, tie: [groups[0].val, groups[1].val], label: 'Full House' };
+        if (flush) return { cat: 5, tie: vals.slice(), label: 'Flush' };
+        if (straightHigh > 0) return { cat: 4, tie: [straightHigh], label: 'Straight' };
+        if (groups[0].cnt === 3) return { cat: 3, tie: [groups[0].val, ...vals.filter(v => v !== groups[0].val)], label: 'Three of a Kind' };
+        if (groups[0].cnt === 2 && groups[1] && groups[1].cnt === 2) {
+          const pr = [groups[0].val, groups[1].val].sort((a, b) => b - a);
+          return { cat: 2, tie: [pr[0], pr[1], vals.find(v => v !== pr[0] && v !== pr[1])], label: 'Two Pair' };
+        }
+        if (groups[0].cnt === 2) return { cat: 1, tie: [groups[0].val, ...vals.filter(v => v !== groups[0].val)], label: `Pair of ${CASINO_RANKS[groups[0].val - 2]}s` };
+        return { cat: 0, tie: vals.slice(), label: `${CASINO_RANKS[vals[0] - 2]} High` };
+      }
 
-        const kicker = (vals[0] || 0) * 0.01 + (vals[1] || 0) * 0.0001;
-        if (isFlush && straightHigh > 0) return { score: 800 + straightHigh + kicker, label: 'Straight Flush' };
-        if (pairs[0].cnt === 4) return { score: 700 + pairs[0].val + kicker, label: 'Four of a Kind' };
-        if (pairs[0].cnt === 3 && pairs[1] && pairs[1].cnt >= 2) return { score: 600 + pairs[0].val + kicker, label: 'Full House' };
-        if (isFlush) return { score: 500 + (vals[0] || 0) + kicker, label: 'Flush' };
-        if (straightHigh > 0) return { score: 400 + straightHigh + kicker, label: 'Straight' };
-        if (pairs[0].cnt === 3) return { score: 300 + pairs[0].val + kicker, label: 'Three of a Kind' };
-        if (pairs[0].cnt === 2 && pairs[1] && pairs[1].cnt === 2) return { score: 200 + pairs[0].val + pairs[1].val * 0.1 + kicker, label: 'Two Pair' };
-        if (pairs[0].cnt === 2) return { score: 100 + pairs[0].val + kicker, label: `Pair of ${CASINO_RANKS[pairs[0].val - 2]}s` };
-        return { score: (vals[0] || 0) + kicker, label: `${CASINO_RANKS[(vals[0] || 2) - 2]} High` };
+      function evaluateHoldemBestHand(cards) {
+        if (!cards || cards.length < 2) return { score: 0, label: 'High Card', key: [0, 2] };
+        let best = null;
+        if (cards.length < 5) {
+          // Partial hand (pre-flop hole cards): groups only, no flush/straight possible.
+          const vals = cards.map(c => c.val).sort((a, b) => b - a);
+          const counts = {};
+          for (const v of vals) counts[v] = (counts[v] || 0) + 1;
+          const groups = Object.entries(counts).map(([v, cnt]) => ({ val: Number(v), cnt })).sort((a, b) => (b.cnt - a.cnt) || (b.val - a.val));
+          if (groups[0].cnt === 4) best = { cat: 7, tie: [groups[0].val], label: 'Four of a Kind' };
+          else if (groups[0].cnt === 3) best = { cat: 3, tie: [groups[0].val, ...vals.filter(v => v !== groups[0].val)], label: 'Three of a Kind' };
+          else if (groups[0].cnt === 2) best = { cat: 1, tie: [groups[0].val, ...vals.filter(v => v !== groups[0].val)], label: `Pair of ${CASINO_RANKS[groups[0].val - 2]}s` };
+          else best = { cat: 0, tie: vals.slice(), label: `${CASINO_RANKS[vals[0] - 2]} High` };
+        } else {
+          // Best 5-card hand among all C(n,5) combinations (n = 5, 6, or 7).
+          const n = cards.length;
+          const combo = [];
+          const consider = () => {
+            const ev = eval5HoldemHand(combo.map(i => cards[i]));
+            if (!best || compareHoldemKeyArrays([ev.cat, ...ev.tie], [best.cat, ...best.tie]) > 0) best = ev;
+          };
+          const pick = (start) => {
+            if (combo.length === 5) { consider(); return; }
+            for (let i = start; i < n; i++) { combo.push(i); pick(i + 1); combo.pop(); }
+          };
+          pick(0);
+        }
+        // Legacy-compatible score: category band + primary rank + base-15 kicker fraction (< 1).
+        let frac = 0;
+        let div = 15;
+        for (let i = 1; i < best.tie.length; i++) { frac += (best.tie[i] || 0) / div; div *= 15; }
+        const score = best.cat * 100 + (best.tie[0] || 0) + frac;
+        return { score, label: best.label, key: [best.cat, ...best.tie] };
       }
 
       function computeAiHoldemStrength(ai, community) {
@@ -24418,7 +24497,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         if (!ante) return;
 
         recordCasinoDelta(-ante);
-        pk.deck = buildFreshDeck();
+        pk.deck = buildFreshDeck(1); // Single 52-card deck: Hold'em must never see duplicate cards (casino-fix#1).
         pk.community = [];
         pk.inHand = true;
         pk.stage = 'PREFLOP';
@@ -24507,40 +24586,70 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
 
           const humanEval = evaluateHoldemBestHand([...pk.humanCards, ...pk.community]);
           pk.humanBestHandLabel = humanEval.label;
-          let bestScore = humanEval.score;
-          let winnerName = 'YOU';
-          let winnerHand = humanEval.label;
-          let winningAi = null;
-
+          // Side-pot showdown (casino-fix#2 + casino-fix#8): every player can only
+          // win pots up to their own total contribution, so short stacks and
+          // all-ins pay out correctly. Ties split each pot slice; odd cents go
+          // to the first winner in seat order (YOU, then AI seats).
+          const showdownEntrants = [{ name: 'YOU', isHuman: true, committed: pk.humanTotalCommitted || 0, folded: false, ev: humanEval, ai: null }];
           for (const ai of pk.aiGamblers) {
             if (ai.folded) {
               ai.handLabel = 'Folded';
               ai.outcome = '🏳️ Folded';
+              showdownEntrants.push({ name: ai.name, isHuman: false, committed: ai.betInRound || 0, folded: true, ev: null, ai });
               continue;
             }
             const aiEv = evaluateHoldemBestHand([...ai.cards, ...pk.community]);
             ai.handLabel = aiEv.label;
             ai.lastAction = `Showdown: ${aiEv.label}`;
-            if (aiEv.score > bestScore) {
-              bestScore = aiEv.score;
-              winnerName = ai.name;
-              winnerHand = aiEv.label;
-              winningAi = ai;
-            }
+            showdownEntrants.push({ name: ai.name, isHuman: false, committed: ai.betInRound || 0, folded: false, ev: aiEv, ai });
           }
+          const showdownPayouts = new Map();
+          for (const e of showdownEntrants) showdownPayouts.set(e.name, 0);
+          const committedLeft = showdownEntrants.map(e => Math.round((e.committed || 0) * 100));
+          for (;;) {
+            const contributors = [];
+            let takeCents = Infinity;
+            for (let i = 0; i < showdownEntrants.length; i++) {
+              if (committedLeft[i] > 0) {
+                contributors.push(i);
+                if (committedLeft[i] < takeCents) takeCents = committedLeft[i];
+              }
+            }
+            if (contributors.length === 0) break;
+            const sliceCents = takeCents * contributors.length;
+            const eligible = contributors.filter(i => !showdownEntrants[i].folded);
+            let sliceBest = null;
+            for (const i of eligible) {
+              if (!sliceBest || compareHoldemEvals(showdownEntrants[i].ev, sliceBest) > 0) sliceBest = showdownEntrants[i].ev;
+            }
+            const sliceWinners = eligible.filter(i => compareHoldemEvals(showdownEntrants[i].ev, sliceBest) === 0);
+            const shareCents = Math.floor(sliceCents / sliceWinners.length);
+            let oddCents = sliceCents - shareCents * sliceWinners.length;
+            for (const i of sliceWinners) {
+              let amt = shareCents;
+              if (oddCents > 0) { amt += 1; oddCents -= 1; }
+              showdownPayouts.set(showdownEntrants[i].name, showdownPayouts.get(showdownEntrants[i].name) + amt);
+            }
+            for (const i of contributors) committedLeft[i] -= takeCents;
+          }
+          const paidEntrants = showdownEntrants.filter(e => (showdownPayouts.get(e.name) || 0) > 0);
+          const humanShare = (showdownPayouts.get('YOU') || 0) / 100;
 
-          if (winnerName === 'YOU') {
+          if (paidEntrants.length === 1 && paidEntrants[0].isHuman) {
             recordCasinoDelta(pk.pot);
             casinoState.wins++;
             const netProfit = pk.pot - pk.humanTotalCommitted;
-            pk.winnerBanner = `🏆 YOU WIN THE ${fmtMoney(pk.pot)} POT WITH ${winnerHand.toUpperCase()} (+${fmtMoney(netProfit)} Net)!`;
+            pk.winnerBanner = `🏆 YOU WIN THE ${fmtMoney(pk.pot)} POT WITH ${humanEval.label.toUpperCase()} (+${fmtMoney(netProfit)} Net)!`;
             casinoState.statusText = pk.winnerBanner;
-            logCasinoEvent(`🤠 Hold'em Showdown Win (${winnerHand}) — Scooped ${fmtMoney(pk.pot)} (+${fmtMoney(netProfit)} net)!`);
-            showToast('🤠 Texas Hold\'em Showdown Winner!', `Your ${winnerHand} won the ${fmtMoney(pk.pot)} pot!`, true);
+            logCasinoEvent(`🤠 Hold'em Showdown Win (${humanEval.label}) — Scooped ${fmtMoney(pk.pot)} (+${fmtMoney(netProfit)} net)!`);
+            showToast('🤠 Texas Hold\'em Showdown Winner!', `Your ${humanEval.label} won the ${fmtMoney(pk.pot)} pot!`, true);
             for (const ai of pk.aiGamblers) {
               if (!ai.folded) ai.outcome = `Lost (${ai.handLabel})`;
             }
-          } else {
+          } else if (paidEntrants.length === 1) {
+            const winningAi = paidEntrants[0].ai;
+            const winnerHand = paidEntrants[0].ev.label;
+            const winnerName = paidEntrants[0].name;
             if (winningAi) {
               winningAi.chips += pk.pot;
               winningAi.outcome = `🏆 Won ${fmtCompact(pk.pot)} (${winnerHand})`;
@@ -24551,6 +24660,33 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             pk.winnerBanner = `❌ ${winnerName} won the ${fmtMoney(pk.pot)} pot with ${winnerHand} (Your Hand: ${humanEval.label}).`;
             casinoState.statusText = pk.winnerBanner;
             logCasinoEvent(`🤠 Hold'em Showdown: ${winnerName} won ${fmtMoney(pk.pot)} with ${winnerHand}.`);
+          } else {
+            // Split pot and/or side pots: distribute each winner's exact share.
+            const fmtNet = (n) => (n >= 0 ? `+${fmtMoney(n)}` : fmtMoney(n));
+            const winBits = paidEntrants.map(e => `${e.name} +${fmtMoney((showdownPayouts.get(e.name) || 0) / 100)} (${e.ev.label})`);
+            if (humanShare > 0) {
+              recordCasinoDelta(humanShare);
+              const netProfit = Number((humanShare - pk.humanTotalCommitted).toFixed(2));
+              if (netProfit > 0) casinoState.wins++;
+              pk.winnerBanner = `🤝 SPLIT POT — ${winBits.join(' • ')} (Your Net: ${fmtNet(netProfit)})!`;
+              casinoState.statusText = pk.winnerBanner;
+              logCasinoEvent(`🤠 Hold'em Showdown Split: ${winBits.join(', ')} (Your Net: ${fmtNet(netProfit)}).`);
+              showToast('🤠 Texas Hold\'em Split Pot!', `You won ${fmtMoney(humanShare)} of the ${fmtMoney(pk.pot)} pot!`, true);
+            } else {
+              pk.winnerBanner = `❌ ${winBits.join(' • ')} (Your Hand: ${humanEval.label}).`;
+              casinoState.statusText = pk.winnerBanner;
+              logCasinoEvent(`🤠 Hold'em Showdown: ${winBits.join(', ')}.`);
+            }
+            for (const ai of pk.aiGamblers) {
+              if (ai.folded) continue;
+              const amt = (showdownPayouts.get(ai.name) || 0) / 100;
+              if (amt > 0) {
+                ai.chips += amt;
+                ai.outcome = `🏆 Won ${fmtCompact(amt)} (${ai.handLabel})`;
+              } else {
+                ai.outcome = `Lost (${ai.handLabel})`;
+              }
+            }
           }
           rotateCasinoTablePatronsIfNeeded('POKER');
           return;
@@ -24573,7 +24709,15 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           pk.toCall = 0;
           casinoState.rounds++;
           const activeAis = pk.aiGamblers.filter(a => !a.folded);
-          const aiWinner = activeAis[Math.floor(Math.random() * activeAis.length)] || pk.aiGamblers[0];
+          // Deterministic fold award (casino-fix#11): the pot goes to the active
+          // AI with the strongest hand (ties break by seat order), never a random seat.
+          let aiWinner = activeAis[0] || pk.aiGamblers[0];
+          let aiWinnerEv = evaluateHoldemBestHand([...aiWinner.cards, ...pk.community]);
+          for (const ai of activeAis) {
+            const ev = evaluateHoldemBestHand([...ai.cards, ...pk.community]);
+            ai.handLabel = ev.label;
+            if (compareHoldemEvals(ev, aiWinnerEv) > 0) { aiWinner = ai; aiWinnerEv = ev; }
+          }
           aiWinner.chips += pk.pot;
           aiWinner.lastAction = `Scooped ${fmtMoney(pk.pot, 0)}`;
           aiWinner.outcome = `🏆 Won ${fmtCompact(pk.pot)} (You Folded)`;
@@ -24722,6 +24866,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       // GAME 4: 4-ROW ONLY ROYAL GOLD VEGAS SLOT MACHINE (4×4 • 10 PAYLINES)
       // -----------------------------------------------------------------------
       window.spinSlotMachine = function(isMaxBet = false, instantFinish = false) {
+        if (casinoState.anim && casinoState.anim.active && casinoState.anim.type === 'SLOTS_SPIN') return; // Double-spin guard (casino-fix#3): a second tap must not cancel the in-flight spin's settlement.
         if (isMaxBet) {
           setCasinoQuickBet(Math.min(Math.max(100, Math.floor((G ? G.human.cash : 1000) * 0.25)), 25000));
         }
@@ -24842,6 +24987,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           settleSlotSpin();
         } else {
           startCasinoAnimation('SLOTS_SPIN', 4800, settleSlotSpin);
+          renderCasinoTab(); // Refresh AFTER the spin starts so the Spin buttons render disabled while spinning (casino-fix#3).
         }
       };
 
@@ -27699,7 +27845,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             const activeH = (bj.playerHands && bj.playerHands[bj.activeHandIdx || 0]) || { cards: bj.playerHand || [], bet: bj.currentBet };
             const canDoubleNow = bj.inProgress && activeH.cards && activeH.cards.length === 2 && !activeH.isSplitAces && G.human.cash >= (activeH.bet || bj.currentBet);
             const canSplitNow = canSplitBjHand(activeH, bj);
-            const canSurrenderNow = bj.inProgress;
+            const canSurrenderNow = bj.inProgress && (!bj.playerHands || bj.playerHands.length === 1) && activeH.cards && activeH.cards.length === 2 && !activeH.isFromSplit; // Match the casinoBjSurrender guard exactly (casino-fix#5).
             const canInsureNow = bj.inProgress && !bj.insuranceTaken && bj.dealerHand && bj.dealerHand[0] && bj.dealerHand[0].rank === 'A' && (!bj.playerHands || bj.playerHands.length === 1) && activeH.cards && activeH.cards.length === 2;
 
             ctrlPanel.innerHTML = `
@@ -27970,12 +28116,13 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             `;
           } else if (casinoState.activeGame === 'ROULETTE') {
             const r = casinoState.roulette;
+            const rouletteSpinInFlight = casinoState.anim && casinoState.anim.active && casinoState.anim.type === 'ROULETTE_SPIN';
             const betBtn = (key, label, colCls) => `
               <button type="button" onclick="setRouletteBetType('${key}')" class="py-1.5 px-2 rounded-lg text-[11px] font-bold transition ${r.betType === key ? 'ring-2 ring-amber-400 ' + colCls : 'bg-[#1C2024] text-white hover:bg-[#262B31]'}">${label}</button>
             `;
             ctrlPanel.innerHTML = `
               <div class="flex flex-wrap items-center justify-between gap-2 pb-1">
-                <button type="button" id="btnSpinRoulette" onclick="spinRouletteWheel()" class="flex-1 py-2.5 px-4 rounded-xl bg-[#00C805] hover:bg-[#00E006] text-black font-extrabold text-xs transition shadow-lg">
+                <button type="button" id="btnSpinRoulette" onclick="spinRouletteWheel()" ${rouletteSpinInFlight ? 'disabled' : ''} class="flex-1 py-2.5 px-4 rounded-xl bg-[#00C805] hover:bg-[#00E006] disabled:opacity-40 text-black font-extrabold text-xs transition shadow-lg">
                   🎡 Spin Roulette Wheel (${fmtMoney(casinoState.betAmount)})
                 </button>
                 <div class="flex items-center gap-1.5 text-xs">
@@ -27996,6 +28143,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
                 ${betBtn('DOZ3', '3rd 12 (2:1)', 'bg-indigo-600 text-white')}
                 ${betBtn('COL1', 'Col 1 (2:1)', 'bg-purple-600 text-white')}
                 ${betBtn('COL2', 'Col 2 (2:1)', 'bg-purple-600 text-white')}
+                ${betBtn('COL3', 'Col 3 (2:1)', 'bg-purple-600 text-white')}<!-- casino-fix#9: COL3 payout already existed; the button was missing -->
               </div>
             `;
           } else if (casinoState.activeGame === 'POKER') {
@@ -28025,12 +28173,13 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             `;
           } else if (casinoState.activeGame === 'SLOTS') {
             // 4-Row Only Slot Machine Controls (No 3/5/6-row buttons!)
+            const slotsSpinInFlight = casinoState.anim && casinoState.anim.active && casinoState.anim.type === 'SLOTS_SPIN';
             ctrlPanel.innerHTML = `
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                <button type="button" id="btnSpinSlots" onclick="spinSlotMachine(false)" class="py-2.5 px-4 rounded-xl bg-[#00C805] hover:bg-[#00E006] text-black font-extrabold transition shadow-lg">
+                <button type="button" id="btnSpinSlots" onclick="spinSlotMachine(false)" ${slotsSpinInFlight ? 'disabled' : ''} class="py-2.5 px-4 rounded-xl bg-[#00C805] hover:bg-[#00E006] disabled:opacity-40 text-black font-extrabold transition shadow-lg">
                   🎰 Spin 4-Row Slot Machine (${fmtMoney(casinoState.betAmount)})
                 </button>
-                <button type="button" onclick="spinSlotMachine(true)" class="py-2.5 px-4 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-extrabold transition">
+                <button type="button" onclick="spinSlotMachine(true)" ${slotsSpinInFlight ? 'disabled' : ''} class="py-2.5 px-4 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 disabled:opacity-40 text-amber-300 border border-amber-500/40 font-extrabold transition">
                   ⚡ High-Roller Spin (25% Cash)
                 </button>
               </div>
@@ -28054,14 +28203,17 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
                 ${tierBtn(50,  '👑', '$500K')}
                 ${tierBtn(100, '🏆', '$1M')}
               </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                 <button type="button" id="btnBuyScratchTicket" onclick="buyScratchTicket()" class="py-2.5 px-3 rounded-xl bg-[#1C2024] hover:bg-[#2A2F36] text-amber-300 border border-amber-500/40 font-extrabold transition">
                   🎫 Buy Fresh $${curPrice} Ticket (5×4 Grid • 20 Spots)
                 </button>
                 <button type="button" id="btnAnimScratchTicket" onclick="scratchTicketAnimated()" class="py-2.5 px-3 rounded-xl bg-[#00C805] hover:bg-[#00E006] text-black font-extrabold transition shadow-lg">
                   🪙 ${canScratchCurrent ? 'Scratch All 20 Spots (Animated)' : `Buy & Scratch Animated ($${curPrice})`}
                 </button>
-              </div>
+                <button type="button" id="btnInstantScratchTicket" onclick="instantScratchTicket()" class="py-2.5 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-extrabold transition shadow-lg">
+                  ⚡ ${canScratchCurrent ? 'Instant Reveal' : `Buy & Instant Reveal ($${curPrice})`}
+                </button>
+              </div><!-- casino-fix#10: Instant Reveal button wires the existing instantScratchTicket() the status text already promised -->
               <div class="text-[11px] text-[#8A919E] flex flex-wrap items-center justify-between gap-1 px-1">
                 <span>💡 <strong class="text-white">Tip:</strong> Drag your finger or mouse across the foil above to scratch manually with a coin!</span>
                 <span class="font-mono text-amber-300">Tickets: ${sc.ticketsBought || 0} • Best Win: ${fmtMoney(sc.biggestWin || 0, 0)}</span>
