@@ -862,6 +862,59 @@ body.light-theme .ph-index-chart { background: var(--bg-card); border-color: var
 body.light-theme .ph-index-chip { color: var(--text-muted); background: var(--bg-chip); border-color: var(--border-col); }
 body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-color: #007A03; }
 
+/* ---- Phase 4: music controls, wallpaper picker, hero art, banners, switcher ---- */
+.ph-music-controls { gap: 8px; cursor: default; }
+.ph-music-nav { flex: 0 0 auto; width: 36px; height: 36px; border-radius: 50%; background: #1e2227; border: 1px solid #2c3137; color: #fff; font-size: 15px; cursor: pointer; font-family: inherit; }
+.ph-music-nav:active { background: #2a2f35; }
+.ph-music-track { flex: 1 1 auto; min-width: 0; text-align: center; font-size: 13.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.ph-set-pill.ph-on { background: #00c805; border-color: #00c805; color: #000; }
+.ph-wallpaper-picker { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 14px; }
+.ph-wp-sw { width: 56px; height: 78px; border-radius: 12px; border: 2px solid #2c3137; background-color: #0e2237; background-size: cover; background-position: center; position: relative; cursor: pointer; overflow: hidden; padding: 0; font-family: inherit; }
+.ph-wp-sw span { position: absolute; left: 0; right: 0; bottom: 0; display: block; font-size: 8.5px; font-weight: 600; line-height: 1.2; color: #fff; background: rgba(0,0,0,.6); padding: 3px 2px; }
+.ph-wp-sw.ph-wp-sel { border-color: #00c805; }
+.ph-wallpaper { background-size: cover; background-position: center; }
+.ph-wallpaper.ph-wallpaper-art::before { display: none; }
+.ph-wallpaper.ph-wallpaper-art > * { display: none; }
+.ph-hero { position: relative; overflow: hidden; }
+.ph-hero-art { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: .3; pointer-events: none; }
+.ph-hero > :not(.ph-hero-art) { position: relative; z-index: 1; }
+#ph-bank-hero { position: relative; overflow: hidden; }
+#ph-bank-hero > :not(.ph-hero-art) { position: relative; z-index: 1; }
+.ph-app-banner { height: 86px; border-radius: 18px; margin-bottom: 14px; background-size: cover; background-position: center; display: none; }
+.ph-app-banner.ph-has-art { display: block; }
+#ph-switcher { position: absolute; inset: 0; z-index: 65; display: none; }
+#ph-switcher.ph-open { display: block; }
+.ph-sw-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.55); }
+.ph-sw-panel { position: absolute; left: 0; right: 0; bottom: 0; max-height: 80%; overflow-y: auto; background: #14181d; border-radius: 24px 24px 0 0; padding: 14px 16px 34px; box-sizing: border-box; }
+.ph-sw-head { display: flex; align-items: center; justify-content: space-between; }
+.ph-sw-head h2 { margin: 0; font-size: 17px; font-weight: 800; color: #fff; }
+#ph-sw-close { background: rgba(255,255,255,.12); color: #fff; border: none; border-radius: 999px; padding: 7px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit; }
+#ph-sw-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.ph-sw-card { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); border-radius: 14px; padding: 10px 12px; color: #fff; cursor: pointer; text-align: left; font-family: inherit; min-width: 0; }
+.ph-sw-card .ph-icon { width: 40px; height: 40px; border-radius: 11px; flex: 0 0 auto; }
+.ph-sw-card .ph-icon svg { width: 22px; height: 22px; }
+.ph-sw-name { flex: 1 1 auto; min-width: 0; font-weight: 600; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-sw-cur { flex: 0 0 auto; font-size: 10px; font-weight: 700; background: #00c805; color: #000; padding: 3px 7px; border-radius: 99px; }
+.ph-sw-empty { grid-column: 1 / -1; margin: 8px 0; color: rgba(255,255,255,.7); font-size: 13px; line-height: 1.55; text-align: center; }
+.ph-sw-hint { color: rgba(255,255,255,.45); font-size: 11px; text-align: center; margin: 14px 0 0; }
+
+/* ---- Phase 4 polish: desktop-only stat-box fixes ----
+   Tailwind's sm: breakpoint keys off VIEWPORT width, so on desktop viewports
+   the portfolio KPI grid and the casino job-desk grid switch to 4 columns
+   inside the ~400px phone window and squeeze their value boxes. Forcing 2
+   columns at >=640px restores exactly the phone layout; below 640px the
+   game's own grid-cols-2 already applies, so phone layout is untouched. */
+@media (min-width: 640px) {
+  #myPortfolioSummaryKpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #casinoJobDeskCard .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ---- Phase 4 art: grid photos, portraits, felts ---- */
+.ph-grid-photo { width: 100%; height: 110px; object-fit: cover; border-radius: 12px; display: block; margin-bottom: 8px; }
+.ph-dossier-portrait { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; float: right; margin: 0 0 8px 10px; border: 2px solid rgba(255,255,255,.2); }
+.ph-portrait { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; float: right; margin: 0 0 6px 8px; border: 2px solid rgba(255,255,255,.15); }
+.ph-felt { background-size: cover; background-position: center; }
+
 </style>
 </head>
 <body class="light-theme min-h-screen flex flex-col selection:bg-[#00C805] selection:text-black ph-shell-active ph-locked">
@@ -959,6 +1012,19 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
 
       <!-- Sliding notification banners -->
       <div id="ph-banners"></div>
+
+      <!-- App switcher: double-tap the home indicator -->
+      <div id="ph-switcher" aria-hidden="true">
+        <div class="ph-sw-backdrop" id="ph-sw-backdrop"></div>
+        <div class="ph-sw-panel">
+          <div class="ph-sw-head">
+            <h2>Open apps</h2>
+            <button type="button" id="ph-sw-close">Done</button>
+          </div>
+          <div id="ph-sw-cards"></div>
+          <p class="ph-sw-hint">Double-tap the home line anytime to switch apps.</p>
+        </div>
+      </div>
 
       <!-- Home indicator -->
       <button type="button" id="ph-home-indicator" aria-label="Home"><i></i></button>
@@ -31703,6 +31769,852 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
 })();
 </script>
 <script>
+/* ================= ph-music.js — InveSim Phone music engine =================
+   Five distinct generative WebAudio compositions. Code-only: NO audio files.
+   Pure logic/audio module: makes NO DOM writes. The shell UI wires it later.
+
+   API (attached to window.__phMusic):
+     init(prefs, savePrefs)
+         prefs: the shell's live INVESIM_PHONE_PREFS object (mutated in place).
+         savePrefs: function that persists that object (may be null).
+         Reads the persisted state; does NOT start playback (autoplay policy:
+         the shell must call play() from a user gesture, e.g. unlock).
+         Safe to call twice; the second call just refreshes the refs/state.
+     play()                    Start playback of the current track. Creates the
+                               AudioContext lazily on first call and resumes it
+                               if suspended. Idempotent; never throws, even if
+                               audio is blocked/unavailable (then a no-op).
+     stop()                    Stop playback cleanly (quick fade, nodes stopped,
+                               context suspended). Idempotent; never throws.
+     setTrack(index)           Switch track (integer; out-of-range wraps). If
+                               playing, crossfades (~400ms) to the new track;
+                               if stopped, just changes the persisted index.
+                               Returns getState().
+     next()                    Advance to the next track (random different track
+                               when shuffle is on). Returns getState().
+     prev()                    Previous track (shuffle history when shuffle is
+                               on, else index-1). Returns getState().
+     toggleShuffle()           Flip shuffle, persist it, return the new value.
+     setOn(bool)               Persist on/off (prefs.music) and play()/stop().
+                               Returns getState().
+     getState()                { on, trackIndex, trackName, shuffle, running }
+                               running = the scheduler is engaged (play called,
+                               stop not called). See _debug().ctxState for the
+                               live AudioContext state.
+     getAudioContext()         The lazily created AudioContext, or null if not
+                               created yet / unavailable. NEVER creates one.
+                               Intended for ph-sfx.js context sharing.
+     TRACKS                    [{ name, key, bpm, timbre }, ...] (5 entries).
+     _debug()                  { schedulers, liveNodes, fadingChains,
+                               audibleChains, ctxState, generation, masterGain }
+                               Diagnostic snapshot for harness verification.
+
+   Prefs keys used (on the object passed to init, same shape as
+   INVESIM_PHONE_PREFS in ph-shell.js):
+     music        boolean, default false (EXISTING key: on/off, same as the
+                  old single-loop toggle — old saves keep working).
+     musicTrack   integer 0-4, default 0 (NEW key).
+     musicShuffle boolean, default false (NEW key).
+   The module tolerates missing keys (defaults apply) and a missing prefs
+   object entirely (internal state only, nothing persisted). NOTE for the
+   shell integrator: ph-shell.js must extend its prefs loader/defaults to
+   copy musicTrack/musicShuffle through, or a reload drops them (the module
+   writes them onto the live object and savePrefs persists them, but the
+   shell loader only copies keys it knows).
+
+   Design notes:
+   - One scheduler (setInterval + 0.5s lookahead) renders a deterministic
+     step grid per track; the loop boundary is NOT a reset — the step counter
+     wraps modulo the loop length on a continuous audio clock, so there are
+     no gaps or clicks at loop points. Patterns are fixed arrays (no random
+     choices inside the audio schedule), so every loop is identical.
+   - Track switches swap to a fresh per-track gain node: the old gain fades
+     out (~400ms) while the new one fades in, the scheduler position resets
+     to the new track's start, and the old track's long notes are stopped
+     once faded. Exactly one scheduler ever runs; after the fade settles
+     exactly one audible chain remains.
+   - Master gain is 0.15. All voice peaks are tuned so the mix stays soft.
+   - ES5 syntax only (var/function, no modules, no promises in our own flow
+     beyond guarding ctx.resume()). No dependencies. Wrapped in an IIFE.
+   - The original Am-F-C-G pad is REWORKED as track 0 ("Morning Light"):
+     same chords/register/mood, rebuilt on this engine with a sparkle line.
+     ======================================================================== */
+(function () {
+  'use strict';
+  var root = typeof window !== 'undefined' ? window : this;
+  if (root.__phMusic) { return; }
+
+  var MASTER_GAIN = 0.15;
+  var LOOKAHEAD = 0.5;   /* seconds of audio scheduled ahead of the playhead */
+  var TICK_MS = 50;      /* scheduler tick */
+  var FADE_MS = 400;     /* crossfade length on track switch */
+
+  function midi(n) { return 440 * Math.pow(2, (n - 69) / 12); }
+  function clampTrack(v, def) {
+    if (typeof v !== 'number' || isNaN(v) || !isFinite(v)) { return def; }
+    var i = Math.floor(v);
+    if (i < 0) { return 0; }
+    if (i > TRACKS.length - 1) { return TRACKS.length - 1; }
+    return i;
+  }
+
+  /* ---------- the five compositions ----------
+     Each track: own key, tempo, chord progression, timbre AND renderer.
+     chords are MIDI note numbers. stepsPerChord is in eighth notes. */
+  var TRACKS = [
+    { name: 'Morning Light', key: 'A minor', bpm: 60,
+      timbre: 'Warm detuned triangle pad + sine sub',
+      voice: 'pad', stepsPerChord: 16,
+      chords: [[57, 60, 64], [53, 57, 60], [55, 60, 64], [55, 59, 62]],
+      sparkle: [[76, 79], [77, 76], [79, 81], [79, 74]] },
+    { name: 'Quiet Ledger', key: 'C major', bpm: 72,
+      timbre: 'Gentle piano arpeggio + soft bass',
+      voice: 'piano', stepsPerChord: 8,
+      chords: [[60, 64, 67, 72], [57, 60, 64, 69], [53, 57, 60, 65], [55, 59, 62, 67]],
+      bass: [48, 45, 41, 43],
+      arp: [0, 1, 2, 3, 2, 1, 2, 3] },
+    { name: 'Amber Hours', key: 'D minor', bpm: 66,
+      timbre: 'Soft Rhodes-like chords, syncopated',
+      voice: 'rhodes', stepsPerChord: 8,
+      chords: [[62, 65, 69, 72], [58, 62, 65, 69], [65, 69, 72, 76], [60, 64, 67, 72]],
+      bass: [50, 46, 53, 48],
+      sparkle: [0, 81, 0, 79] },
+    { name: 'High Windows', key: 'G major', bpm: 54,
+      timbre: 'Airy bells over a sustained drone',
+      voice: 'bells', stepsPerChord: 16,
+      chords: [[43, 50, 55], [40, 47, 52], [48, 52, 55], [50, 54, 57]],
+      bells: [[79, 83, 81, 86], [76, 79, 83, 79], [81, 79, 76, 72], [78, 81, 86, 81]] },
+    { name: 'Paper Lanterns', key: 'E minor', bpm: 84,
+      timbre: 'Mellow fingerstyle plucks + soft pad',
+      voice: 'pluck', stepsPerChord: 8,
+      chords: [[52, 55, 59, 64], [55, 60, 64, 67], [55, 59, 62, 67], [54, 57, 62, 66]],
+      bass: [[40, 47], [48, 55], [43, 50], [42, 57]] }
+  ];
+
+  /* ---------- state ---------- */
+  var prefsRef = null, saveFn = null;
+  var on = false, trackIndex = 0, shuffle = false;
+  var history = [];
+  var ctx = null, master = null, audioOK = true, audioTried = false;
+  var schedTimer = null, generation = 0, nextTime = 0, nextStep = 0;
+  var trackGain = null, fading = []; /* [{node}] gains fading out after a switch */
+  var live = []; /* [{osc, end, gen, dead}] oscillators scheduled but not ended */
+
+  function persist() {
+    if (!prefsRef) { return; }
+    try {
+      prefsRef.music = on;
+      prefsRef.musicTrack = trackIndex;
+      prefsRef.musicShuffle = shuffle;
+    } catch (e) {}
+    if (typeof saveFn === 'function') {
+      try { saveFn(); } catch (e) {}
+    }
+  }
+
+  /* ---------- AudioContext lifecycle (lazy, never throws) ---------- */
+  function ensureCtx() {
+    if (ctx) { return ctx; }
+    if (audioTried && !audioOK) { return null; }
+    audioTried = true;
+    try {
+      var Ctx = root.AudioContext || root.webkitAudioContext;
+      if (!Ctx) { audioOK = false; return null; }
+      ctx = new Ctx();
+      master = ctx.createGain();
+      master.gain.value = MASTER_GAIN;
+      master.connect(ctx.destination);
+    } catch (e) {
+      audioOK = false; ctx = null; master = null;
+      return null;
+    }
+    return ctx;
+  }
+  function resumeCtx() {
+    try {
+      if (ctx && ctx.state === 'suspended') {
+        var p = ctx.resume();
+        if (p && typeof p.catch === 'function') { p.catch(function () {}); }
+      }
+    } catch (e) {}
+  }
+
+  /* ---------- node bookkeeping ---------- */
+  function reg(osc, end, gen) {
+    live.push({ osc: osc, end: end, gen: gen, dead: false });
+    if (live.length > 400) { prune(ctx ? ctx.currentTime : 0); }
+  }
+  function prune(now) {
+    var kept = [];
+    for (var i = 0; i < live.length; i++) {
+      if (!live[i].dead && live[i].end > now - 1) { kept.push(live[i]); }
+    }
+    live = kept;
+  }
+  function stopGenNodes(gen, delayMs) {
+    setTimeout(function () {
+      for (var i = 0; i < live.length; i++) {
+        if (live[i].gen === gen && !live[i].dead) {
+          live[i].dead = true;
+          try { live[i].osc.stop(); } catch (e) {}
+        }
+      }
+      prune(ctx ? ctx.currentTime : 0);
+    }, delayMs);
+  }
+  function removeFading(node) {
+    for (var i = fading.length - 1; i >= 0; i--) {
+      if (fading[i].node === node) { fading.splice(i, 1); }
+    }
+  }
+
+  /* ---------- voice helpers ---------- */
+  /* Short decaying note: fast attack, exponential decay. */
+  function decayNote(dest, freq, t, dur, peak, type, gen, filterFreq, detune) {
+    try {
+      var o = ctx.createOscillator();
+      o.type = type; o.frequency.value = freq;
+      if (detune) { o.detune.value = detune; }
+      var g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(peak, t + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      var f = null, head = o;
+      if (filterFreq) {
+        f = ctx.createBiquadFilter();
+        f.type = 'lowpass'; f.frequency.value = filterFreq; f.Q.value = 0.4;
+        o.connect(f); head = f;
+      }
+      head.connect(g); g.connect(dest);
+      o.onended = function () {
+        try { g.disconnect(); } catch (e1) {}
+        try { if (f) { f.disconnect(); } } catch (e2) {}
+      };
+      o.start(t); o.stop(t + dur + 0.05);
+      reg(o, t + dur + 0.05, gen);
+    } catch (e) {}
+  }
+  /* Long sustained note: slow attack, hold, slow release (pads/drones). */
+  function padNote(dest, freq, t, dur, peak, type, gen, attack, release, detune) {
+    try {
+      var o = ctx.createOscillator();
+      o.type = type; o.frequency.value = freq;
+      if (detune) { o.detune.value = detune; }
+      var g = ctx.createGain();
+      var atk = Math.min(attack, dur * 0.4);
+      var rel = Math.min(release, dur * 0.4);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(peak, t + atk);
+      g.gain.setValueAtTime(peak, t + Math.max(atk, dur - rel));
+      g.gain.linearRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(dest);
+      o.onended = function () { try { g.disconnect(); } catch (e1) {} };
+      o.start(t); o.stop(t + dur + 0.05);
+      reg(o, t + dur + 0.05, gen);
+    } catch (e) {}
+  }
+
+  /* ---------- the five renderers ----------
+     Each renders one eighth-note step of its track at audio time t into the
+     per-track gain node dest. ci = chord index, si = step within the chord. */
+  function renderPad(tr, ci, si, t, dest, gen, stepDur) {
+    var chord = tr.chords[ci];
+    var chordDur = tr.stepsPerChord * stepDur;
+    if (si === 0) {
+      var filt = dest;
+      try {
+        filt = ctx.createBiquadFilter();
+        filt.type = 'lowpass'; filt.frequency.value = 820; filt.Q.value = 0.4;
+        filt.connect(dest);
+        (function (fl) {
+          setTimeout(function () { try { fl.disconnect(); } catch (e) {} }, (chordDur + 2) * 1000);
+        })(filt);
+      } catch (e) { filt = dest; }
+      for (var i = 0; i < chord.length; i++) {
+        padNote(filt, midi(chord[i]), t, chordDur + 1.5, 0.11, 'triangle', gen, 2.5, 2.5, (i - 1) * 4);
+      }
+      padNote(dest, midi(chord[0] - 12), t, chordDur + 1.5, 0.08, 'sine', gen, 3.0, 2.5, 0);
+    }
+    if (si === 4 || si === 12) {
+      decayNote(dest, midi(tr.sparkle[ci][si === 4 ? 0 : 1]), t, 2.5, 0.05, 'sine', gen, 0, 0);
+    }
+  }
+  function renderPiano(tr, ci, si, t, dest, gen, stepDur) {
+    var chord = tr.chords[ci];
+    if (si === 0) {
+      decayNote(dest, midi(tr.bass[ci]), t, 1.8, 0.12, 'sine', gen, 0, 0);
+    }
+    var f = midi(chord[tr.arp[si]]);
+    decayNote(dest, f, t, 1.3, 0.17, 'triangle', gen, 3200, 0);
+    decayNote(dest, f, t, 1.1, 0.08, 'sine', gen, 0, 0);
+  }
+  function renderRhodes(tr, ci, si, t, dest, gen, stepDur) {
+    var chord = tr.chords[ci];
+    if (si === 0) {
+      decayNote(dest, midi(tr.bass[ci]), t, 1.6, 0.11, 'sine', gen, 0, 0);
+    }
+    if (si === 0 || si === 5) {
+      for (var i = 0; i < chord.length; i++) {
+        var f = midi(chord[i]);
+        decayNote(dest, f, t, 1.9, 0.085, 'sine', gen, 0, 0);
+        decayNote(dest, f * 2, t, 1.2, 0.028, 'sine', gen, 0, 0);
+        decayNote(dest, f, t, 0.9, 0.02, 'triangle', gen, 2400, 0);
+      }
+    }
+    if (si === 3 && tr.sparkle[ci]) {
+      decayNote(dest, midi(tr.sparkle[ci]), t, 2.0, 0.05, 'sine', gen, 0, 0);
+    }
+  }
+  function renderBells(tr, ci, si, t, dest, gen, stepDur) {
+    var chord = tr.chords[ci];
+    var chordDur = tr.stepsPerChord * stepDur;
+    if (si === 0) {
+      padNote(dest, midi(chord[0]), t, chordDur + 1, 0.045, 'sine', gen, 3, 3, 0);
+      padNote(dest, midi(chord[0] + 7), t, chordDur + 1, 0.04, 'sine', gen, 3, 3, 0);
+      padNote(dest, midi(chord[0] + 12), t, chordDur + 1, 0.02, 'sine', gen, 3, 3, 0);
+    }
+    if (si % 4 === 0) {
+      var f = midi(tr.bells[ci][si / 4]);
+      decayNote(dest, f, t, 2.8, 0.12, 'sine', gen, 0, 0);
+      decayNote(dest, f * 2.76, t, 1.4, 0.045, 'sine', gen, 0, 0);
+      decayNote(dest, f * 5.40, t, 0.6, 0.018, 'sine', gen, 0, 0);
+    }
+  }
+  function renderPluck(tr, ci, si, t, dest, gen, stepDur) {
+    var chord = tr.chords[ci], bass = tr.bass[ci];
+    if (si === 0) {
+      padNote(dest, midi(chord[0] - 12), t, tr.stepsPerChord * stepDur, 0.025, 'sine', gen, 0.8, 0.8, 0);
+    }
+    var tone = -1, isBass = false;
+    if (si === 0 || si === 4) { tone = bass[0]; isBass = true; }
+    else if (si === 2 || si === 6) { tone = bass[1]; isBass = true; }
+    else if (si === 1 || si === 7) { tone = chord[3]; }
+    else if (si === 3) { tone = chord[2]; }
+    else if (si === 5) { tone = chord[1]; }
+    if (tone >= 0) {
+      decayNote(dest, midi(tone), t, isBass ? 0.7 : 0.55, isBass ? 0.15 : 0.16,
+        'triangle', gen, isBass ? 900 : 1700, 0);
+    }
+  }
+  var RENDER = { pad: renderPad, piano: renderPiano, rhodes: renderRhodes, bells: renderBells, pluck: renderPluck };
+
+  /* ---------- scheduler: one timer, lookahead, continuous step grid ---------- */
+  function tick() {
+    var gen = generation;
+    try {
+      if (!ctx || !trackGain) { return; }
+      var tr = TRACKS[trackIndex];
+      var stepDur = 60 / tr.bpm / 2;
+      var total = tr.chords.length * tr.stepsPerChord;
+      var horizon = ctx.currentTime + LOOKAHEAD;
+      var guard = 0;
+      while (nextTime < horizon && guard < 64) {
+        var step = nextStep % total;
+        var ci = Math.floor(step / tr.stepsPerChord);
+        var si = step % tr.stepsPerChord;
+        RENDER[tr.voice](tr, ci, si, nextTime, trackGain, gen, stepDur);
+        nextStep++;
+        nextTime += stepDur;
+        guard++;
+      }
+      prune(ctx.currentTime);
+    } catch (e) {}
+  }
+
+  /* Swap to a fresh per-track gain (crossfade) and restart the step grid at
+     the new track's beginning. Old long notes are stopped once faded. */
+  function beginTrack() {
+    if (!ctx || !master) { return; }
+    var prevGen = generation;
+    generation++;
+    var old = trackGain;
+    if (old) {
+      try {
+        old.gain.cancelScheduledValues(ctx.currentTime);
+        old.gain.setTargetAtTime(0, ctx.currentTime, 0.12);
+      } catch (e) {}
+      fading.push({ node: old });
+      (function (og) {
+        setTimeout(function () {
+          try { og.disconnect(); } catch (e) {}
+          removeFading(og);
+        }, FADE_MS + 250);
+      })(old);
+      stopGenNodes(prevGen, FADE_MS + 250);
+    }
+    try {
+      trackGain = ctx.createGain();
+      trackGain.gain.value = 0.0001;
+      trackGain.gain.setTargetAtTime(1, ctx.currentTime, 0.12);
+      trackGain.connect(master);
+    } catch (e) { trackGain = null; return; }
+    nextStep = 0;
+    nextTime = ctx.currentTime + 0.06;
+  }
+
+  /* ---------- public API ---------- */
+  function init(p, save) {
+    if (p && typeof p === 'object') { prefsRef = p; }
+    if (typeof save === 'function') { saveFn = save; }
+    if (prefsRef) {
+      if (typeof prefsRef.music === 'boolean') { on = prefsRef.music; }
+      if (typeof prefsRef.musicTrack === 'number') { trackIndex = clampTrack(prefsRef.musicTrack, trackIndex); }
+      if (typeof prefsRef.musicShuffle === 'boolean') { shuffle = prefsRef.musicShuffle; }
+    }
+    return getState();
+  }
+  function play() {
+    try {
+      if (schedTimer) { resumeCtx(); return; }
+      if (!ensureCtx()) { return; }
+      resumeCtx();
+      beginTrack();
+      if (!trackGain) { return; }
+      schedTimer = setInterval(tick, TICK_MS);
+      tick();
+    } catch (e) {}
+  }
+  function stop() {
+    var gen = generation;
+    generation++;
+    if (schedTimer) { clearInterval(schedTimer); schedTimer = null; }
+    try {
+      if (ctx && trackGain) {
+        var g = trackGain;
+        trackGain = null;
+        g.gain.cancelScheduledValues(ctx.currentTime);
+        g.gain.setTargetAtTime(0, ctx.currentTime, 0.08);
+        setTimeout(function () { try { g.disconnect(); } catch (e) {} }, 600);
+      }
+    } catch (e) {}
+    stopGenNodes(gen, 500);
+    try {
+      if (ctx) {
+        setTimeout(function () {
+          try { if (!schedTimer && ctx && ctx.state === 'running') { ctx.suspend(); } } catch (e) {}
+        }, 800);
+      }
+    } catch (e) {}
+  }
+  function getState() {
+    return { on: on, trackIndex: trackIndex, trackName: TRACKS[trackIndex].name, shuffle: shuffle, running: !!schedTimer };
+  }
+  function setTrack(i) {
+    if (typeof i !== 'number' || isNaN(i) || !isFinite(i)) { return getState(); }
+    var n = TRACKS.length;
+    var idx = ((Math.floor(i) % n) + n) % n;
+    var changed = idx !== trackIndex;
+    trackIndex = idx;
+    persist();
+    if (changed && schedTimer && ctx) { beginTrack(); }
+    return getState();
+  }
+  function next() {
+    history.push(trackIndex);
+    if (history.length > 20) { history.shift(); }
+    var idx;
+    if (shuffle) {
+      idx = trackIndex;
+      var tries = 0;
+      while (idx === trackIndex && tries < 10) {
+        idx = Math.floor(Math.random() * TRACKS.length);
+        tries++;
+      }
+      if (idx === trackIndex) { idx = (trackIndex + 1) % TRACKS.length; }
+    } else {
+      idx = (trackIndex + 1) % TRACKS.length;
+    }
+    return setTrack(idx);
+  }
+  function prev() {
+    var idx;
+    if (shuffle && history.length) {
+      idx = history.pop();
+    } else {
+      history.push(trackIndex);
+      if (history.length > 20) { history.shift(); }
+      idx = (trackIndex - 1 + TRACKS.length) % TRACKS.length;
+    }
+    return setTrack(idx);
+  }
+  function toggleShuffle() {
+    shuffle = !shuffle;
+    persist();
+    return shuffle;
+  }
+  function setOn(b) {
+    on = !!b;
+    persist();
+    if (on) { play(); } else { stop(); }
+    return getState();
+  }
+  function getAudioContext() { return ctx; }
+  function debug() {
+    return {
+      schedulers: schedTimer ? 1 : 0,
+      liveNodes: live.length,
+      fadingChains: fading.length,
+      audibleChains: (schedTimer ? 1 : 0) + fading.length,
+      ctxState: ctx ? ctx.state : 'none',
+      generation: generation,
+      masterGain: MASTER_GAIN
+    };
+  }
+
+  var META = [];
+  for (var m = 0; m < TRACKS.length; m++) {
+    META.push({ name: TRACKS[m].name, key: TRACKS[m].key, bpm: TRACKS[m].bpm, timbre: TRACKS[m].timbre });
+  }
+
+  root.__phMusic = {
+    init: init,
+    play: play,
+    stop: stop,
+    setTrack: setTrack,
+    next: next,
+    prev: prev,
+    toggleShuffle: toggleShuffle,
+    setOn: setOn,
+    getState: getState,
+    getAudioContext: getAudioContext,
+    TRACKS: META,
+    _debug: debug,
+    version: '1.0'
+  };
+})();
+
+</script>
+<script>
+/* ================= ph-sfx.js — InveSim Phone sound effects =================
+   Synthesized WebAudio SFX. Code-only: NO audio files. Pure logic/audio
+   module: makes NO DOM writes. The shell UI wires it later (call
+   __phSfx.play(name) from tap/open/close/casino handlers).
+
+   API (attached to window.__phSfx):
+     init(prefs, savePrefs, getMusicContext?)
+         prefs: the shell's live INVESIM_PHONE_PREFS object (mutated in
+         place). savePrefs: function that persists it (may be null).
+         getMusicContext: optional function returning the music module's
+         AudioContext (or null). When it returns a live context, SFX share
+         it; otherwise SFX create their OWN single context lazily on first
+         play(). Pass e.g.:
+           function () { return window.__phMusic
+               ? window.__phMusic.getAudioContext() : null; }
+         Safe to call twice; the second call refreshes refs/state.
+     play(name)            Fire one sound, EXACTLY once per accepted call.
+                           Returns true if the sound was scheduled, false if
+                           SFX are disabled, the name is unknown, audio is
+                           unavailable, or the same name was played <60ms
+                           ago (double-invocation guard). Never throws.
+     setEnabled(bool)      Persist on/off (prefs.sfxOn). Returns new value.
+     isEnabled()           Current enabled state (default true).
+     vibrate(ms)           navigator.vibrate guarded for support; ms clamped
+                           to 1-200, default 15. Returns true if a vibration
+                           was requested, false otherwise. The shell calls
+                           this for major actions only.
+     SOUNDS                ['tap','appOpen','appClose','toggle','chip',
+                           'cardDeal','slotSpin','slotWin','winStinger',
+                           'loseStinger'].
+     _debug()              { enabled, ctxChoice ('shared'|'own'|null),
+                           ctxState, counts } — counts[name] = accepted
+                           plays, for harness verification.
+
+   Sounds (all peaks <= 0.13 voice gain through a 0.9 bus, so absolute
+   peak <= 0.12 — quiet next to the music, never overlapping it
+   unpleasantly; durations <= 600ms except the two stingers <= ~1.1s):
+     tap         70ms   soft sine blip (generic press feedback)
+     appOpen     250ms  rising two-note chime
+     appClose    250ms  falling two-note chime
+     toggle      120ms  two-stage click-blip (switches)
+     chip        180ms  three chip clacks + low thock
+     cardDeal    140ms  filtered noise swoosh (card slide)
+     slotSpin    380ms  six accelerating ticks
+     slotWin     460ms  ascending coin arpeggio
+     winStinger  ~1.1s  major arpeggio + shimmer tail
+     loseStinger ~0.9s  soft descending minor phrase
+
+   Prefs keys used (on the object passed to init):
+     sfxOn  boolean, default true (NEW key).
+   The module tolerates a missing key (default true) and a missing prefs
+   object entirely. NOTE for the shell integrator: ph-shell.js must extend
+   its prefs loader/defaults to copy sfxOn through, or a reload drops it
+   (same caveat as ph-music.js's new keys).
+
+   Context choice (reported): SHARE the music context when cleanly
+   available, else ONE own context. The choice is sticky once made: at
+   most one context per module, never more than two total, and SFX keep
+   working if the music module is absent or blocked. If music's stop()
+   suspends a shared context, the next play() resumes it. Every audio
+   call is guarded: a blocked/missing AudioContext degrades to silent
+   no-ops, never an exception.
+
+   ES5 syntax only (var/function, no modules). No dependencies. IIFE.
+   ======================================================================== */
+(function () {
+  'use strict';
+  var root = typeof window !== 'undefined' ? window : this;
+  if (root.__phSfx) { return; }
+
+  var BUS_GAIN = 0.9;
+  var DEBOUNCE_MS = 60;
+  var SOUND_NAMES = ['tap', 'appOpen', 'appClose', 'toggle', 'chip',
+    'cardDeal', 'slotSpin', 'slotWin', 'winStinger', 'loseStinger'];
+
+  var prefsRef = null, saveFn = null, getCtxFn = null;
+  var enabled = true;
+  var ownCtx = null, sharedCtx = null, ctxChoice = null; /* 'shared' | 'own' | null */
+  var bus = null, busCtx = null, noiseBuf = null, noiseCtx = null;
+  var AC = null; /* context used by the sound currently being scheduled */
+  var lastPlay = {}, counts = {};
+
+  function nowMs() {
+    try {
+      if (typeof performance !== 'undefined' && performance.now) { return performance.now(); }
+    } catch (e) {}
+    return Date.now();
+  }
+  function persist() {
+    if (!prefsRef) { return; }
+    try { prefsRef.sfxOn = enabled; } catch (e) {}
+    if (typeof saveFn === 'function') {
+      try { saveFn(); } catch (e) {}
+    }
+  }
+
+  /* ---------- context resolution (sticky, at most one own context) ---------- */
+  function resolveCtx() {
+    if (ctxChoice === 'shared') {
+      try {
+        if (typeof getCtxFn === 'function') {
+          var c = getCtxFn();
+          if (c && typeof c.createGain === 'function' && c !== sharedCtx) {
+            sharedCtx = c; bus = null; noiseBuf = null;
+          }
+        }
+      } catch (e) {}
+      return sharedCtx;
+    }
+    if (ctxChoice === 'own') { return ownCtx; }
+    /* First resolution: prefer the shared music context. */
+    try {
+      if (typeof getCtxFn === 'function') {
+        var m = getCtxFn();
+        if (m && typeof m.createGain === 'function') {
+          ctxChoice = 'shared'; sharedCtx = m;
+          return m;
+        }
+      }
+    } catch (e) {}
+    try {
+      var Ctx = root.AudioContext || root.webkitAudioContext;
+      if (!Ctx) { return null; }
+      ownCtx = new Ctx();
+      ctxChoice = 'own';
+      return ownCtx;
+    } catch (e) {
+      return null;
+    }
+  }
+  function ensureBus(c) {
+    if (bus && busCtx === c) { return bus; }
+    try {
+      bus = c.createGain();
+      bus.gain.value = BUS_GAIN;
+      bus.connect(c.destination);
+      busCtx = c;
+      return bus;
+    } catch (e) {
+      return null;
+    }
+  }
+  function resumeCtx(c) {
+    try {
+      if (c && c.state === 'suspended') {
+        var p = c.resume();
+        if (p && typeof p.catch === 'function') { p.catch(function () {}); }
+      }
+    } catch (e) {}
+  }
+  function getNoise(c) {
+    if (noiseBuf && noiseCtx === c) { return noiseBuf; }
+    try {
+      var len = Math.floor(c.sampleRate * 0.25);
+      var buf = c.createBuffer(1, len, c.sampleRate);
+      var d = buf.getChannelData(0);
+      for (var i = 0; i < len; i++) { d[i] = Math.random() * 2 - 1; }
+      noiseBuf = buf; noiseCtx = c;
+      return buf;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /* ---------- scheduling helpers (use module-level AC, set in play()) ---------- */
+  function blip(dest, freq, t, dur, peak, type, slideTo) {
+    try {
+      var o = AC.createOscillator();
+      o.type = type; o.frequency.setValueAtTime(freq, t);
+      if (slideTo) { o.frequency.exponentialRampToValueAtTime(slideTo, t + dur); }
+      var g = AC.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(peak, t + 0.006);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(dest);
+      o.onended = function () { try { g.disconnect(); } catch (e1) {} };
+      o.start(t); o.stop(t + dur + 0.05);
+    } catch (e) {}
+  }
+  function noiseBurst(dest, t, dur, peak, f0, f1) {
+    try {
+      var buf = getNoise(AC);
+      if (!buf) { return; }
+      var src = AC.createBufferSource();
+      src.buffer = buf;
+      var f = AC.createBiquadFilter();
+      f.type = 'bandpass'; f.Q.value = 0.9;
+      f.frequency.setValueAtTime(f0, t);
+      f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+      var g = AC.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(peak, t + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      src.connect(f); f.connect(g); g.connect(dest);
+      src.onended = function () {
+        try { g.disconnect(); } catch (e1) {}
+        try { f.disconnect(); } catch (e2) {}
+      };
+      src.start(t); src.stop(t + dur + 0.05);
+    } catch (e) {}
+  }
+
+  /* ---------- the ten sounds (t0 = start time, dest = SFX bus) ---------- */
+  var SOUND_FNS = {
+    tap: function (t0, dest) {
+      blip(dest, 1300, t0, 0.07, 0.12, 'sine', 850);
+    },
+    appOpen: function (t0, dest) {
+      blip(dest, 523.25, t0, 0.18, 0.12, 'sine', 0);
+      blip(dest, 783.99, t0 + 0.07, 0.18, 0.12, 'sine', 0);
+    },
+    appClose: function (t0, dest) {
+      blip(dest, 783.99, t0, 0.18, 0.11, 'sine', 0);
+      blip(dest, 523.25, t0 + 0.07, 0.18, 0.11, 'sine', 0);
+    },
+    toggle: function (t0, dest) {
+      blip(dest, 660, t0, 0.05, 0.10, 'triangle', 0);
+      blip(dest, 990, t0 + 0.05, 0.07, 0.10, 'triangle', 0);
+    },
+    chip: function (t0, dest) {
+      blip(dest, 2400, t0, 0.035, 0.13, 'triangle', 0);
+      blip(dest, 1900, t0 + 0.045, 0.035, 0.12, 'triangle', 0);
+      blip(dest, 2100, t0 + 0.09, 0.04, 0.13, 'triangle', 0);
+      blip(dest, 170, t0, 0.08, 0.10, 'sine', 0);
+    },
+    cardDeal: function (t0, dest) {
+      noiseBurst(dest, t0, 0.14, 0.10, 500, 2800);
+    },
+    slotSpin: function (t0, dest) {
+      var times = [0, 0.07, 0.14, 0.21, 0.28, 0.35];
+      for (var i = 0; i < times.length; i++) {
+        blip(dest, 1600, t0 + times[i], 0.025, 0.09, 'triangle', 0);
+      }
+    },
+    slotWin: function (t0, dest) {
+      var notes = [987.77, 1174.66, 1318.51, 1567.98];
+      for (var i = 0; i < notes.length; i++) {
+        blip(dest, notes[i], t0 + i * 0.07, 0.22, 0.13, 'sine', 0);
+      }
+      blip(dest, 2093.0, t0 + 0.21, 0.25, 0.06, 'sine', 0);
+    },
+    winStinger: function (t0, dest) {
+      var notes = [523.25, 659.25, 783.99, 1046.5];
+      for (var i = 0; i < notes.length; i++) {
+        blip(dest, notes[i], t0 + i * 0.12, 0.5, 0.13, 'triangle', 0);
+      }
+      blip(dest, 1046.5, t0 + 0.36, 0.7, 0.05, 'sine', 0);
+      blip(dest, 1318.51, t0 + 0.36, 0.7, 0.05, 'sine', 0);
+    },
+    loseStinger: function (t0, dest) {
+      var notes = [392.0, 311.13, 261.63];
+      for (var i = 0; i < notes.length; i++) {
+        blip(dest, notes[i], t0 + i * 0.22, 0.45, 0.10, 'sine', 0);
+      }
+    }
+  };
+
+  /* ---------- public API ---------- */
+  function init(p, save, getMusicContext) {
+    if (p && typeof p === 'object') { prefsRef = p; }
+    if (typeof save === 'function') { saveFn = save; }
+    if (typeof getMusicContext === 'function') { getCtxFn = getMusicContext; }
+    if (prefsRef && typeof prefsRef.sfxOn === 'boolean') { enabled = prefsRef.sfxOn; }
+    return enabled;
+  }
+  function play(name) {
+    if (!enabled) { return false; }
+    if (!Object.prototype.hasOwnProperty.call(SOUND_FNS, name)) { return false; }
+    var now = nowMs();
+    if (lastPlay[name] && now - lastPlay[name] < DEBOUNCE_MS) { return false; }
+    var c;
+    try { c = resolveCtx(); } catch (e) { return false; }
+    if (!c) { return false; }
+    AC = c;
+    var dest;
+    try { dest = ensureBus(c); } catch (e) { return false; }
+    if (!dest) { return false; }
+    resumeCtx(c);
+    try {
+      SOUND_FNS[name](c.currentTime + 0.01, dest);
+    } catch (e) {
+      return false;
+    }
+    lastPlay[name] = now;
+    counts[name] = (counts[name] || 0) + 1;
+    return true;
+  }
+  function setEnabled(b) {
+    enabled = !!b;
+    persist();
+    return enabled;
+  }
+  function isEnabled() { return enabled; }
+  function vibrate(ms) {
+    try {
+      if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+        var m = (typeof ms === 'number' && isFinite(ms))
+          ? Math.max(1, Math.min(200, Math.floor(ms))) : 15;
+        return !!navigator.vibrate(m);
+      }
+    } catch (e) {}
+    return false;
+  }
+  function debug() {
+    var copy = {};
+    for (var k in counts) {
+      if (Object.prototype.hasOwnProperty.call(counts, k)) { copy[k] = counts[k]; }
+    }
+    return {
+      enabled: enabled,
+      ctxChoice: ctxChoice,
+      ctxState: AC ? AC.state : 'none',
+      counts: copy
+    };
+  }
+
+  root.__phSfx = {
+    init: init,
+    play: play,
+    setEnabled: setEnabled,
+    isEnabled: isEnabled,
+    vibrate: vibrate,
+    SOUNDS: SOUND_NAMES.slice(),
+    _debug: debug,
+    version: '1.0'
+  };
+})();
+
+</script>
+<script>
 /* ================= InveSim Phone shell JS (Phase 1) =================
    Additive only: the game IIFE is untouched. The shell reads window.G
    (exposed by the game), calls window.switchMainTab, and re-parents the
@@ -31755,8 +32667,8 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
     return chars.length > 20 ? chars.slice(0, 20).join('') : s;
   }
   var PREFS_KEY = 'INVESIM_PHONE_PREFS';
-  var prefs = { music: false, order: null, stocksTab: 'stocks', playerName: '' };
-  try { var raw = localStorage.getItem(PREFS_KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p.music === 'boolean') prefs.music = p.music; if (p && Array.isArray(p.order)) prefs.order = p.order; if (p && (p.stocksTab === 'stocks' || p.stocksTab === 'etfs' || p.stocksTab === 'options')) prefs.stocksTab = p.stocksTab; if (p && typeof p.playerName === 'string') prefs.playerName = normalizeName(p.playerName); } } catch (e) {}
+  var prefs = { music: false, order: null, stocksTab: 'stocks', playerName: '', musicTrack: 0, musicShuffle: false, sfxOn: true, wallpaper: 0 };
+  try { var raw = localStorage.getItem(PREFS_KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p.music === 'boolean') prefs.music = p.music; if (p && Array.isArray(p.order)) prefs.order = p.order; if (p && (p.stocksTab === 'stocks' || p.stocksTab === 'etfs' || p.stocksTab === 'options')) prefs.stocksTab = p.stocksTab; if (p && typeof p.playerName === 'string') prefs.playerName = normalizeName(p.playerName); if (p && typeof p.musicTrack === 'number' && isFinite(p.musicTrack)) prefs.musicTrack = Math.max(0, Math.min(4, Math.floor(p.musicTrack))); if (p && typeof p.musicShuffle === 'boolean') prefs.musicShuffle = p.musicShuffle; if (p && typeof p.sfxOn === 'boolean') prefs.sfxOn = p.sfxOn; if (p && typeof p.wallpaper === 'number' && isFinite(p.wallpaper)) prefs.wallpaper = Math.max(0, Math.min(4, Math.floor(p.wallpaper))); } } catch (e) {}
   function savePrefs() { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {} }
   function validOrder(o) {
     if (!Array.isArray(o) || o.length !== APPS.length) return false;
@@ -31801,7 +32713,7 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
   ];
   var HERO_LABELS = { stocks: 'Trading Terminal', realestate: 'Property Equity', ereits: 'Private Real Estate', smallbiz: 'Business Portfolio', forex: 'Forex Equity', commodities: 'Commodities Desk', vc: 'Venture Portfolio', casino: 'Casino Balance', job: 'Casino Career', rivals: 'Championship Race', managers: 'Managed Capital', portfolio: 'Total Net Worth' };
   function heroHtml(app) {
-    return '<div class="ph-hero ph-hero-' + app.id + '" id="ph-hero-' + app.id + '"><div class="ph-hero-label">' + esc(HERO_LABELS[app.id] || app.name) + '</div><div class="ph-hero-big" id="ph-hero-big-' + app.id + '">—</div><div class="ph-hero-row" id="ph-hero-row-' + app.id + '"></div></div>';
+    return '<div class="ph-hero ph-hero-' + app.id + '" id="ph-hero-' + app.id + '"><div class="ph-hero-art" id="ph-hero-art-' + app.id + '" aria-hidden="true"></div><div class="ph-hero-label">' + esc(HERO_LABELS[app.id] || app.name) + '</div><div class="ph-hero-big" id="ph-hero-big-' + app.id + '">—</div><div class="ph-hero-row" id="ph-hero-row-' + app.id + '"></div></div>';
   }
 
   /* ---------- build home grid, dots, windows ---------- */
@@ -31860,7 +32772,7 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
       var body = '';
       if (app.id === 'bank') {
         body = '<div class="ph-scroll" id="ph-bank-scroll">' +
-          '<div id="ph-bank-hero"><div class="ph-bh-label">Available Cash</div><div id="ph-bank-cash">$10,000.00</div>' +
+          '<div id="ph-bank-hero"><div class="ph-hero-art" id="ph-hero-art-bank" aria-hidden="true"></div><div class="ph-bh-label">Available Cash</div><div id="ph-bank-cash">$10,000.00</div>' +
           '<div class="ph-bh-row"><div><span>Net Worth</span><b id="ph-bank-nw">$10,000.00</b></div>' +
           '<div><span>Day Change</span><b id="ph-bank-day">+$0.00</b></div>' +
           '<div><span>Margin Debt</span><b id="ph-bank-debt">$0.00</b></div></div></div>' +
@@ -31870,9 +32782,10 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
           (app.id === 'stocks' ? '<div class="ph-subtabs" id="ph-stocks-subtabs"><button type="button" data-stab="stocks">Stocks</button><button type="button" data-stab="etfs">ETFs</button><button type="button" data-stab="options">Options</button></div>' : '') +
           '<div id="' + HOSTS[app.id] + '" class="ph-host"></div></div>';
       } else if (app.id === 'news') {
-        body = '<div class="ph-scroll" id="ph-news-scroll"><div id="news-wire-host" class="ph-host"></div><div id="news-monitor-host" class="ph-host"></div></div>';
+        body = '<div class="ph-scroll" id="ph-news-scroll"><div class="ph-app-banner" id="ph-banner-news" aria-hidden="true"></div><div id="news-wire-host" class="ph-host"></div><div id="news-monitor-host" class="ph-host"></div></div>';
       } else if (app.id === 'settings') {
         body = '<div class="ph-scroll"><div class="ph-settings">' +
+          '<div class="ph-app-banner" id="ph-banner-settings" aria-hidden="true"></div>' +
           '<div class="ph-set-group">' +
             '<button type="button" class="ph-set-row" id="ph-set-name"><span class="ph-set-ic">👤</span><span class="ph-set-tx"><b>Player name</b><i id="ph-set-name-sub">Set your name</i></span><span class="ph-set-chev">›</span></button>' +
             '<div class="ph-name-edit" id="ph-name-edit" hidden><input type="text" id="ph-name-input" placeholder="Your name" autocomplete="off" autocapitalize="words" enterkeyhint="done" aria-label="Player name"><div class="ph-name-btns"><button type="button" id="ph-name-save">Save</button><button type="button" id="ph-name-cancel">Cancel</button></div></div>' +
@@ -31884,7 +32797,15 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
           '<div class="ph-set-group">' +
             '<div class="ph-set-row"><span class="ph-set-ic">🎨</span><span class="ph-set-tx"><b>Theme</b><i>Light or black</i></span><button type="button" class="ph-set-pill" id="ph-set-theme"><span id="ph-set-theme-label">Light</span></button></div>' +
             '<div class="ph-set-row"><span class="ph-set-ic">⏱️</span><span class="ph-set-tx"><b>Autoplay time</b><i>Days advance automatically</i></span><button type="button" class="ph-toggle" id="ph-set-autoplay" aria-label="Toggle autoplay"></button></div>' +
-            '<div class="ph-set-row"><span class="ph-set-ic">🎵</span><span class="ph-set-tx"><b>Soft music</b><i>Gentle ambient loop, on or off</i></span><button type="button" class="ph-toggle" id="ph-settings-music-toggle" aria-label="Toggle music"></button></div>' +
+          '</div>' +
+          '<div class="ph-set-group">' +
+            '<div class="ph-set-row"><span class="ph-set-ic">🎵</span><span class="ph-set-tx"><b>Soft music</b><i id="ph-music-now">Off</i></span><button type="button" class="ph-toggle" id="ph-settings-music-toggle" aria-label="Toggle music"></button></div>' +
+            '<div class="ph-set-row ph-music-controls"><button type="button" class="ph-music-nav" id="ph-music-prev" aria-label="Previous track">⏮</button><span class="ph-music-track" id="ph-music-track-name" role="button" tabindex="0" title="Tap for next track">—</span><button type="button" class="ph-music-nav" id="ph-music-next" aria-label="Next track">⏭</button><button type="button" class="ph-set-pill" id="ph-music-shuffle">Shuffle: Off</button></div>' +
+            '<div class="ph-set-row"><span class="ph-set-ic">🔊</span><span class="ph-set-tx"><b>Sound effects</b><i>Taps, casino sounds, stingers</i></span><button type="button" class="ph-toggle" id="ph-settings-sfx-toggle" aria-label="Toggle sound effects"></button></div>' +
+          '</div>' +
+          '<div class="ph-set-group">' +
+            '<div class="ph-set-row"><span class="ph-set-ic">🖼️</span><span class="ph-set-tx"><b>Wallpaper</b><i id="ph-wallpaper-name">Original</i></span></div>' +
+            '<div class="ph-wallpaper-picker" id="ph-wallpaper-picker"></div>' +
           '</div>' +
           '<div class="ph-set-group">' +
             '<a class="ph-set-row" href="guide.html" target="_blank" rel="noopener"><span class="ph-set-ic">📖</span><span class="ph-set-tx"><b>Investing Guides</b><i>Learn to invest for real</i></span><span class="ph-set-chev">›</span></a>' +
@@ -31904,11 +32825,17 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
       windows[app.id] = win;
     });
     var st = $('ph-settings-music-toggle');
-    if (st) st.addEventListener('click', function () { setMusic(!prefs.music); });
+    if (st) st.addEventListener('click', function () { setMusic(!prefs.music); playSfx('toggle'); });
+    var mp = $('ph-music-prev'); if (mp) mp.addEventListener('click', function () { musicPrev(); playSfx('tap'); });
+    var mn = $('ph-music-next'); if (mn) mn.addEventListener('click', function () { musicNext(); playSfx('tap'); });
+    var mt = $('ph-music-track-name'); if (mt) { mt.addEventListener('click', function () { musicNext(); playSfx('tap'); }); mt.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); musicNext(); playSfx('tap'); } }); }
+    var ms = $('ph-music-shuffle'); if (ms) ms.addEventListener('click', function () { musicToggleShuffle(); playSfx('toggle'); });
+    var sx = $('ph-settings-sfx-toggle'); if (sx) sx.addEventListener('click', function () { var on = prefs.sfxOn === false; setSfx(on); if (on) playSfx('toggle'); });
+    var wp = $('ph-wallpaper-picker'); if (wp) wp.addEventListener('click', function (e) { var b = e.target.closest ? e.target.closest('[data-wp]') : null; if (b) { setWallpaper(parseInt(b.getAttribute('data-wp'), 10) || 0); playSfx('tap'); } });
     var sv = $('ph-set-save'); if (sv) sv.addEventListener('click', function () { var b = $('btnSaveGame'); if (b) b.click(); });
     var ng = $('ph-set-newgame'); if (ng) ng.addEventListener('click', function () { var b = $('btnNewGame'); if (b) b.click(); });
-    var th = $('ph-set-theme'); if (th) th.addEventListener('click', function () { try { if (typeof window.toggleAppTheme === 'function') window.toggleAppTheme(); } catch (e) {} setTimeout(renderSettingsState, 200); });
-    var ap = $('ph-set-autoplay'); if (ap) ap.addEventListener('click', function () { var b = $('btnAutoPlay'); if (b) b.click(); setTimeout(function () { renderSettingsState(); refreshHUD(); }, 200); });
+    var th = $('ph-set-theme'); if (th) th.addEventListener('click', function () { try { if (typeof window.toggleAppTheme === 'function') window.toggleAppTheme(); } catch (e) {} setTimeout(renderSettingsState, 200); playSfx('toggle'); });
+    var ap = $('ph-set-autoplay'); if (ap) ap.addEventListener('click', function () { var b = $('btnAutoPlay'); if (b) b.click(); setTimeout(function () { renderSettingsState(); refreshHUD(); }, 200); playSfx('toggle'); });
     var nm = $('ph-set-name'); if (nm) nm.addEventListener('click', function () { var ed = $('ph-name-edit'); if (ed && ed.hidden) openNameEdit(); else closeNameEdit(); });
     var nsv = $('ph-name-save'); if (nsv) nsv.addEventListener('click', saveNameEdit);
     var ncl = $('ph-name-cancel'); if (ncl) ncl.addEventListener('click', function () { closeNameEdit(); });
@@ -31964,6 +32891,7 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
   }
   function handleEditTap(id) {
     if (dragSession) return;
+    playSfx('tap');
     if (!selectedId) { selectedId = id; markSelected(); return; }
     if (selectedId === id) { selectedId = null; markSelected(); return; }
     moveApp(selectedId, appOrder.indexOf(id));
@@ -32091,10 +33019,13 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
   function openApp(id, originEl) {
     if (!unlocked) return;
     closeNotifCenter();
+    closeSwitcher();
     var app = APP_MAP[id]; if (!app) return;
     if (app.external) { window.location.href = app.external; return; } /* redirect, same tab: leaving the page stops the music */
     if (currentApp && currentApp !== id) { var prev = windows[currentApp]; prev.classList.remove('ph-open', 'ph-closing'); }
     currentApp = id;
+    noteRecentApp(id);
+    playSfx('appOpen');
     if (!histPushed) { try { history.pushState({ phApp: id }, ''); histPushed = true; } catch (e) {} }
     var win = windows[id];
     if (originEl && screenEl) {
@@ -32113,17 +33044,19 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
     if (id === 'bank') { insertLoansCard(); renderLoans(true); renderBankHero(); }
     if (id === 'news') { renderNewsTeaser(); markAllRead(); }
     if (id === 'settings') renderSettingsState();
+    if (id === 'casino') { ensureCasinoFeedObserver(); syncCasinoFeedSeen(); }
     renderHero(id);
     var sc = win.querySelector('.ph-scroll'); if (sc) sc.scrollTop = 0;
   }
   function closeCurrentApp() {
     var win = windows[currentApp];
     currentApp = null;
-    if (win) { win.classList.remove('ph-open'); win.classList.add('ph-closing'); setTimeout(function () { win.classList.remove('ph-closing'); }, 200); }
+    if (win) { win.classList.remove('ph-open'); win.classList.add('ph-closing'); setTimeout(function () { win.classList.remove('ph-closing'); }, 200); playSfx('appClose'); }
     try { if (typeof window.switchMainTab === 'function') window.switchMainTab('home'); } catch (e) {}
   }
   function goHome() {
     if (editing && !currentApp) { exitEditMode(); return; }
+    if (switcherOpen) { closeSwitcher(); return; }
     if ($('ph-notif-center').classList.contains('ph-open')) { closeNotifCenter(); return; }
     if (!currentApp) return;
     if (histPushed) { histPushed = false; try { history.back(); } catch (e) { closeCurrentApp(); } return; }
@@ -32133,6 +33066,129 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
   window.addEventListener('popstate', function () {
     if (currentApp) { histPushed = false; closeCurrentApp(); }
   });
+
+  /* ---------- app switcher: double-tap the home indicator ----------
+     Session-only recency (no live snapshots, no persistence). The first tap
+     always goes home immediately — no tap delay — and a second tap within
+     350 ms opens the switcher instead. Cards reuse openApp, so history
+     behavior stays exactly as if the app were opened from the home grid. */
+  var recentApps = [];
+  var switcherOpen = false;
+  var lastIndTap = 0;
+  function noteRecentApp(id) {
+    var i = recentApps.indexOf(id);
+    if (i !== -1) recentApps.splice(i, 1);
+    recentApps.unshift(id);
+    if (recentApps.length > 15) recentApps.length = 15;
+  }
+  function renderSwitcher() {
+    var box = $('ph-sw-cards'); if (!box) return;
+    if (!recentApps.length) {
+      box.innerHTML = '<p class="ph-sw-empty">No apps open yet.<br>Open an app, then double-tap the home line to switch between apps.</p>';
+      return;
+    }
+    var html = '';
+    recentApps.forEach(function (id) {
+      var app = APP_MAP[id]; if (!app) return;
+      html += '<button type="button" class="ph-sw-card" data-sw-app="' + id + '">' +
+        '<span class="ph-icon" style="background:' + app.grad + '">' + app.glyph + '</span>' +
+        '<span class="ph-sw-name">' + esc(app.name) + '</span>' +
+        (id === currentApp ? '<span class="ph-sw-cur">Current</span>' : '') +
+        '</button>';
+    });
+    box.innerHTML = html;
+  }
+  function openSwitcher() {
+    if (!unlocked || editing) return;
+    renderSwitcher();
+    var sw = $('ph-switcher'); if (!sw) return;
+    sw.classList.add('ph-open'); sw.setAttribute('aria-hidden', 'false');
+    switcherOpen = true;
+    playSfx('tap');
+  }
+  function closeSwitcher() {
+    if (!switcherOpen) return;
+    var sw = $('ph-switcher'); if (sw) { sw.classList.remove('ph-open'); sw.setAttribute('aria-hidden', 'true'); }
+    switcherOpen = false;
+  }
+  function onIndicatorTap() {
+    if (!unlocked) return;
+    if (switcherOpen) { closeSwitcher(); lastIndTap = 0; return; }
+    if (editing) { lastIndTap = 0; goHome(); return; }
+    var now = Date.now();
+    if (now - lastIndTap < 350) { lastIndTap = 0; openSwitcher(); return; }
+    lastIndTap = now;
+    goHome();
+  }
+
+  /* ---------- casino sounds: button taps + win/loss stingers ----------
+     Click sounds are matched on the game's own button ids/onclick handlers
+     (btnBj*, btnBaccaratDeal, btnPokerDeal, btnSpinSlots, btnSpinRoulette,
+     setCasinoQuickBet chip buttons). Outcome stingers watch the casino
+     history feed's newest entry: the game's logCasinoEvent messages carry
+     explicit win/loss wording, classified below. Exactly one sound per
+     outcome; slots wins get the coin sound, other wins the stinger. */
+  var casinoFeedSeen = null;
+  var casinoFeedObs = null;
+  var CASINO_WIN_RE = /(WON|WIN:|Win \(|Won \+|Won pot|Cashed Out|Scooped|Net \+|Paid \+| — \+\$)/;
+  var CASINO_LOSS_RE = /(No match|Exploded|Loss \(|Lost -|folded \(-|finished #|finished P|Net -| — -\$|, -\$|Showdown: .* won )/;
+  function casinoOutcomeSound(text) {
+    if (!text) return;
+    var win = CASINO_WIN_RE.test(text);
+    var loss = CASINO_LOSS_RE.test(text);
+    if (win && !loss) {
+      if (text.indexOf('🎰') !== -1) { playSfx('slotWin'); }
+      else { playSfx('winStinger'); try { var s = sfxMod(); if (s && s.vibrate) s.vibrate(20); } catch (e) {} }
+    } else if (loss && !win) {
+      playSfx('loseStinger');
+    }
+  }
+  function casinoFeedLatest() {
+    var feed = $('casinoHistoryFeed'); if (!feed) return '';
+    var first = feed.firstElementChild;
+    return first ? (first.textContent || '') : '';
+  }
+  function syncCasinoFeedSeen() { casinoFeedSeen = casinoFeedLatest(); }
+  function checkCasinoFeed() {
+    var text = casinoFeedLatest();
+    if (!text || text === casinoFeedSeen) return;
+    var isNew = casinoFeedSeen !== null;
+    casinoFeedSeen = text;
+    if (isNew && currentApp === 'casino') casinoOutcomeSound(text);
+  }
+  function ensureCasinoFeedObserver() {
+    var feed = $('casinoHistoryFeed');
+    if (!feed || casinoFeedObs) return;
+    try {
+      casinoFeedObs = new MutationObserver(function () { checkCasinoFeed(); });
+      casinoFeedObs.observe(feed, { childList: true, subtree: false });
+      syncCasinoFeedSeen();
+    } catch (e) {}
+  }
+  function casinoClickSound(e) {
+    if (currentApp !== 'casino') return;
+    var t = e.target; if (!t || !t.closest) return;
+    var b = t.closest('button'); if (!b) return;
+    var host = $('casino-host'); if (host && !host.contains(b)) return;
+    if (b.hasAttribute('data-casino-game')) { playSfx('tap'); return; }
+    var id = b.id || '';
+    if (id === 'btnSpinSlots' || id === 'btnSpinRoulette') { playSfx('slotSpin'); return; }
+    if (id.indexOf('btnBj') === 0 || id === 'btnBaccaratDeal' || id === 'btnPokerDeal') { playSfx('cardDeal'); return; }
+    var oc = b.getAttribute('onclick') || '';
+    if (oc.indexOf('setCasinoQuickBet') !== -1) { playSfx('chip'); return; }
+    var txt = (b.textContent || '').trim().toUpperCase();
+    if (txt === 'SPIN') { playSfx('slotSpin'); return; }
+    if (txt === 'DEAL' || txt === 'HIT' || txt === 'STAND' || txt === 'DOUBLE' || txt === 'SPLIT') { playSfx('cardDeal'); return; }
+    if (/^\$\d/.test(txt)) { playSfx('chip'); return; }
+  }
+  function bindCasinoSfx() {
+    /* Capture phase: the game's own onclick handlers re-render the controls
+       panel synchronously, detaching the clicked button before a bubble-phase
+       document listener runs — host.contains() then fails and the sound is
+       lost (blackjack Deal). Capturing decides on the live DOM first. */
+    document.addEventListener('click', casinoClickSound, true);
+    ensureCasinoFeedObserver();
+  }
 
   /* ---------- Phase 3: cross-tab link routing ----------
      In-tab links call the game's switchMainTab() to a DIFFERENT app's tab
@@ -32525,74 +33581,89 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
     });
   }
 
-  /* ---------- soft music: one original generative ambient loop ---------- */
-  var AC = null, master = null, padTimer = null, chordIdx = 0;
-  var CHORDS = [
-    [220.00, 261.63, 329.63],
-    [174.61, 220.00, 261.63],
-    [196.00, 261.63, 329.63],
-    [196.00, 246.94, 293.66]
-  ];
-  function playChord(freqs) {
-    if (!AC || !master) return;
-    var t0 = AC.currentTime;
-    var filt = AC.createBiquadFilter(); filt.type = 'lowpass'; filt.frequency.value = 820; filt.Q.value = 0.4;
-    filt.connect(master);
-    freqs.forEach(function (f, i) {
-      var o = AC.createOscillator(); o.type = 'triangle'; o.frequency.value = f; o.detune.value = (i - 1) * 4;
-      var g = AC.createGain();
-      g.gain.setValueAtTime(0.0001, t0);
-      g.gain.exponentialRampToValueAtTime(0.05, t0 + 2.6);
-      g.gain.setValueAtTime(0.05, t0 + 6.4);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 10.5);
-      o.connect(g); g.connect(filt);
-      o.start(t0); o.stop(t0 + 10.8);
-    });
-    var sub = AC.createOscillator(); sub.type = 'sine'; sub.frequency.value = freqs[0] / 2;
-    var sg = AC.createGain();
-    sg.gain.setValueAtTime(0.0001, t0);
-    sg.gain.exponentialRampToValueAtTime(0.035, t0 + 3);
-    sg.gain.exponentialRampToValueAtTime(0.0001, t0 + 10.5);
-    sub.connect(sg); sg.connect(master);
-    sub.start(t0); sub.stop(t0 + 10.8);
+  /* ---------- Music + SFX (generative WebAudio modules, no assets) ---------- */
+  /* ph-music.js (window.__phMusic) and ph-sfx.js (window.__phSfx) load before
+     this shell script. Both are pure logic modules; the shell owns all UI and
+     all call sites. Every call is guarded so the shell works if a module is
+     absent or audio is blocked. */
+  function musicMod() { try { return window.__phMusic || null; } catch (e) { return null; } }
+  function sfxMod() { try { return window.__phSfx || null; } catch (e) { return null; } }
+  function initAudio() {
+    try { var m = musicMod(); if (m && m.init) m.init(prefs, savePrefs); } catch (e) {}
+    try { var s = sfxMod(); if (s && s.init) s.init(prefs, savePrefs, function () { var mm = musicMod(); return (mm && mm.getAudioContext) ? mm.getAudioContext() : null; }); } catch (e) {}
   }
-  function startMusic() {
-    try {
-      if (!AC) {
-        var Ctx = window.AudioContext || window.webkitAudioContext;
-        if (!Ctx) return;
-        AC = new Ctx();
-        master = AC.createGain(); master.gain.value = 0.0; master.connect(AC.destination);
-      }
-      if (AC.state === 'suspended') AC.resume();
-      master.gain.cancelScheduledValues(AC.currentTime);
-      master.gain.setTargetAtTime(0.5, AC.currentTime, 0.8);
-      if (!padTimer) {
-        playChord(CHORDS[chordIdx % CHORDS.length]);
-        padTimer = setInterval(function () { chordIdx++; playChord(CHORDS[chordIdx % CHORDS.length]); }, 9000);
-      }
-    } catch (e) {}
-  }
-  function stopMusic() {
-    try {
-      if (padTimer) { clearInterval(padTimer); padTimer = null; }
-      if (AC && master) {
-        master.gain.cancelScheduledValues(AC.currentTime);
-        master.gain.setTargetAtTime(0.0, AC.currentTime, 0.4);
-        setTimeout(function () { try { if (AC && !prefs.music) AC.suspend(); } catch (e) {} }, 1200);
-      }
-    } catch (e) {}
-  }
+  function playSfx(name) { try { var s = sfxMod(); if (s && s.play) s.play(name); } catch (e) {} }
+  function startMusic() { try { var m = musicMod(); if (m && m.play) m.play(); } catch (e) {} }
+  function stopMusic() { try { var m = musicMod(); if (m && m.stop) m.stop(); } catch (e) {} }
+  function musicState() { try { var m = musicMod(); if (m && m.getState) return m.getState(); } catch (e) {} return { on: !!prefs.music, trackIndex: prefs.musicTrack || 0, trackName: '', shuffle: !!prefs.musicShuffle, running: false }; }
+  function musicTrackName() { try { var m = musicMod(); if (m && m.TRACKS && m.TRACKS[prefs.musicTrack || 0]) return m.TRACKS[prefs.musicTrack || 0].name; } catch (e) {} return ''; }
   function syncMusicUI() {
+    var st = musicState();
     var pill = $('ph-btn-music');
-    if (pill) { pill.innerHTML = prefs.music ? '&#9834; Music: On' : '&#9834; Music: Off'; pill.className = 'ph-pill-btn' + (prefs.music ? ' ph-on' : ''); }
+    if (pill) { pill.innerHTML = st.on ? '&#9834; Music: On' : '&#9834; Music: Off'; pill.className = 'ph-pill-btn' + (st.on ? ' ph-on' : ''); }
     var tog = $('ph-settings-music-toggle');
-    if (tog) tog.className = 'ph-toggle' + (prefs.music ? ' ph-on' : '');
+    if (tog) { tog.className = 'ph-toggle' + (st.on ? ' ph-on' : ''); tog.setAttribute('aria-checked', st.on ? 'true' : 'false'); }
+    var now = $('ph-music-now'); if (now) now.textContent = st.on ? ('Now playing: ' + (st.trackName || musicTrackName())) : 'Off';
+    var tn = $('ph-music-track-name'); if (tn) tn.textContent = st.trackName || musicTrackName() || '—';
+    var sh = $('ph-music-shuffle'); if (sh) { sh.textContent = 'Shuffle: ' + (st.shuffle ? 'On' : 'Off'); sh.className = 'ph-set-pill' + (st.shuffle ? ' ph-on' : ''); }
+    var sfxT = $('ph-settings-sfx-toggle'); if (sfxT) { var en = prefs.sfxOn !== false; sfxT.className = 'ph-toggle' + (en ? ' ph-on' : ''); sfxT.setAttribute('aria-checked', en ? 'true' : 'false'); }
   }
   function setMusic(on) {
-    prefs.music = !!on; savePrefs(); syncMusicUI();
-    if (prefs.music) startMusic(); else stopMusic();
+    try { var m = musicMod(); if (m && m.setOn) { m.setOn(!!on); } else { prefs.music = !!on; savePrefs(); } } catch (e) { prefs.music = !!on; savePrefs(); }
+    syncMusicUI();
   }
+  function musicPrev() { try { var m = musicMod(); if (m && m.prev) m.prev(); } catch (e) {} syncMusicUI(); }
+  function musicNext() { try { var m = musicMod(); if (m && m.next) m.next(); } catch (e) {} syncMusicUI(); }
+  function musicToggleShuffle() { try { var m = musicMod(); if (m && m.toggleShuffle) { m.toggleShuffle(); } else { prefs.musicShuffle = !prefs.musicShuffle; savePrefs(); } } catch (e) {} syncMusicUI(); }
+  function setSfx(on) {
+    try { var s = sfxMod(); if (s && s.setEnabled) { s.setEnabled(!!on); } else { prefs.sfxOn = !!on; savePrefs(); } } catch (e) { prefs.sfxOn = !!on; savePrefs(); }
+    syncMusicUI();
+  }
+
+  /* ---------- Wallpapers (art module, lazy; fallback = CSS orbs) ---------- */
+  function artMod() { try { return window.__phArt || null; } catch (e) { return null; } }
+  function applyWallpaper(idx) {
+    var a = artMod();
+    var wps = document.querySelectorAll('.ph-wallpaper');
+    if (!a || !a.getWallpaper || idx === 0) {
+      for (var i = 0; i < wps.length; i++) { wps[i].style.backgroundImage = ''; wps[i].classList.remove('ph-wallpaper-art'); }
+      return;
+    }
+    var uri = a.getWallpaper(idx);
+    if (!uri) {
+      /* Retry only while the group can still load: on failure the promise
+         resolves immediately, and re-calling applyWallpaper from .then
+         would spin microtasks forever. Fallback = CSS orbs (already set
+         by the wallpaper divs' own background). */
+      var st = null; try { st = a.loadState && a.loadState.wallpapers; } catch (e) {}
+      if (a.ensureWallpapers && st !== 'failed') a.ensureWallpapers().then(function () { applyWallpaper(prefs.wallpaper || 0); renderWallpaperPicker(); });
+      return;
+    }
+    for (var j = 0; j < wps.length; j++) { wps[j].style.backgroundImage = 'url("' + uri + '")'; wps[j].classList.add('ph-wallpaper-art'); }
+  }
+  function setWallpaper(idx) {
+    prefs.wallpaper = Math.max(0, Math.min(4, Math.floor(idx) || 0));
+    savePrefs();
+    applyWallpaper(prefs.wallpaper);
+    renderWallpaperPicker();
+  }
+  function renderWallpaperPicker() {
+    var picker = $('ph-wallpaper-picker'); if (!picker) return;
+    var a = artMod();
+    var defs = (a && a.wallpaperList) ? a.wallpaperList() : [{ name: 'Original' }];
+    var html = '';
+    for (var i = 0; i < defs.length; i++) {
+      var sel = (prefs.wallpaper || 0) === i ? ' ph-wp-sel' : '';
+      var thumb = '';
+      if (i > 0 && a && a.getWallpaper) { var u = a.getWallpaper(i); if (u) thumb = ' style="background-image:url(\'' + u + '\')"'; }
+      html += '<button type="button" class="ph-wp-sw' + sel + '" data-wp="' + i + '"' + thumb + ' aria-label="' + defs[i].name + '"><span>' + defs[i].name + '</span></button>';
+    }
+    picker.innerHTML = html;
+    var nameEl = $('ph-wallpaper-name'); if (nameEl) nameEl.textContent = (defs[prefs.wallpaper || 0] || defs[0]).name;
+  }
+  /* The art module calls this hook once its wallpaper group is ready, so the
+     picker gains real names + thumbnails. Safe to call anytime. */
+  window.__phRenderWallpaperPicker = function () { renderWallpaperPicker(); applyWallpaper(prefs.wallpaper || 0); };
 
   /* ---------- re-parenting + init ---------- */
   function moveNode(node, hostId) {
@@ -32657,10 +33728,19 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
     });
     $('ph-nc-close').addEventListener('click', closeNotifCenter);
     $('ph-nc-clear').addEventListener('click', function () { notifications = []; unread = 0; updateBadge(); renderCenter(); });
-    $('ph-home-indicator').addEventListener('click', goHome);
+    $('ph-home-indicator').addEventListener('click', onIndicatorTap);
+    $('ph-sw-backdrop').addEventListener('click', closeSwitcher);
+    $('ph-sw-close').addEventListener('click', closeSwitcher);
+    $('ph-sw-cards').addEventListener('click', function (e) {
+      var c = e.target.closest ? e.target.closest('[data-sw-app]') : null;
+      if (!c) return;
+      var id = c.getAttribute('data-sw-app');
+      closeSwitcher();
+      openApp(id);
+    });
     $('ph-btn-autoplay').addEventListener('click', function () { var b = $('btnAutoPlay'); if (b) b.click(); setTimeout(refreshHUD, 150); });
     $('ph-btn-stepday').addEventListener('click', function () { var b = $('btnStepDay'); if (b) b.click(); setTimeout(refreshHUD, 300); });
-    $('ph-btn-music').addEventListener('click', function () { setMusic(!prefs.music); });
+    $('ph-btn-music').addEventListener('click', function () { setMusic(!prefs.music); playSfx('toggle'); });
     $('ph-edit-done').addEventListener('click', exitEditMode);
     $('ph-edit-az').addEventListener('click', sortAZ);
     $('ph-edit-reset').addEventListener('click', resetOrder);
@@ -32684,6 +33764,10 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
   buildWindows();
   bindLock();
   bindChrome();
+  bindCasinoSfx();
+  initAudio();
+  applyWallpaper(prefs.wallpaper || 0);
+  renderWallpaperPicker();
   updateLockClock();
   setInterval(updateLockClock, 10000);
   syncMusicUI();
@@ -32716,12 +33800,378 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
     get unread() { return unread; },
     get notifications() { return notifications.length; },
     get musicOn() { return prefs.music; },
+    get musicTrack() { return prefs.musicTrack || 0; },
+    get musicTrackName() { return musicTrackName(); },
+    get musicShuffle() { return !!prefs.musicShuffle; },
+    get sfxOn() { return prefs.sfxOn !== false; },
+    get wallpaper() { return prefs.wallpaper || 0; },
+    get switcherOpen() { return switcherOpen; },
+    get recentApps() { return recentApps.slice(); },
     get playerName() { return prefs.playerName; },
     get editing() { return editing; },
     get order() { return appOrder.slice(); },
     get page() { return currentPage; },
     get histPushed() { return histPushed; },
-    get audioRunning() { try { return !!(AC && AC.state === 'running' && padTimer); } catch (e) { return false; } }
+    get audioRunning() { try { var m = musicMod(); return !!(m && m.getState && m.getState().running); } catch (e) { return false; } }
+  };
+})();
+
+</script>
+<script>
+/* ================= ph-art.js — InveSim Phone art pack =================
+   Lazy art loader + applier. Mirrors the ph-data.js pattern: sharded JSON
+   asset files under assets/art/, fetched per app, merged into an in-memory
+   cache (never localStorage). Fetch failure = current look, no error.
+
+   Groups (files written by ship-art.js from art-staging/):
+     wallpapers : wallpapers.json  (4 JPEGs, base64)
+     photos     : photos-p1.json (10 property photos) + photos-p2.json (8 biz)
+     portraits  : portraits.json   (9 rival + 5 manager portraits, base64 JPEG)
+     svg        : svg.json         (16 hero SVGs + 6 felt SVGs, raw markup)
+
+   API (attached to window.__phArt):
+     ensureWallpapers/ensurePhotos/ensurePortraits/ensureSvg() -> Promise
+     ensureForApp(appId)   loads the groups an app needs
+     wallpapersReady/photosReady/portraitsReady/svgReady() -> bool
+     wallpaperList()       [{name}] — 5 entries, index 0 = Original (no fetch)
+     getWallpaper(idx)     data URI or null (idx 0 -> null: CSS orbs)
+     getPropertyPhoto(artCat)   data URI or null (artCat from datasets' ac map)
+     getBizPhoto(catIndex)      data URI or null (0-7, SMALL_BIZ_CATEGORIES id)
+     getPortrait(key)           data URI or null (AI_1..AI_9, manager keys)
+     getRivalPortrait(ai)       data URI or null (ai.id or ai.shortTag)
+     getManagerPortrait(text)   data URI or null (card header text -> family)
+     getHero(appId)             SVG data URI or null
+     getFelt(family)            SVG data URI or null
+     FELT_FAMILY                casino game key -> felt family map
+     loadState / fetchCount / cacheKeys()   test hooks (mirror __phData)
+   ========================================================================== */
+(function () {
+  'use strict';
+  if (window.__phArtLoaded) return;
+  window.__phArtLoaded = true;
+
+  function $(id) { return document.getElementById(id); }
+
+  var ART_BASE = 'assets/art/';
+  var GROUPS = {
+    wallpapers: ['wallpapers.json'],
+    photos: ['photos-p1.json', 'photos-p2.json'],
+    portraits: ['portraits.json'],
+    svg: ['svg.json']
+  };
+  var APP_GROUPS = {
+    realestate: ['svg', 'photos'],
+    smallbiz: ['svg', 'photos'],
+    rivals: ['svg', 'portraits'],
+    managers: ['svg', 'portraits'],
+    casino: ['svg'],
+    settings: ['svg', 'wallpapers']
+  };
+  var WALLPAPER_DEFS = [
+    { name: 'Original', key: '' },
+    { name: 'Ocean', key: 'ocean' },
+    { name: 'Dusk', key: 'dusk' },
+    { name: 'Aurora', key: 'aurora' },
+    { name: 'Geometric', key: 'geometric' }
+  ];
+  /* SMALL_BIZ_CATEGORIES order (id 0-7); keys are the manifest photo keys
+     (category names without the emoji prefix). */
+  var BIZ_KEYS = [
+    'Food, Beverage & Restaurants',
+    'Retail, Convenience & Laundromats',
+    'Auto Repair, HVAC, Plumbing & Trades',
+    'Salons, Dental, Healthcare & Gyms',
+    'Trucking, Storage, Logistics & Mfg',
+    'IT Services, Accounting, Cleaning & B2B',
+    'Entertainment, Daycare, Events & Motels',
+    'Landscaping, Solar, Waste & Agribusiness'
+  ];
+  var RIVAL_BY_TAG = {
+    'Mega/Value': 'AI_1', 'Momentum': 'AI_2', 'Options Pro': 'AI_3',
+    'Mini-Cap Hunter': 'AI_4', 'Real Estate Mogul': 'AI_5',
+    'Macro / Gold': 'AI_6', 'Long/Short': 'AI_7',
+    'Dividend & Rent': 'AI_8', 'YOLO Catalyst': 'AI_9'
+  };
+  var FELT_FAMILY = {
+    BLACKJACK: 'cards', BACCARAT: 'cards', POKER: 'cards',
+    ROULETTE: 'roulette',
+    SLOTS: 'slots', SCRATCH: 'slots',
+    HORSES: 'racing', NASCAR: 'racing',
+    CHESS: 'strategy', VIKING_SAMURAI: 'strategy',
+    ROCKET: 'crash'
+  };
+
+  var loadState = { wallpapers: 'idle', photos: 'idle', portraits: 'idle', svg: 'idle' };
+  var fetchCount = { wallpapers: 0, photos: 0, portraits: 0, svg: 0 };
+  var cache = { wallpapers: null, photos: null, portraits: null, svg: null };
+  var pending = {};
+
+  function loadGroup(name) {
+    if (loadState[name] === 'ready' || loadState[name] === 'failed') return Promise.resolve(loadState[name]);
+    if (pending[name]) return pending[name];
+    loadState[name] = 'loading';
+    var files = GROUPS[name];
+    pending[name] = Promise.all(files.map(function (f) {
+      fetchCount[name]++;
+      return fetch(ART_BASE + f).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      });
+    })).then(function (parts) {
+      var map = {};
+      parts.forEach(function (part) {
+        (part.items || []).forEach(function (it) { map[it.key] = it; });
+      });
+      cache[name] = map;
+      loadState[name] = 'ready';
+      /* Fan-out: data notes (photos/dossier) and current-app surfaces pick
+         the new art up immediately instead of waiting for the next scan. */
+      try { if (window.__phData && window.__phData.refresh) window.__phData.refresh(); } catch (e) {}
+      try { applyForApp(currentOpenApp()); } catch (e) {}
+      try { if (window.__phRenderWallpaperPicker) window.__phRenderWallpaperPicker(); } catch (e) {}
+      return 'ready';
+    }).catch(function () {
+      loadState[name] = 'failed';
+      cache[name] = null;
+      return 'failed';
+    });
+    return pending[name];
+  }
+  function ensureForApp(appId) {
+    var groups = APP_GROUPS[appId] || ['svg'];
+    return Promise.all(groups.map(loadGroup)).then(function () { applyForApp(appId); });
+  }
+  function jpegUri(item) {
+    if (!item || !item.b64) return null;
+    return 'data:' + (item.mime || 'image/jpeg') + ';base64,' + item.b64;
+  }
+  function svgUri(item) {
+    if (!item || !item.svg) return null;
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(item.svg);
+  }
+
+  /* ---------- getters (null when not loaded / unknown key: fallback) ---- */
+  function getWallpaper(idx) {
+    if (!idx || idx < 1 || idx >= WALLPAPER_DEFS.length) return null;
+    if (loadState.wallpapers !== 'ready' || !cache.wallpapers) return null;
+    return jpegUri(cache.wallpapers[WALLPAPER_DEFS[idx].key]);
+  }
+  function getPropertyPhoto(artCat) {
+    if (loadState.photos !== 'ready' || !cache.photos || !artCat) return null;
+    return jpegUri(cache.photos[artCat]);
+  }
+  function getBizPhoto(catIndex) {
+    if (loadState.photos !== 'ready' || !cache.photos) return null;
+    var key = BIZ_KEYS[catIndex];
+    if (!key) return null;
+    return jpegUri(cache.photos[key]);
+  }
+  function getPortrait(key) {
+    if (loadState.portraits !== 'ready' || !cache.portraits || !key) return null;
+    return jpegUri(cache.portraits[key]);
+  }
+  function getRivalPortrait(ai) {
+    if (!ai) return null;
+    if (typeof ai === 'string') {
+      if (/^AI_[1-9]$/.test(ai)) return getPortrait(ai);
+      if (RIVAL_BY_TAG[ai]) return getPortrait(RIVAL_BY_TAG[ai]);
+      return null;
+    }
+    if (ai.id && /^AI_[1-9]$/.test(ai.id)) return getPortrait(ai.id);
+    if (ai.shortTag && RIVAL_BY_TAG[ai.shortTag]) return getPortrait(RIVAL_BY_TAG[ai.shortTag]);
+    return null;
+  }
+  function getManagerPortrait(headerText) {
+    var t = headerText || '';
+    if (t.indexOf('ROBOT TRADER') !== -1) return getPortrait('ROBOT_TRADER');
+    if (t.indexOf('TRADING FIRM') !== -1) return getPortrait('TRADING_FIRM');
+    if (t.indexOf('WEALTH GROUP') !== -1) return getPortrait('WEALTH_GROUP');
+    return null;
+  }
+  function getHero(appId) {
+    if (loadState.svg !== 'ready' || !cache.svg || !appId) return null;
+    return svgUri(cache.svg['hero:' + appId]);
+  }
+  function getFelt(family) {
+    if (loadState.svg !== 'ready' || !cache.svg || !family) return null;
+    return svgUri(cache.svg['felt:' + family]);
+  }
+
+  /* ---------- appliers -------------------------------------------------- */
+  function applyHeroArt(appId) {
+    if (!appId) return;
+    var uri = getHero(appId);
+    if (appId === 'news' || appId === 'settings') {
+      var banner = $('ph-banner-' + appId);
+      if (banner && uri) { banner.style.backgroundImage = 'url("' + uri + '")'; banner.classList.add('ph-has-art'); }
+      return;
+    }
+    var el = $('ph-hero-art-' + appId);
+    if (el && uri) el.style.backgroundImage = 'url("' + uri + '")';
+  }
+  var lastFeltFamily = '';
+  function applyFelt() {
+    var gameKey = '';
+    try { if (window.casinoState && window.casinoState.activeGame) gameKey = window.casinoState.activeGame; } catch (e) {}
+    var family = FELT_FAMILY[gameKey] || '';
+    if (family === lastFeltFamily && family !== '') return;
+    var uri = family ? getFelt(family) : null;
+    if (family && !uri) return; /* svg not ready yet: leave lastFeltFamily unset so the next poll retries */
+    lastFeltFamily = family;
+    var panel = $('casinoControlsPanel');
+    if (panel) {
+      if (uri) { panel.style.backgroundImage = 'url("' + uri + '")'; panel.classList.add('ph-felt'); }
+      else { panel.style.backgroundImage = ''; panel.classList.remove('ph-felt'); }
+    }
+    var canvas = $('casinoMainCanvas');
+    var card = canvas && canvas.closest ? canvas.closest('.rh-card') : null;
+    if (card) {
+      if (uri) { card.style.backgroundImage = 'url("' + uri + '")'; card.classList.add('ph-felt'); }
+      else { card.style.backgroundImage = ''; card.classList.remove('ph-felt'); }
+    }
+  }
+  function processManagerCard(card) {
+    if (!card || card.getAttribute('data-ph-art-done')) return;
+    /* Don't settle while portraits are still loading: the card must be
+       revisited once they arrive. Only mark done when the group is ready
+       (apply or no-match) or failed (fallback: no portrait). */
+    if (loadState.portraits === 'idle') { loadGroup('portraits'); return; }
+    if (loadState.portraits === 'loading') return;
+    card.setAttribute('data-ph-art-done', '1');
+    var header = (card.textContent || '').slice(0, 400);
+    var uri = getManagerPortrait(header);
+    if (!uri) return;
+    var img = document.createElement('img');
+    img.className = 'ph-portrait';
+    img.alt = '';
+    img.src = uri;
+    card.insertBefore(img, card.firstChild);
+  }
+  function processManagerGrid(gridId) {
+    var grid = $(gridId);
+    if (!grid) return;
+    var cards = grid.querySelectorAll(':scope > div');
+    for (var i = 0; i < cards.length; i++) processManagerCard(cards[i]);
+  }
+  function applyManagerPortraits() {
+    processManagerGrid('portfolioManagersGrid');
+    processManagerGrid('activePortfolioManagerDesk');
+  }
+  function currentOpenApp() {
+    var wins = document.querySelectorAll('.ph-window.ph-open');
+    if (!wins.length) return null;
+    return (wins[0].id || '').replace(/^ph-win-/, '') || null;
+  }
+  function applyForApp(appId) {
+    applyHeroArt(appId);
+    if (appId === 'casino') applyFelt();
+    if (appId === 'managers') applyManagerPortraits();
+  }
+
+  /* ---------- observers ------------------------------------------------- */
+  function armAppObserver() {
+    var layer = $('ph-app-layer');
+    if (!layer) return;
+    var wins = layer.querySelectorAll('.ph-window');
+    var obs = new MutationObserver(function (muts) {
+      muts.forEach(function (m) {
+        var el = m.target;
+        if (el.classList && el.classList.contains('ph-open')) {
+          var id = (el.id || '').replace(/^ph-win-/, '');
+          if (id) {
+            ensureForApp(id);
+            /* If the group is already cached, apply synchronously so the
+               art is present with the window (no flash on repeat opens). */
+            applyForApp(id);
+          }
+        }
+      });
+    });
+    Array.prototype.forEach.call(wins, function (w) { obs.observe(w, { attributes: true, attributeFilter: ['class'] }); });
+    var open = currentOpenApp();
+    if (open) ensureForApp(open);
+  }
+  function armManagerObserver() {
+    ['portfolioManagersGrid', 'activePortfolioManagerDesk'].forEach(function (gid) {
+      var grid = $(gid);
+      if (!grid || grid.getAttribute('data-ph-art-watched')) return;
+      grid.setAttribute('data-ph-art-watched', '1');
+      /* Synchronous re-injection like ph-data.js: the game's tick rebuilds
+         grid innerHTML; the microtask callback restores portraits before
+         the next paint. */
+      new MutationObserver(function () { processManagerGrid(gid); }).observe(grid, { childList: true, subtree: false });
+      processManagerGrid(gid);
+    });
+  }
+  function armCasinoObserver() {
+    document.addEventListener('click', function (e) {
+      var t = e.target;
+      if (!t || !t.closest) return;
+      var b = t.closest('[data-casino-game]');
+      if (!b) return;
+      lastFeltFamily = '';
+      setTimeout(function () {
+        if (loadState.svg === 'ready') applyFelt();
+        else loadGroup('svg').then(applyFelt);
+      }, 60);
+    }, false);
+    /* Poll the active game: the game can switch games without a selector
+       click (e.g. restored saves). Cheap: one property read per second. */
+    setInterval(function () {
+      if (currentOpenApp() !== 'casino') return;
+      if (loadState.svg === 'ready') applyFelt();
+    }, 1000);
+  }
+
+  var armed = false;
+  function tryArm() {
+    if (armed) return;
+    if (!window.G || !window.G.human || !$('ph-app-layer')) return;
+    armed = true;
+    armAppObserver();
+    armManagerObserver();
+    armCasinoObserver();
+    /* Wallpaper fan-out: if the shell asked for an art wallpaper before
+       this module armed, applying it now keeps home/lock consistent. */
+    try { if (window.__phRenderWallpaperPicker) window.__phRenderWallpaperPicker(); } catch (e) {}
+  }
+  setInterval(tryArm, 500);
+  tryArm();
+  /* Re-arm the manager observer on a slow backstop: the managers grid is
+     rendered by the game after tab switches. */
+  setInterval(function () { if (armed) armManagerObserver(); }, 5000);
+
+  window.__phArt = {
+    ensureWallpapers: function () { return loadGroup('wallpapers'); },
+    ensurePhotos: function () { return loadGroup('photos'); },
+    ensurePortraits: function () { return loadGroup('portraits'); },
+    ensureSvg: function () { return loadGroup('svg'); },
+    ensureForApp: ensureForApp,
+    wallpapersReady: function () { return loadState.wallpapers === 'ready'; },
+    photosReady: function () { return loadState.photos === 'ready'; },
+    portraitsReady: function () { return loadState.portraits === 'ready'; },
+    svgReady: function () { return loadState.svg === 'ready'; },
+    wallpaperList: function () { return WALLPAPER_DEFS.slice(); },
+    getWallpaper: getWallpaper,
+    getPropertyPhoto: getPropertyPhoto,
+    getBizPhoto: getBizPhoto,
+    getPortrait: getPortrait,
+    getRivalPortrait: getRivalPortrait,
+    getManagerPortrait: getManagerPortrait,
+    getHero: getHero,
+    getFelt: getFelt,
+    FELT_FAMILY: FELT_FAMILY,
+    applyHeroArt: applyHeroArt,
+    applyFelt: applyFelt,
+    applyManagerPortraits: applyManagerPortraits,
+    applyForApp: applyForApp,
+    get loadState() { return { wallpapers: loadState.wallpapers, photos: loadState.photos, portraits: loadState.portraits, svg: loadState.svg }; },
+    get fetchCount() { return { wallpapers: fetchCount.wallpapers, photos: fetchCount.photos, portraits: fetchCount.portraits, svg: fetchCount.svg }; },
+    cacheKeys: function () {
+      var out = {};
+      Object.keys(cache).forEach(function (k) { out[k] = cache[k] ? Object.keys(cache[k]).length : 0; });
+      return out;
+    }
   };
 })();
 
@@ -33439,7 +34889,14 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
     if (!bio || !nameEl) return;
     var G = window.G;
     if (!G || !G.aiPlayers) return;
-    var sig = (nameEl.textContent || '') + '|' + loadState.rivals;
+    // Match the inspected rival by the name shown in the dossier header.
+    var header = nameEl.textContent || '';
+    var ai = G.aiPlayers.find(function (a) { return header.indexOf(a.name) === 0; });
+    var portraitUri = '';
+    try { var art = window.__phArt; if (art && art.getRivalPortrait) portraitUri = art.getRivalPortrait(ai) || ''; } catch (e) {}
+    /* The portrait flag in the signature re-renders the card when the
+       portraits group arrives after the dossier already rendered. */
+    var sig = header + '|' + loadState.rivals + '|' + (portraitUri ? '1' : '0');
     if (sig === lastDossierSig) return;
     lastDossierSig = sig;
     if (loadState.rivals !== 'ready') {
@@ -33454,17 +34911,15 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
       }
       return;
     }
-    // Match the inspected rival by the name shown in the dossier header.
-    var header = nameEl.textContent || '';
-    var ai = G.aiPlayers.find(function (a) { return header.indexOf(a.name) === 0; });
     if (!ai) { removeCard('phRivalProfile'); return; }
     var prof = rivalProfile(ai);
     if (!prof) { removeCard('phRivalProfile'); return; }
     var card = ensureCardAfter(bio, 'phRivalProfile');
     if (!card) return;
     card.removeAttribute('data-ph-skel');
+    var portraitHtml = portraitUri ? '<img class="ph-dossier-portrait" alt="" src="' + portraitUri + '">' : '';
     card.innerHTML = profileCardHtml('Rival Dossier — ' + ai.shortTag, '🕵️',
-      paraHtml(prof.bio) + paraHtml(prof.strat) + paraHtml(prof.track) + paraHtml(prof.risk, 'ph-data-risk'));
+      portraitHtml + paraHtml(prof.bio) + paraHtml(prof.strat) + paraHtml(prof.track) + paraHtml(prof.risk, 'ph-data-risk'));
   }
 
   /* ---------- grid injection (properties / businesses / VC / FX / comm) - */
@@ -33490,6 +34945,26 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
     if (pendingFlag) card.setAttribute('data-ph-pending', '1');
     else card.removeAttribute('data-ph-pending');
     card.setAttribute('data-ph-done', '1');
+  }
+  /* Art-pack photos for grid notes. Returns { html, pending }: pending keeps
+     the card eligible for re-processing so the photo appears when its group
+     finishes loading. Settles (pending=false) when art is absent, failed,
+     or the key has no photo — never spins forever. */
+  function artPhotoHtml(kind, key) {
+    var art = null;
+    try { art = window.__phArt || null; } catch (e) {}
+    if (!art) return { html: '', pending: false };
+    var uri = null, st = '';
+    try {
+      st = (art.loadState && art.loadState.photos) || '';
+      uri = (kind === 'property') ? art.getPropertyPhoto(key) : art.getBizPhoto(key);
+    } catch (e) {}
+    if (uri) return { html: '<img class="ph-grid-photo" alt="" src="' + uri + '">', pending: false };
+    if (st === 'idle' || st === 'loading') {
+      try { if (art.ensurePhotos) art.ensurePhotos(); } catch (e) {}
+      return { html: '', pending: true };
+    }
+    return { html: '', pending: false };
   }
   function processGrid(gridId, handler) {
     var grid = $(gridId);
@@ -33538,10 +35013,11 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
       : prof.studio
         ? esc(prof.sqft.toLocaleString('en-US')) + ' sqft • studio • ' + prof.baths + ' ba'
         : esc(prof.sqft.toLocaleString('en-US')) + ' sqft • ' + prof.units + ' units';
-    injectGridNote(card,
+    var photo = artPhotoHtml('property', prof.artCat);
+    injectGridNote(card, photo.html +
       '<div class="ph-grid-title">📍 ' + esc(prof.nb || p.city) + ' • ' + specs + '</div>' +
       '<p class="ph-grid-text">' + prof.desc + '</p>' +
-      (prof.amen ? '<p class="ph-grid-text ph-grid-dim">' + prof.amen + '</p>' : ''), false);
+      (prof.amen ? '<p class="ph-grid-text ph-grid-dim">' + prof.amen + '</p>' : ''), photo.pending);
   }
   function bizCardHandler(card) {
     var G = window.G;
@@ -33554,10 +35030,11 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
     if (loadState.businesses !== 'ready') return;
     var prof = bizProfile(biz);
     if (!prof) return;
-    injectGridNote(card,
+    var photo = artPhotoHtml('biz', biz.cat);
+    injectGridNote(card, photo.html +
       '<div class="ph-grid-title">🏪 Owner: ' + esc(prof.own) + '</div>' +
       '<p class="ph-grid-text">' + prof.pitch + '</p>' +
-      (prof.bg ? '<p class="ph-grid-text ph-grid-dim">' + prof.bg + '</p>' : ''), false);
+      (prof.bg ? '<p class="ph-grid-text ph-grid-dim">' + prof.bg + '</p>' : ''), photo.pending);
   }
   function vcCardHandler(card) {
     var G = window.G;
