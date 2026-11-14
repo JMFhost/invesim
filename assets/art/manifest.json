@@ -1,0 +1,117 @@
+{
+  "v": 1,
+  "groups": {
+    "wallpapers": {
+      "files": [
+        "wallpapers.json"
+      ]
+    },
+    "photos": {
+      "files": [
+        "photos-p1.json",
+        "photos-p2.json"
+      ]
+    },
+    "portraits": {
+      "files": [
+        "portraits.json"
+      ]
+    },
+    "svg": {
+      "files": [
+        "svg.json"
+      ]
+    }
+  },
+  "shards": [
+    {
+      "file": "wallpapers.json",
+      "bytes": 212130,
+      "keys": [
+        "ocean",
+        "dusk",
+        "aurora",
+        "geometric"
+      ]
+    },
+    {
+      "file": "photos-p1.json",
+      "bytes": 1267681,
+      "keys": [
+        "condo",
+        "house",
+        "apartment",
+        "retail",
+        "medical",
+        "warehouse",
+        "plaza",
+        "complex",
+        "hotel",
+        "tower"
+      ]
+    },
+    {
+      "file": "photos-p2.json",
+      "bytes": 1006564,
+      "keys": [
+        "Food, Beverage & Restaurants",
+        "Retail, Convenience & Laundromats",
+        "Auto Repair, HVAC, Plumbing & Trades",
+        "Salons, Dental, Healthcare & Gyms",
+        "Trucking, Storage, Logistics & Mfg",
+        "IT Services, Accounting, Cleaning & B2B",
+        "Entertainment, Daycare, Events & Motels",
+        "Landscaping, Solar, Waste & Agribusiness"
+      ]
+    },
+    {
+      "file": "portraits.json",
+      "bytes": 565852,
+      "keys": [
+        "AI_1",
+        "AI_2",
+        "AI_3",
+        "AI_4",
+        "AI_5",
+        "AI_6",
+        "AI_7",
+        "AI_8",
+        "AI_9",
+        "ROBOT_TRADER",
+        "PORTFOLIO_MANAGER",
+        "TRADER",
+        "WEALTH_GROUP",
+        "TRADING_FIRM"
+      ]
+    },
+    {
+      "file": "svg.json",
+      "bytes": 45171,
+      "keys": [
+        "hero:bank",
+        "hero:stocks",
+        "hero:realestate",
+        "hero:ereits",
+        "hero:smallbiz",
+        "hero:forex",
+        "hero:commodities",
+        "hero:vc",
+        "hero:casino",
+        "hero:job",
+        "hero:rivals",
+        "hero:managers",
+        "hero:portfolio",
+        "hero:news",
+        "hero:settings",
+        "hero:games",
+        "felt:cards",
+        "felt:roulette",
+        "felt:slots",
+        "felt:racing",
+        "felt:strategy",
+        "felt:crash"
+      ]
+    }
+  ],
+  "totalBytes": 3097398
+}
