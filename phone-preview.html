@@ -593,6 +593,55 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
   .ph-grid { gap: 10px 8px; padding-top: 6px; }
   .ph-icon { width: 42px; height: 42px; border-radius: 12px; }
   .ph-icon svg { width: 23px; height: 23px; }
+  /* arrange mode adds the edit bar above the grid; on short screens that
+     pushes the 4th row out of #ph-pages (Nov 15 fit audit). The Pause/+1 Day/
+     Music pills are irrelevant while arranging, so hide them in edit mode and
+     give the space back to the grid. */
+  #ph-home.ph-editing #ph-controls { display: none; }
+}
+
+/* very short viewports (568px-tall phones): shrink further so the 4th icon
+   row stays inside #ph-pages and clear of the home indicator (Nov 15 fit
+   audit: at 568px the 700px tier still left the grid ~33-45px too tall, so
+   Portfolio/News/Settings/Games were clipped and untappable). Boundary 620px:
+   the 700px tier's slack runs out below ~613px at 320px wide (wrapped labels),
+   and no tested/passing size sits under 640px, so nothing that fits today
+   changes. */
+@media (max-height: 620px) {
+  #ph-ticker { padding: 5px 12px; }
+  #ph-widgets { margin-top: 6px; gap: 4px; }
+  .ph-widget { padding: 5px 12px; }
+  #ph-w-nw { font-size: 19px; }
+  #ph-controls { margin-top: 4px; }
+  .ph-pill-btn { padding: 4px 4px; }
+  #ph-edit-bar { margin-top: 6px; }
+  .ph-edit-btn { padding: 5px 4px; }
+  #ph-pages { margin-top: 4px; }
+  .ph-grid { gap: 6px 8px; padding-top: 4px; }
+  .ph-app-btn { gap: 4px; }
+  .ph-icon { width: 36px; height: 36px; border-radius: 10px; }
+  .ph-icon svg { width: 20px; height: 20px; }
+  .ph-app-label { font-size: 10px; }
+}
+
+/* landscape phones: the framed 430/932 phone would shrink to ~156px wide and
+   unusable (Nov 15 fit audit: every icon clipped, lock screen overflowing,
+   app content 2x wider than the window). Go full-bleed like narrow portrait,
+   hide the widgets, and lay the 16 icons out 8-across in 2 rows so everything
+   stays on one screen. Scoped to phone widths so desktop short windows keep
+   the frame. Placed after the short-height tier so it wins on conflicts. */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 1000px) {
+  #phone-frame { padding: 0; }
+  #phone-screen {
+    width: 100%; max-height: none; aspect-ratio: auto;
+    border: none; border-radius: 0; outline: none; box-shadow: none;
+  }
+  #ph-camera { top: 9px; width: 11px; height: 11px; }
+  #ph-lock .ph-lock-top { padding-top: 48px; }
+  #ph-lock-clock { font-size: 54px; }
+  #ph-lock-hint { padding-bottom: 24px; }
+  #ph-widgets, #ph-greeting { display: none; }
+  .ph-grid { grid-template-columns: repeat(8, 1fr); gap: 10px 6px; }
 }
 
 /* ---- arrange mode: long-press to jiggle, drag / tap-to-move, A-Z ---- */
@@ -797,7 +846,9 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
 #phone-screen > #toastContainer { position: absolute !important; top: auto !important; bottom: 56px !important; left: 12px !important; right: 12px !important; max-width: none !important; align-items: flex-end; }
 #phone-screen > #toastContainer > * { max-width: 100%; }
 #phone-screen > .ph-contained { position: absolute !important; z-index: 70 !important; }
-#phone-screen #modalSmallBizReport .rh-card { max-height: calc(100% - 8px) !important; }
+#phone-screen #modalSmallBizReport .rh-card,
+#phone-screen #modalSaveLoad .rh-card,
+#phone-screen #modalNewGame .rh-card { max-height: calc(100% - 8px) !important; overflow-y: auto !important; }
 
 /* casino game selector: 2 columns inside the phone */
 #casino-host .ph-casino-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
