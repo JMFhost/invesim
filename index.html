@@ -7046,6 +7046,16 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             isWorkingAtCasino: false,
             workExpDays: 0,
             totalCasinoWagesEarned: 0,
+            payrollEtf: {
+              slots: [
+                { sym: null, pct: 0 },
+                { sym: null, pct: 0 },
+                { sym: null, pct: 0 },
+                { sym: null, pct: 0 }
+              ],
+              totalContributed: 0,
+              lastContribDay: 0
+            },
             netWorth: startingCapital,
             prevDayWorth: startingCapital,
             dayReturnPct: 0,
@@ -10359,6 +10369,196 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         if (yearsWorked === 3) return `🤠 Holdem Floor Supervisor (Yr 3 • $${hr}/hr • $${dy}/d Net)`;
         if (yearsWorked === 4) return `🎰 High-Limit Cage Host (Yr 4 • $${hr}/hr • $${dy}/d Net)`;
         return `🎩 VIP Casino Executive (Yr ${yearsWorked} • $${hr}/hr • $${dy}/d Net)`;
+      }
+
+      // =========================================================================
+      // PAYROLL ETF PLAN — auto-invest 5%-20% of Casino paychecks into ETFs.
+      // Sanctioned exception to the investing lock: the deduction happens inside
+      // the wage-credit path (before the player can spend it), like a real 401(k)
+      // payroll deduction. Manual trades stay locked while working. ETF ONLY.
+      // =========================================================================
+      const PAYROLL_ETF_MAX_SLOTS = 4;
+      const PAYROLL_ETF_MAX_TOTAL_PCT = 20;
+      const PAYROLL_ETF_PCT_STEPS = [0, 5, 10, 15, 20];
+
+      // Migration + sanitizer for old saves that predate the payroll plan.
+      function ensurePayrollEtfState(human) {
+        if (!human || typeof human !== 'object') return null;
+        const p = human.payrollEtf;
+        const okShape = p && typeof p === 'object' && Array.isArray(p.slots)
+          && p.slots.length === PAYROLL_ETF_MAX_SLOTS
+          && p.slots.every(s => s && typeof s === 'object' && typeof s.pct === 'number');
+        if (!okShape) {
+          human.payrollEtf = {
+            slots: Array.from({ length: PAYROLL_ETF_MAX_SLOTS }, () => ({ sym: null, pct: 0 })),
+            totalContributed: (p && typeof p.totalContributed === 'number') ? p.totalContributed : 0,
+            lastContribDay: (p && typeof p.lastContribDay === 'number') ? p.lastContribDay : 0
+          };
+          return human.payrollEtf;
+        }
+        // Clamp each pct to a legal 5% step and enforce the 20% total cap.
+        let budget = PAYROLL_ETF_MAX_TOTAL_PCT;
+        for (const s of p.slots) {
+          let pct = Math.floor((Number(s.pct) || 0) / 5) * 5;
+          pct = Math.max(0, Math.min(20, pct));
+          pct = Math.min(pct, budget);
+          budget -= pct;
+          s.pct = pct;
+          if (typeof s.sym !== 'string' || !s.sym) s.sym = null;
+        }
+        if (typeof p.totalContributed !== 'number' || !(p.totalContributed >= 0)) p.totalContributed = 0;
+        if (typeof p.lastContribDay !== 'number') p.lastContribDay = 0;
+        return p;
+      }
+      window.ensurePayrollEtfState = ensurePayrollEtfState;
+
+      function getPayrollEtfTotalPct(human) {
+        const p = ensurePayrollEtfState(human || (typeof G !== 'undefined' ? G.human : null));
+        return p ? p.slots.reduce((sum, s) => sum + (s.pct || 0), 0) : 0;
+      }
+      window.getPayrollEtfTotalPct = getPayrollEtfTotalPct;
+
+      // Invests a slice of one paycheck (already credited to cash) into the
+      // allocated ETFs at current prices, fractional shares, exact to the cent.
+      // Returns total dollars invested. Never touches margin; skips delisted
+      // ETFs (their share stays in cash as normal wages). No market-hours or
+      // investing-lock checks: payroll deductions don't wait for the open.
+      function applyPayrollEtfContributions(payAmount) {
+        if (typeof G === 'undefined' || !G || !G.human || !(payAmount > 0)) return 0;
+        const plan = ensurePayrollEtfState(G.human);
+        if (!plan) return 0;
+        if (!G.human.etfs) G.human.etfs = {};
+        const payCents = Math.round(Number(payAmount) * 100);
+        if (payCents <= 0) return 0;
+        let budget = PAYROLL_ETF_MAX_TOTAL_PCT;
+        let total = 0;
+        const boughtSyms = [];
+        for (const slot of plan.slots) {
+          const wanted = Math.max(0, Math.min(20, Math.floor((Number(slot.pct) || 0) / 5) * 5));
+          const pct = Math.min(wanted, budget);
+          budget -= pct;
+          if (pct <= 0 || !slot.sym) continue;
+          const etf = (G.etfs || []).find(e => e.sym === slot.sym);
+          if (!etf || !(etf.price > 0)) continue;
+          const cents = Math.round(payCents * pct / 100);
+          if (cents <= 0) continue;
+          const amt = cents / 100;
+          const sh = Number((amt / etf.price).toFixed(6));
+          if (sh <= 0) continue;
+          const prev = G.human.etfs[slot.sym] || { shares: 0, avgPrice: etf.price, entryDay: G.day };
+          const totSh = Number((prev.shares + sh).toFixed(6));
+          if (totSh <= 0) continue;
+          prev.avgPrice = ((prev.shares * prev.avgPrice) + amt) / totSh;
+          prev.shares = totSh;
+          G.human.etfs[slot.sym] = prev;
+          total = Number((total + amt).toFixed(2));
+          boughtSyms.push(slot.sym);
+        }
+        if (total > 0) {
+          G.human.cash = Number((G.human.cash - total).toFixed(2));
+          plan.totalContributed = Number(((plan.totalContributed || 0) + total).toFixed(2));
+          if (plan.lastContribDay !== G.day) {
+            plan.lastContribDay = G.day;
+            const uniq = [...new Set(boughtSyms)];
+            G.human.logs.unshift(`Day ${G.day}: 📈 Payroll ETF plan: ${fmtMoney(total)} from a Casino paycheck auto-invested into ${uniq.join(', ')}.`);
+          }
+        }
+        return total;
+      }
+      window.applyPayrollEtfContributions = applyPayrollEtfContributions;
+
+      // --- Payroll plan UI handlers (payroll elections, not trades: allowed
+      // --- while working; changes apply from the next paycheck) ---
+      window.setPayrollEtfSlot = function(idx, sym) {
+        if (!G || !G.human) return;
+        const plan = ensurePayrollEtfState(G.human);
+        if (!plan || idx < 0 || idx >= PAYROLL_ETF_MAX_SLOTS) return;
+        sym = (sym || '').trim();
+        if (sym && !(G.etfs || []).some(e => e.sym === sym)) {
+          showToast('ETF Not Found', `${sym} is not in the ETF universe.`, false);
+          renderCasinoTab();
+          return;
+        }
+        plan.slots[idx].sym = sym || null;
+        // Picking an ETF auto-starts it at 5% when the 20% cap allows it.
+        if (sym && !plan.slots[idx].pct && getPayrollEtfTotalPct(G.human) + 5 <= PAYROLL_ETF_MAX_TOTAL_PCT) {
+          plan.slots[idx].pct = 5;
+        }
+        renderCasinoTab();
+      };
+
+      window.setPayrollEtfSlotPct = function(idx, pct) {
+        if (!G || !G.human) return;
+        const plan = ensurePayrollEtfState(G.human);
+        if (!plan || idx < 0 || idx >= PAYROLL_ETF_MAX_SLOTS) return;
+        pct = PAYROLL_ETF_PCT_STEPS.includes(Number(pct)) ? Number(pct) : 0;
+        const others = plan.slots.reduce((sum, s, i) => sum + (i === idx ? 0 : (s.pct || 0)), 0);
+        if (others + pct > PAYROLL_ETF_MAX_TOTAL_PCT) {
+          showToast('Payroll Plan Capped at 20%', `Your other slots already use ${others}%. The max total is 20% — lower another slot first.`, false);
+          renderCasinoTab();
+          return;
+        }
+        plan.slots[idx].pct = pct;
+        renderCasinoTab();
+      };
+
+      window.clearPayrollEtfPlan = function() {
+        if (!G || !G.human) return;
+        const plan = ensurePayrollEtfState(G.human);
+        if (!plan) return;
+        plan.slots = Array.from({ length: PAYROLL_ETF_MAX_SLOTS }, () => ({ sym: null, pct: 0 }));
+        showToast('Payroll ETF Plan Cleared', 'No more paycheck deductions. Your ETF shares stay invested.', true);
+        renderCasinoTab();
+      };
+
+      function renderPayrollEtfBlock() {
+        if (typeof G === 'undefined' || !G || !G.human) return '';
+        const plan = ensurePayrollEtfState(G.human);
+        const isWorking = Boolean(G.human.isWorkingAtCasino);
+        const expDays = isWorking ? (G.human.workExpDays || 0) : 0;
+        const dailyWage = getCasinoDailyWage(expDays);
+        const totalPct = getPayrollEtfTotalPct(G.human);
+        const etfs = G.etfs || [];
+        const slotRows = plan.slots.map((slot, i) => {
+          const listed = slot.sym ? etfs.some(e => e.sym === slot.sym) : false;
+          const etf = listed ? etfs.find(e => e.sym === slot.sym) : null;
+          const opts = etfs.map(e => `<option value="${e.sym}"${e.sym === slot.sym ? ' selected' : ''}>${e.sym} — ${e.name} ($${e.price.toFixed(2)})</option>`).join('');
+          const delistedOpt = (slot.sym && !listed)
+            ? `<option value="${slot.sym}" selected disabled>⚠️ ${slot.sym} — no longer listed</option>` : '';
+          const pctOpts = PAYROLL_ETF_PCT_STEPS.map(p => `<option value="${p}"${slot.pct === p ? ' selected' : ''}>${p}%</option>`).join('');
+          const est = (etf && slot.pct > 0) ? fmtMoney(dailyWage * slot.pct / 100) + '/day' : '—';
+          const warn = (slot.sym && !listed)
+            ? `<span class="text-[10px] text-rose-400 font-bold">⚠️ Delisted — pick another ETF (share stays as cash wages meanwhile)</span>`
+            : (slot.pct > 0 && !slot.sym ? `<span class="text-[10px] text-amber-300">Pick an ETF to activate this ${slot.pct}%</span>` : '');
+          return `
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-[10px] font-mono font-bold text-[#8A919E] w-11">SLOT ${i + 1}</span>
+              <select id="payrollEtfSlot_${i}" aria-label="Payroll ETF slot ${i + 1}" onchange="setPayrollEtfSlot(${i}, this.value)" class="flex-1 min-w-[190px] bg-[#0C0E10] border border-[#2A2E33] rounded-lg px-2 py-1.5 text-white text-xs font-semibold focus:outline-none focus:border-[#00C805]">
+                <option value="">— No ETF —</option>${delistedOpt}${opts}
+              </select>
+              <select id="payrollEtfPct_${i}" aria-label="Payroll percent slot ${i + 1}" onchange="setPayrollEtfSlotPct(${i}, Number(this.value))" class="bg-[#0C0E10] border border-[#2A2E33] rounded-lg px-2 py-1.5 text-white text-xs font-bold focus:outline-none focus:border-[#00C805]">
+                ${pctOpts}
+              </select>
+              <span class="text-[11px] font-mono font-bold ${etf && slot.pct > 0 ? 'text-[#00C805]' : 'text-[#8A919E]'} w-[74px]">${est}</span>
+              ${warn}
+            </div>`;
+        }).join('');
+        const statusLine = isWorking
+          ? `<span class="text-[#00C805] font-bold">✅ Active — deducts from each paycheck (next payday included)</span>`
+          : `<span class="text-amber-300 font-bold">⏸️ Paused — clock in to resume contributions (plan stays saved)</span>`;
+        return `
+          <div class="mt-1 p-3 rounded-xl bg-[#141820] border border-emerald-500/30 flex flex-col gap-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="font-extrabold text-emerald-300 text-xs sm:text-sm">📈 Payroll ETF Plan — Auto-Invest Your Paycheck</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#1C2024] text-white">TOTAL ${totalPct}% / 20% • ≈ ${fmtMoney(dailyWage * totalPct / 100)}/day</span>
+            </div>
+            <div class="text-[11px] text-[#8A919E]">Direct <strong class="text-white">5%–20%</strong> of every paycheck into up to <strong class="text-white">4 ETFs</strong> (5% steps). Deducted before your pay hits cash — it works even while investing is locked. <strong class="text-white">ETF only.</strong> Changes apply from the next paycheck. Quitting pauses contributions; your plan and ETF shares stay saved.</div>
+            ${slotRows}
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5">
+              <div class="text-[11px] text-[#8A919E]">${statusLine} <span class="text-[#8A919E]">• Lifetime payroll contributions: <strong class="text-white font-mono">${fmtMoney(plan.totalContributed || 0)}</strong></span></div>
+              <button type="button" onclick="clearPayrollEtfPlan()" class="px-3 py-1.5 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-rose-300 font-bold text-[11px] transition">Clear Plan</button>
+            </div>
+          </div>`;
       }
 
       // =========================================================================
@@ -13727,6 +13927,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             G.human.totalCasinoWagesEarned = Number(((G.human.totalCasinoWagesEarned || 0) + wageToday).toFixed(2));
             G.human.taxLedger.jobIncomeYtd = Number(((G.human.taxLedger.jobIncomeYtd || 0) + wageToday).toFixed(2));
             humanPassiveToday += wageToday;
+            applyPayrollEtfContributions(wageToday);
           }
           if (G.human.workExpDays % 252 === 0) {
             const roleNow = getCasinoJobTitle(G.human.workExpDays);
@@ -14647,6 +14848,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             G.human.taxLedger.jobIncomeYtd = Number(((G.human.taxLedger.jobIncomeYtd || 0) + hrPay).toFixed(2));
             G.human.casinoHoursWorkedToday = hrsWorked + 1;
             recomputeTaxLiability(G.human.taxLedger);
+            applyPayrollEtfContributions(hrPay);
           }
         }
 
@@ -27839,6 +28041,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
                 <div class="text-[10px] ${isWorking ? 'text-[#FF5000]' : 'text-[#00C805]'}">${isWorking ? '🔒 Investing Locked' : '✅ Investing Active'}</div>
               </div>
             </div>
+            ${renderPayrollEtfBlock()}
           `;
         }
         const cashEl = document.getElementById('casinoCashBalanceLabel');
@@ -30295,6 +30498,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           if (!base.human.taxLedger) {
             base.human.taxLedger = { shortTermGains: 0, longTermGains: 0, ordinaryIncome: 0, depreciationShield: 0, accruedTax: 0, totalTaxesPaid: 0 };
           }
+          ensurePayrollEtfState(base.human);
         }
 
         if (snap.nextAiPlayerId) base.nextAiPlayerId = snap.nextAiPlayerId;
