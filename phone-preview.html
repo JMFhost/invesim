@@ -543,6 +543,11 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
 #ph-w-nw { font-size: 27px; font-weight: 800; letter-spacing: -.01em; line-height: 1.15; font-variant-numeric: tabular-nums; }
 #ph-w-nw-sub { font-size: 12px; font-family: 'JetBrains Mono', ui-monospace, monospace; margin-top: 1px; }
 #ph-w-nw-sub .ph-up { color: #00e006; } #ph-w-nw-sub .ph-down { color: #ff5a4e; }
+/* goal progress line inside the Net Worth widget (six-features build) */
+#ph-goal-line { margin-top: 7px; cursor: pointer; }
+#ph-goal-line .ph-goal-text { font-size: 11px; font-family: 'JetBrains Mono', ui-monospace, monospace; color: #c3cad4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#ph-goal-line .ph-goal-track { margin-top: 4px; height: 6px; border-radius: 999px; background: rgba(255,255,255,.14); overflow: hidden; }
+#ph-goal-line .ph-goal-fill { height: 100%; border-radius: 999px; background: #00c805; }
 .ph-widget-row { display: flex; gap: 8px; }
 .ph-widget-row .ph-widget { flex: 1; min-width: 0; }
 .ph-widget .ph-w-big { font-size: 15px; font-weight: 700; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -593,6 +598,12 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
   .ph-grid { gap: 10px 8px; padding-top: 6px; }
   .ph-icon { width: 42px; height: 42px; border-radius: 12px; }
   .ph-icon svg { width: 23px; height: 23px; }
+  /* goal line: bar only — the text line would push the 4th icon row into
+     the home-indicator zone at 640px (verify-arrange short-viewport check:
+     full line 594.6px vs 578px limit; bar-only 571.1px). */
+  #ph-goal-line { margin-top: 4px; }
+  #ph-goal-line .ph-goal-text { display: none; }
+  #ph-goal-line .ph-goal-track { margin-top: 0; }
   /* arrange mode adds the edit bar above the grid; on short screens that
      pushes the 4th row out of #ph-pages (Nov 15 fit audit). The Pause/+1 Day/
      Music pills are irrelevant while arranging, so hide them in edit mode and
@@ -1148,6 +1159,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             <div class="ph-w-label">Net Worth</div>
             <div id="ph-w-nw">$10,000.00</div>
             <div id="ph-w-nw-sub"><span class="ph-up">+$0.00 today</span> &nbsp;&middot;&nbsp; Cash $10,000.00</div>
+            <div id="ph-goal-line"></div>
           </div>
           <div class="ph-widget-row">
             <div class="ph-widget">
@@ -1351,6 +1363,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             </span>
           </div>
         </div>
+
+        <div id="goalProgressBox"></div>
 
         <!-- Live 10,000-Player Net Worth Ranking Banner on Home -->
         <div id="homeRankingBanner" class="rh-card px-4 py-3 flex flex-wrap items-center justify-between gap-3 cursor-pointer hover:border-[#00C805]/50 transition" onclick="switchMainTab('competitors')">
@@ -1921,6 +1935,27 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
               Submit Buy Order ($100.00 • 0.7018 sh)
             </button>
 
+            <div class="border-t border-[#24282D] pt-3 flex flex-col gap-2">
+              <div class="text-xs font-extrabold text-white">⏳ Conditional Order (Limit / Stop)</div>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <label class="flex flex-col gap-1"><span class="text-[#8A919E] font-semibold">Order</span>
+                  <select id="spCondType" class="bg-[#1C2024] border border-[#2E343B] rounded-lg px-2 py-1.5 text-white font-semibold">
+                    <option value="BUY_LIMIT">Buy Limit (at/below)</option>
+                    <option value="BUY_STOP">Buy Stop (at/above)</option>
+                    <option value="SELL_LIMIT">Sell Limit (at/above)</option>
+                    <option value="SELL_STOP">Sell Stop / Stop-Loss (at/below)</option>
+                  </select></label>
+                <label class="flex flex-col gap-1"><span class="text-[#8A919E] font-semibold">Trigger Price ($)</span>
+                  <input id="spCondPrice" type="number" min="0" step="any" placeholder="0.00" class="bg-[#0C0E10] border border-[#2E343B] rounded-lg px-2.5 py-1.5 text-right font-mono font-bold text-white" /></label>
+                <label class="flex flex-col gap-1 col-span-2"><span class="text-[#8A919E] font-semibold">Amount ($)</span>
+                  <input id="spCondAmount" type="number" min="1" step="any" value="100" class="bg-[#0C0E10] border border-[#2E343B] rounded-lg px-2.5 py-1.5 text-right font-mono font-bold text-white" /></label>
+              </div>
+              <button type="button" onclick="placePendingOrderFromStockPage()" class="w-full py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold text-xs transition">Place Conditional Order — fills at the close when triggered</button>
+              <p class="text-[11px] text-[#8A919E]">Open orders live in Portfolio → Conditional Orders. Fills automatically, even while working at the Casino.</p>
+            </div>
+
+            <div id="stockWatchBtnBox"></div>
+
             <button type="button" onclick="switchMainTab('home')" class="w-full py-2 rounded-xl bg-[#1E2227] hover:bg-[#2A2F36] text-white text-xs font-semibold transition">
               Open Full Order Ticket →
             </button>
@@ -2104,6 +2139,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           </div>
           <div id="optionsChainList" class="divide-y divide-[#22262A]"></div>
         </div>
+        <div id="optStrategyBox"></div>
       </div>
 
       <div class="lg:col-span-4 flex flex-col gap-5">
@@ -2461,6 +2497,24 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
                 </div>
                 <span id="etfTopTradeOwned" class="font-mono text-[#8A919E]">Owned: 0 sh</span>
               </div>
+              <div class="border-t border-[#24282D] pt-3 flex flex-col gap-2">
+                <div class="text-xs font-extrabold text-white">⏳ Conditional Order (Limit / Stop)</div>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                  <label class="flex flex-col gap-1"><span class="text-[#8A919E] font-semibold">Order</span>
+                    <select id="etfCondType" class="bg-[#1C2024] border border-[#2E343B] rounded-lg px-2 py-1.5 text-white font-semibold">
+                      <option value="BUY_LIMIT">Buy Limit (at/below)</option>
+                      <option value="BUY_STOP">Buy Stop (at/above)</option>
+                      <option value="SELL_LIMIT">Sell Limit (at/above)</option>
+                      <option value="SELL_STOP">Sell Stop / Stop-Loss (at/below)</option>
+                    </select></label>
+                  <label class="flex flex-col gap-1"><span class="text-[#8A919E] font-semibold">Trigger Price ($)</span>
+                    <input id="etfCondPrice" type="number" min="0" step="any" placeholder="0.00" class="bg-[#0C0E10] border border-[#2E343B] rounded-lg px-2.5 py-1.5 text-right font-mono font-bold text-white" /></label>
+                  <label class="flex flex-col gap-1 col-span-2"><span class="text-[#8A919E] font-semibold">Amount ($)</span>
+                    <input id="etfCondAmount" type="number" min="1" step="any" value="100" class="bg-[#0C0E10] border border-[#2E343B] rounded-lg px-2.5 py-1.5 text-right font-mono font-bold text-white" /></label>
+                </div>
+                <button type="button" onclick="placePendingOrderFromEtfPage()" class="w-full py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold text-xs transition">Place Conditional Order — fills at the close when triggered</button>
+              </div>
+              <div id="etfWatchBtnBox"></div>
             </div>
 
             <!-- ETF Chart Timeframe Selector Bar: 1M Daily vs 1Y, 5Y, 10Y, Up to 30Y (Matched to Underlying Portfolio Stocks!) -->
@@ -2877,6 +2931,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           <!-- 2D Casino Table Canvas (Taller 360px-420px for 5x4 Scratch-Offs & Full 2D Stadiums) -->
           <div class="relative w-full h-[380px] sm:h-[440px] rounded-2xl overflow-hidden bg-[#072A16] border border-[#1E3F2B]">
             <canvas id="casinoMainCanvas" class="w-full h-full block"></canvas>
+            <div id="chessPromoPickerSlot"></div>
           </div>
 
           <!-- PLAY BUTTONS RIGHT BELOW THE GAME CANVAS (NO SCROLLING NEEDED!) -->
@@ -3389,6 +3444,15 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           </div>
           <div id="myPortfolioCommoditiesBox" class="divide-y divide-[#22262A] max-h-80 overflow-y-auto text-xs"></div>
         </div>
+      </div>
+
+      <!-- 6. AUTOMATION: DRIP, SCHEDULED AUTO-BUYS, GOALS, CONDITIONAL ORDERS, WATCHLIST -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div id="myPortfolioDripBox"></div>
+        <div id="myPortfolioDcaBox"></div>
+        <div id="myPortfolioGoalsBox"></div>
+        <div id="myPortfolioOrdersBox"></div>
+        <div id="myPortfolioWatchlistBox" class="lg:col-span-2"></div>
       </div>
 
       <!-- 5. 24-HOUR FOREX, REAL ESTATE, eREITs, VC & MANAGED ACCOUNTS SUMMARY -->
@@ -7056,6 +7120,11 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
               totalContributed: 0,
               lastContribDay: 0
             },
+            drip: { enabled: false, on: {}, off: {}, totalReinvested: 0 },
+            autoBuys: [],
+            goal: { target: 100000, celebrated: {}, goalCelebrated: false, lifetimeBest: startingCapital },
+            pendingOrders: [],
+            watchlist: [],
             netWorth: startingCapital,
             prevDayWorth: startingCapital,
             dayReturnPct: 0,
@@ -10511,7 +10580,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         renderCasinoTab();
       };
 
-      function renderPayrollEtfBlock() {
+      function renderPayrollEtfBlock(ns) {
+        const idNs = ns ? String(ns) + '_' : '';
         if (typeof G === 'undefined' || !G || !G.human) return '';
         const plan = ensurePayrollEtfState(G.human);
         const isWorking = Boolean(G.human.isWorkingAtCasino);
@@ -10533,10 +10603,10 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           return `
             <div class="flex flex-wrap items-center gap-2">
               <span class="text-[10px] font-mono font-bold text-[#8A919E] w-11">SLOT ${i + 1}</span>
-              <select id="payrollEtfSlot_${i}" aria-label="Payroll ETF slot ${i + 1}" onchange="setPayrollEtfSlot(${i}, this.value)" class="flex-1 min-w-[190px] bg-[#0C0E10] border border-[#2A2E33] rounded-lg px-2 py-1.5 text-white text-xs font-semibold focus:outline-none focus:border-[#00C805]">
+              <select id="payrollEtfSlot_${idNs}${i}" aria-label="Payroll ETF slot ${i + 1}" onchange="setPayrollEtfSlot(${i}, this.value)" class="flex-1 min-w-[190px] bg-[#0C0E10] border border-[#2A2E33] rounded-lg px-2 py-1.5 text-white text-xs font-semibold focus:outline-none focus:border-[#00C805]">
                 <option value="">— No ETF —</option>${delistedOpt}${opts}
               </select>
-              <select id="payrollEtfPct_${i}" aria-label="Payroll percent slot ${i + 1}" onchange="setPayrollEtfSlotPct(${i}, Number(this.value))" class="bg-[#0C0E10] border border-[#2A2E33] rounded-lg px-2 py-1.5 text-white text-xs font-bold focus:outline-none focus:border-[#00C805]">
+              <select id="payrollEtfPct_${idNs}${i}" aria-label="Payroll percent slot ${i + 1}" onchange="setPayrollEtfSlotPct(${i}, Number(this.value))" class="bg-[#0C0E10] border border-[#2A2E33] rounded-lg px-2 py-1.5 text-white text-xs font-bold focus:outline-none focus:border-[#00C805]">
                 ${pctOpts}
               </select>
               <span class="text-[11px] font-mono font-bold ${etf && slot.pct > 0 ? 'text-[#00C805]' : 'text-[#8A919E]'} w-[74px]">${est}</span>
@@ -10559,6 +10629,1002 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
               <button type="button" onclick="clearPayrollEtfPlan()" class="px-3 py-1.5 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-rose-300 font-bold text-[11px] transition">Clear Plan</button>
             </div>
           </div>`;
+      }
+
+      window.renderPayrollEtfBlock = renderPayrollEtfBlock;
+
+      // =========================================================================
+      // SIX FEATURES (Nov 17, 2026): DRIP, SCHEDULED AUTO-BUYS, GOALS &
+      // MILESTONES, LIMIT/STOP ORDERS, WATCHLIST + PRICE ALERTS, MULTI-LEG
+      // OPTIONS STRATEGIES. Pure additions; no existing function modified.
+      // All state lives on G.human (auto-persisted by createSaveSnapshot);
+      // ensure* sanitizers migrate old saves. Automation runs once per day
+      // inside stepSimulationDay (processDailyAutomation before net-worth
+      // recalc; checkGoalMilestones after). Casino-lock interaction: DRIP,
+      // auto-buys and pending orders are payroll/schedule/trigger-driven,
+      // so they execute even while working at the Casino (like the payroll
+      // ETF plan); while IN JAIL, auto-buys and order fills pause (orders
+      // stay pending, schedules do not advance). Options strategies are
+      // manual trades and respect the lock + market hours like singles.
+      // =========================================================================
+
+      const SIXFEAT_DCA_MAX = 10;
+      const SIXFEAT_ORDER_MAX = 20;
+      const SIXFEAT_WATCH_MAX = 30;
+      const GOAL_MILESTONES = [100000, 250000, 500000, 1000000, 2000000, 5000000, 10000000, 25000000, 50000000, 100000000, 1000000000];
+      const GOAL_DEFAULT_TARGET = 100000;
+
+      function sixfeatNum(v, fallback) {
+        const n = Number(v);
+        return (typeof n === 'number' && isFinite(n)) ? n : fallback;
+      }
+      function sixfeatRound2(v) { return Number((Number(v) || 0).toFixed(2)); }
+
+      // ---------- State ensures (migration + sanitizers) ----------
+      function ensureDripState(human) {
+        if (!human || typeof human !== 'object') return null;
+        const d = human.drip;
+        if (!d || typeof d !== 'object' || Array.isArray(d)) {
+          human.drip = { enabled: false, on: {}, off: {}, totalReinvested: 0 };
+          return human.drip;
+        }
+        if (typeof d.enabled !== 'boolean') d.enabled = false;
+        if (!d.on || typeof d.on !== 'object' || Array.isArray(d.on)) d.on = {};
+        if (!d.off || typeof d.off !== 'object' || Array.isArray(d.off)) d.off = {};
+        if (!(sixfeatNum(d.totalReinvested, -1) >= 0)) d.totalReinvested = 0;
+        return d;
+      }
+      function ensureAutoBuysState(human) {
+        if (!human || typeof human !== 'object') return null;
+        if (!Array.isArray(human.autoBuys)) human.autoBuys = [];
+        human.autoBuys = human.autoBuys.filter(s => s && typeof s === 'object' && typeof s.sym === 'string' && (s.kind === 'STOCK' || s.kind === 'ETF'));
+        for (const s of human.autoBuys) {
+          if (!(sixfeatNum(s.amount, 0) > 0)) s.amount = 100;
+          s.amount = sixfeatRound2(s.amount);
+          if (s.freq !== 'WEEKLY') s.freq = 'DAILY';
+          if (!(sixfeatNum(s.nextDay, 0) >= 1)) s.nextDay = 1;
+          if (typeof s.active !== 'boolean') s.active = true;
+          if (typeof s.stale !== 'boolean') s.stale = false;
+          if (!(sixfeatNum(s.totalInvested, -1) >= 0)) s.totalInvested = 0;
+          if (!(sixfeatNum(s.skips, -1) >= 0)) s.skips = 0;
+          if (!s.id) s.id = 'DCA_' + Date.now() + '_' + Math.floor(Math.random() * 99999);
+        }
+        return human.autoBuys;
+      }
+      function ensureGoalState(human) {
+        if (!human || typeof human !== 'object') return null;
+        const g = human.goal;
+        if (!g || typeof g !== 'object' || Array.isArray(g)) {
+          human.goal = { target: GOAL_DEFAULT_TARGET, celebrated: {}, goalCelebrated: false, lifetimeBest: sixfeatNum(human.netWorth, 10000) };
+          return human.goal;
+        }
+        if (!(sixfeatNum(g.target, 0) > 0)) g.target = GOAL_DEFAULT_TARGET;
+        g.target = sixfeatRound2(g.target);
+        if (!g.celebrated || typeof g.celebrated !== 'object' || Array.isArray(g.celebrated)) g.celebrated = {};
+        if (typeof g.goalCelebrated !== 'boolean') g.goalCelebrated = false;
+        if (!(sixfeatNum(g.lifetimeBest, -1) >= 0)) g.lifetimeBest = sixfeatNum(human.netWorth, 0);
+        return g;
+      }
+      function ensurePendingOrdersState(human) {
+        if (!human || typeof human !== 'object') return null;
+        if (!Array.isArray(human.pendingOrders)) human.pendingOrders = [];
+        human.pendingOrders = human.pendingOrders.filter(o => o && typeof o === 'object' && typeof o.sym === 'string'
+          && (o.kind === 'STOCK' || o.kind === 'ETF') && (o.side === 'BUY' || o.side === 'SELL')
+          && (o.otype === 'LIMIT' || o.otype === 'STOP')
+          && sixfeatNum(o.targetPrice, 0) > 0 && sixfeatNum(o.amount, 0) > 0);
+        for (const o of human.pendingOrders) {
+          o.targetPrice = sixfeatRound2(o.targetPrice);
+          o.amount = sixfeatRound2(o.amount);
+          if (!(sixfeatNum(o.createdDay, 0) >= 1)) o.createdDay = 1;
+          if (!o.id) o.id = 'ORD_' + Date.now() + '_' + Math.floor(Math.random() * 99999);
+        }
+        return human.pendingOrders;
+      }
+      function ensureWatchlistState(human) {
+        if (!human || typeof human !== 'object') return null;
+        if (!Array.isArray(human.watchlist)) human.watchlist = [];
+        human.watchlist = human.watchlist.filter(w => w && typeof w === 'object' && typeof w.sym === 'string' && (w.kind === 'STOCK' || w.kind === 'ETF'));
+        for (const w of human.watchlist) {
+          if (w.targetPrice != null && !(sixfeatNum(w.targetPrice, 0) > 0)) w.targetPrice = null;
+          if (w.targetPrice != null) w.targetPrice = sixfeatRound2(w.targetPrice);
+          if (w.direction !== 'ABOVE' && w.direction !== 'BELOW') w.direction = null;
+          if (w.lastSide !== 'ABOVE' && w.lastSide !== 'BELOW') w.lastSide = null;
+          if (typeof w.stale !== 'boolean') w.stale = false;
+          if (!(sixfeatNum(w.lastAlertDay, -1) >= 0)) w.lastAlertDay = 0;
+        }
+        return human.watchlist;
+      }
+      function ensureSixFeaturesState(human) {
+        if (!human || typeof human !== 'object') return;
+        ensureDripState(human);
+        ensureAutoBuysState(human);
+        ensureGoalState(human);
+        ensurePendingOrdersState(human);
+        ensureWatchlistState(human);
+      }
+      window.ensureSixFeaturesState = ensureSixFeaturesState;
+
+      // ---------- Shared helpers ----------
+      // Resolves a tradable symbol to its live price/name, or null if delisted.
+      function findTradeTarget(kind, sym) {
+        if (typeof G === 'undefined' || !G) return null;
+        if (kind === 'STOCK') {
+          const st = (G.stocks || []).find(s => s.ticker === sym);
+          return (st && st.price > 0) ? { price: st.price, name: st.name, obj: st } : null;
+        }
+        if (kind === 'ETF') {
+          const etf = (G.etfs || []).find(e => e.sym === sym);
+          return (etf && etf.price > 0) ? { price: etf.price, name: etf.name, obj: etf } : null;
+        }
+        return null;
+      }
+      // Credits fractional shares bought with `dollars` at `price`, updating
+      // the weighted average exactly like buyEtfDollars/executeStockOrder.
+      // Returns shares credited (0 when the position is short — automation
+      // never covers shorts; the caller skips those runs).
+      function creditPositionShares(kind, sym, dollars, price) {
+        const book = kind === 'STOCK' ? G.human.stocks : G.human.etfs;
+        if (!book) return 0;
+        const prev = book[sym] || { shares: 0, avgPrice: price, entryDay: G.day };
+        if (prev.shares < 0) return 0;
+        const sh = Number((dollars / price).toFixed(6));
+        if (sh <= 0) return 0;
+        const totSh = Number((prev.shares + sh).toFixed(6));
+        prev.avgPrice = ((prev.shares * prev.avgPrice) + dollars) / totSh;
+        if (prev.shares === 0) prev.entryDay = G.day;
+        prev.shares = totSh;
+        book[sym] = prev;
+        return sh;
+      }
+
+      // ---------- 1. DRIP ----------
+      function isDripEffective(kind, sym) {
+        if (typeof G === 'undefined' || !G || !G.human) return false;
+        const d = ensureDripState(G.human);
+        if (!d) return false;
+        const key = kind + ':' + sym;
+        if (d.on[key]) return true;
+        if (d.off[key]) return false;
+        return !!d.enabled;
+      }
+      // Reinvests one dividend payment into the same holding at the current
+      // price. Returns true when DRIP handled the payment (caller must NOT
+      // also credit cash); false when DRIP is off for this holding (caller
+      // credits cash as before). Sub-cent remainders always go to cash, so
+      // cash + reinvested shares always sum to the dividend exactly.
+      function applyDripReinvestment(kind, sym, divAmount, price) {
+        if (!isDripEffective(kind, sym)) return false;
+        const div = Math.max(0, Number(divAmount) || 0);
+        const cents = Math.floor(div * 100 + 1e-9);
+        const reinvestAmt = cents / 100;
+        const remainder = sixfeatRound2(div - reinvestAmt);
+        if (remainder > 0) G.human.cash = sixfeatRound2(G.human.cash + remainder);
+        if (reinvestAmt <= 0 || !(price > 0)) return true;
+        const book = kind === 'STOCK' ? G.human.stocks : (kind === 'ETF' ? G.human.etfs : G.human.privateRe);
+        const prev = book ? book[sym] : null;
+        if (!prev || !(prev.shares > 0)) {
+          G.human.cash = sixfeatRound2(G.human.cash + reinvestAmt);
+          return true;
+        }
+        const sh = Number((reinvestAmt / price).toFixed(6));
+        if (sh <= 0) {
+          G.human.cash = sixfeatRound2(G.human.cash + reinvestAmt);
+          return true;
+        }
+        const totSh = Number((prev.shares + sh).toFixed(6));
+        prev.avgPrice = ((prev.shares * prev.avgPrice) + reinvestAmt) / totSh;
+        prev.shares = totSh;
+        const d = ensureDripState(G.human);
+        d.totalReinvested = sixfeatRound2((d.totalReinvested || 0) + reinvestAmt);
+        return true;
+      }
+      window.applyDripReinvestment = applyDripReinvestment;
+
+      window.toggleDripMaster = function() {
+        if (!G || !G.human) return;
+        const d = ensureDripState(G.human);
+        d.enabled = !d.enabled;
+        showToast(d.enabled ? 'DRIP Turned ON' : 'DRIP Turned OFF',
+          d.enabled ? 'Dividends on all holdings now auto-reinvest (per-holding overrides still apply).' : 'Dividends now pay to cash, except holdings you switched ON individually.', true);
+        renderAll();
+      };
+      // Toggles the explicit per-holding override to the opposite of the
+      // holding's current effective state.
+      window.toggleDripHolding = function(kind, sym) {
+        if (!G || !G.human) return;
+        const d = ensureDripState(G.human);
+        const key = kind + ':' + sym;
+        if (isDripEffective(kind, sym)) { delete d.on[key]; d.off[key] = true; }
+        else { delete d.off[key]; d.on[key] = true; }
+        renderAll();
+      };
+      window.clearDripHoldingOverride = function(kind, sym) {
+        if (!G || !G.human) return;
+        const d = ensureDripState(G.human);
+        const key = kind + ':' + sym;
+        delete d.on[key];
+        delete d.off[key];
+        renderAll();
+      };
+
+      // ---------- 2. SCHEDULED AUTO-BUYS (DCA) ----------
+      // Runs once per day inside stepSimulationDay. Cash-only (never margin,
+      // never overdrafts): a short-cash day is skipped and the schedule
+      // advances anyway so misses never pile up. Delisted symbols retire
+      // the schedule (stale) instead of erroring.
+      function processAutoBuys() {
+        if (typeof G === 'undefined' || !G || !G.human || G.human.inJail) return;
+        const list = ensureAutoBuysState(G.human);
+        if (!list) return;
+        for (const s of list) {
+          if (!s.active || s.stale) continue;
+          if (G.day < (s.nextDay || 1)) continue;
+          const step = s.freq === 'WEEKLY' ? 7 : 1;
+          const target = findTradeTarget(s.kind, s.sym);
+          if (!target) {
+            s.stale = true;
+            s.active = false;
+            G.human.logs.unshift(`Day ${G.day}: ⏸️ Auto-buy for ${s.sym} paused — symbol is no longer listed. Delete it or set up a new schedule.`);
+            continue;
+          }
+          const amt = sixfeatRound2(s.amount);
+          if (amt < 1) { s.nextDay = G.day + step; continue; }
+          if (G.human.cash < amt) {
+            s.skips = (s.skips || 0) + 1;
+            s.nextDay = G.day + step;
+            G.human.logs.unshift(`Day ${G.day}: ⏭️ Auto-buy skipped for ${s.sym} (${fmtMoney(amt)} ${s.freq === 'WEEKLY' ? 'weekly' : 'daily'}) — cash ${fmtMoney(G.human.cash)} was short. No overdraft; next run Day ${s.nextDay}.`);
+            continue;
+          }
+          const book = s.kind === 'STOCK' ? G.human.stocks : G.human.etfs;
+          const prev = book ? book[s.sym] : null;
+          if (prev && prev.shares < 0) {
+            s.skips = (s.skips || 0) + 1;
+            s.nextDay = G.day + step;
+            continue;
+          }
+          G.human.cash = sixfeatRound2(G.human.cash - amt);
+          const sh = creditPositionShares(s.kind, s.sym, amt, target.price);
+          if (sh <= 0) {
+            G.human.cash = sixfeatRound2(G.human.cash + amt);
+            s.nextDay = G.day + step;
+            continue;
+          }
+          s.totalInvested = sixfeatRound2((s.totalInvested || 0) + amt);
+          s.nextDay = G.day + step;
+          recordSocialActivity(G, s.sym, s.kind, { isHuman: true, name: 'You (Human)' }, 'BOUGHT', target.price, sh, amt, G.day);
+          G.human.logs.unshift(`Day ${G.day}: 🔁 Auto-buy: ${fmtMoney(amt)} into ${s.sym} (${sh.toFixed(4)} sh @ $${target.price.toFixed(2)}).`);
+        }
+      }
+
+      window.addAutoBuySchedule = function() {
+        if (!G || !G.human) return;
+        const list = ensureAutoBuysState(G.human);
+        if (list.length >= SIXFEAT_DCA_MAX) {
+          showToast('Auto-Buy Limit Reached', `You can have up to ${SIXFEAT_DCA_MAX} schedules. Delete one first.`, false);
+          return;
+        }
+        const symEl = document.getElementById('dcaSymInput');
+        const amtEl = document.getElementById('dcaAmtInput');
+        const freqEl = document.getElementById('dcaFreqSelect');
+        const rawSym = (symEl ? symEl.value : '').trim().toUpperCase();
+        if (!rawSym) { showToast('Enter a Symbol', 'Type a stock ticker or ETF symbol, e.g. AAPL or SPY.', false); return; }
+        let kind = null;
+        if ((G.stocks || []).some(s => s.ticker === rawSym)) kind = 'STOCK';
+        else if ((G.etfs || []).some(e => e.sym === rawSym)) kind = 'ETF';
+        if (!kind) { showToast('Symbol Not Found', `${rawSym} is not a listed stock or ETF.`, false); return; }
+        const amt = sixfeatRound2(amtEl ? Number(amtEl.value) : 0);
+        if (!(amt >= 1)) { showToast('Amount Too Small', 'Auto-buys need at least $1.00 per run.', false); return; }
+        const freq = freqEl && freqEl.value === 'WEEKLY' ? 'WEEKLY' : 'DAILY';
+        list.push({
+          id: 'DCA_' + Date.now() + '_' + Math.floor(Math.random() * 99999),
+          kind, sym: rawSym, amount: amt, freq,
+          nextDay: G.day + (freq === 'WEEKLY' ? 7 : 1),
+          totalInvested: 0, skips: 0, active: true, stale: false
+        });
+        showToast('Auto-Buy Scheduled', `${fmtMoney(amt)} ${freq === 'WEEKLY' ? 'every 7 days' : 'every day'} into ${rawSym}, starting Day ${G.day + (freq === 'WEEKLY' ? 7 : 1)}.`, true);
+        renderAll();
+      };
+      window.toggleAutoBuySchedule = function(id) {
+        if (!G || !G.human) return;
+        const s = ensureAutoBuysState(G.human).find(x => x.id === id);
+        if (!s || s.stale) return;
+        s.active = !s.active;
+        if (s.active && s.nextDay < G.day) s.nextDay = G.day + (s.freq === 'WEEKLY' ? 7 : 1);
+        renderAll();
+      };
+      window.deleteAutoBuySchedule = function(id) {
+        if (!G || !G.human) return;
+        const list = ensureAutoBuysState(G.human);
+        const idx = list.findIndex(x => x.id === id);
+        if (idx >= 0) list.splice(idx, 1);
+        renderAll();
+      };
+
+      // ---------- 4. LIMIT + STOP-LOSS ORDERS ----------
+      // Orders are dollar-based and fill at the day's closing price once the
+      // trigger condition holds at the close — so a limit fill is always at
+      // the limit or better. BUY fills are cash-only; a short-cash day
+      // leaves the order pending for the next day. SELL fills mirror the
+      // manual sell math (stock spread + ST/LT split; ETF realized-gain
+      // recording). Delisted symbols cancel the order.
+      function processPendingOrders() {
+        if (typeof G === 'undefined' || !G || !G.human || G.human.inJail) return;
+        const list = ensurePendingOrdersState(G.human);
+        if (!list) return;
+        for (let i = list.length - 1; i >= 0; i--) {
+          const o = list[i];
+          const target = findTradeTarget(o.kind, o.sym);
+          if (!target) {
+            list.splice(i, 1);
+            G.human.logs.unshift(`Day ${G.day}: ❌ ${o.otype} ${o.side} order for ${o.sym} cancelled — symbol is no longer listed.`);
+            continue;
+          }
+          const p = target.price;
+          let triggered = false;
+          if (o.side === 'BUY' && o.otype === 'LIMIT') triggered = p <= o.targetPrice;
+          else if (o.side === 'BUY' && o.otype === 'STOP') triggered = p >= o.targetPrice;
+          else if (o.side === 'SELL' && o.otype === 'LIMIT') triggered = p >= o.targetPrice;
+          else if (o.side === 'SELL' && o.otype === 'STOP') triggered = p <= o.targetPrice;
+          if (!triggered) continue;
+
+          if (o.side === 'BUY') {
+            const book = o.kind === 'STOCK' ? G.human.stocks : G.human.etfs;
+            const prev = book ? book[o.sym] : null;
+            if (prev && prev.shares < 0) continue;
+            if (G.human.cash < o.amount) continue;
+            G.human.cash = sixfeatRound2(G.human.cash - o.amount);
+            const sh = creditPositionShares(o.kind, o.sym, o.amount, p);
+            if (sh <= 0) { G.human.cash = sixfeatRound2(G.human.cash + o.amount); continue; }
+            recordSocialActivity(G, o.sym, o.kind, { isHuman: true, name: 'You (Human)' }, 'BOUGHT', p, sh, o.amount, G.day);
+            G.human.logs.unshift(`Day ${G.day}: ✅ ${o.otype} BUY filled: ${fmtMoney(o.amount)} into ${o.sym} (${sh.toFixed(4)} sh @ $${p.toFixed(2)}, target $${o.targetPrice.toFixed(2)}).`);
+            showToast(`${o.otype} Buy Filled — ${o.sym}`, `Bought ${sh.toFixed(4)} sh @ $${p.toFixed(2)} for ${fmtMoney(o.amount)}.`, true);
+            list.splice(i, 1);
+          } else {
+            const book = o.kind === 'STOCK' ? G.human.stocks : G.human.etfs;
+            const pos = book ? book[o.sym] : null;
+            if (!pos || !(pos.shares > 0)) {
+              list.splice(i, 1);
+              G.human.logs.unshift(`Day ${G.day}: ❌ ${o.otype} SELL order for ${o.sym} cancelled — no shares held.`);
+              continue;
+            }
+            if (o.kind === 'STOCK') {
+              const st = target.obj;
+              const spreadPct = getSpreadPctForTier(st.tier);
+              const sharesQty = Number((o.amount / p).toFixed(6));
+              const sellSh = Math.min(sharesQty, pos.shares);
+              const proceeds = sellSh * p * (1 - spreadPct);
+              const pnl = proceeds - (sellSh * pos.avgPrice);
+              const daysHeld = G.day - (pos.entryDay || 1);
+              if (daysHeld >= 30) G.human.taxLedger.longTermGains += pnl;
+              else G.human.taxLedger.shortTermGains += pnl;
+              recomputeTaxLiability(G.human.taxLedger);
+              G.human.cash += proceeds;
+              pos.shares = Number((pos.shares - sellSh).toFixed(6));
+              if (pos.shares < 0.0001) delete G.human.stocks[o.sym];
+              recordSocialActivity(G, o.sym, 'STOCK', { isHuman: true, name: 'You (Human)' }, 'SOLD', p, sellSh, proceeds, G.day);
+              G.human.logs.unshift(`Day ${G.day}: ✅ ${o.otype} SELL filled: ${sellSh.toFixed(4)} sh of ${o.sym} @ $${p.toFixed(2)} for ${fmtMoney(proceeds)} (P&L ${fmtMoney(pnl)}, target $${o.targetPrice.toFixed(2)}).`);
+              showToast(`${o.otype} Sell Filled — ${o.sym}`, `Sold ${sellSh.toFixed(4)} sh for ${fmtMoney(proceeds)} (P&L: ${fmtMoney(pnl)}).`, pnl >= 0);
+            } else {
+              const shToSell = Math.min(o.amount / p, pos.shares);
+              const proceeds = Number((shToSell * p).toFixed(2));
+              const costSold = (pos.avgPrice || pos.avgCost || p) * shToSell;
+              const realizedPnl = proceeds - costSold;
+              G.human.taxLedger.shortTermGains += realizedPnl;
+              recomputeTaxLiability(G.human.taxLedger);
+              pos.shares = Number((pos.shares - shToSell).toFixed(6));
+              if (pos.shares < 0.0001) delete G.human.etfs[o.sym];
+              G.human.cash = sixfeatRound2(G.human.cash + proceeds);
+              G.human.tradesCount++;
+              recordSocialActivity(G, o.sym, 'ETF', { isHuman: true, name: 'You (Human)' }, 'SOLD', p, shToSell, proceeds, G.day);
+              G.human.logs.unshift(`Day ${G.day}: ✅ ${o.otype} SELL filled: ${shToSell.toFixed(4)} sh of ETF ${o.sym} @ $${p.toFixed(2)} for ${fmtMoney(proceeds)} (P&L ${fmtMoney(realizedPnl)}, target $${o.targetPrice.toFixed(2)}).`);
+              showToast(`${o.otype} Sell Filled — ${o.sym}`, `Sold ${shToSell.toFixed(4)} sh for ${fmtMoney(proceeds)} (P&L: ${fmtMoney(realizedPnl)}).`, realizedPnl >= 0);
+            }
+            list.splice(i, 1);
+          }
+        }
+      }
+
+      function placePendingOrder(kind, sym, side, otype, targetPrice, amount) {
+        if (!G || !G.human) return false;
+        const list = ensurePendingOrdersState(G.human);
+        if (list.length >= SIXFEAT_ORDER_MAX) {
+          showToast('Too Many Open Orders', `You can have up to ${SIXFEAT_ORDER_MAX} open conditional orders.`, false);
+          return false;
+        }
+        const target = findTradeTarget(kind, sym);
+        if (!target) { showToast('Symbol Not Found', `${sym} is not currently listed.`, false); return false; }
+        targetPrice = sixfeatRound2(targetPrice);
+        amount = sixfeatRound2(amount);
+        if (!(targetPrice > 0)) { showToast('Enter a Target Price', 'The trigger price must be above $0.00.', false); return false; }
+        if (!(amount >= 1)) { showToast('Amount Too Small', 'Conditional orders need at least $1.00.', false); return false; }
+        if (side === 'SELL') {
+          const book = kind === 'STOCK' ? G.human.stocks : G.human.etfs;
+          const pos = book ? book[sym] : null;
+          if (!pos || !(pos.shares > 0)) {
+            showToast('No Shares to Sell', `You don't hold ${sym} yet — a SELL order needs shares behind it.`, false);
+            return false;
+          }
+        }
+        list.push({
+          id: 'ORD_' + Date.now() + '_' + Math.floor(Math.random() * 99999),
+          kind, sym, side, otype, targetPrice, amount, createdDay: G.day
+        });
+        showToast(`${otype} ${side} Order Placed`, `${fmtMoney(amount)} of ${sym} triggers at $${targetPrice.toFixed(2)} (now $${target.price.toFixed(2)}). Fills automatically at the close — even while working at the Casino.`, true);
+        renderAll();
+        return true;
+      }
+      window.placePendingOrderFromStockPage = function() {
+        const typeEl = document.getElementById('spCondType');
+        const priceEl = document.getElementById('spCondPrice');
+        const amtEl = document.getElementById('spCondAmount');
+        const parts = (typeEl ? typeEl.value : 'BUY_LIMIT').split('_');
+        placePendingOrder('STOCK', G.activeTicker, parts[0], parts[1], Number(priceEl ? priceEl.value : 0), Number(amtEl ? amtEl.value : 0));
+      };
+      window.placePendingOrderFromEtfPage = function() {
+        const typeEl = document.getElementById('etfCondType');
+        const priceEl = document.getElementById('etfCondPrice');
+        const amtEl = document.getElementById('etfCondAmount');
+        const parts = (typeEl ? typeEl.value : 'BUY_LIMIT').split('_');
+        placePendingOrder('ETF', G.activeEtfSym, parts[0], parts[1], Number(priceEl ? priceEl.value : 0), Number(amtEl ? amtEl.value : 0));
+      };
+      window.cancelPendingOrder = function(id) {
+        if (!G || !G.human) return;
+        const list = ensurePendingOrdersState(G.human);
+        const idx = list.findIndex(o => o.id === id);
+        if (idx >= 0) {
+          const o = list[idx];
+          list.splice(idx, 1);
+          showToast('Order Cancelled', `${o.otype} ${o.side} for ${o.sym} was cancelled. No fill, no charge.`, true);
+        }
+        renderAll();
+      };
+
+      // ---------- 5. WATCHLIST + PRICE ALERTS ----------
+      // Alerts fire once per crossing: the price must cross back to the
+      // other side before the same alert can fire again (lastSide flip).
+      // Alerts go through G.newsFeed (the phone Notification Center reads
+      // it) plus a toast and a portfolio log line.
+      function processWatchlistAlerts() {
+        if (typeof G === 'undefined' || !G || !G.human) return;
+        const list = ensureWatchlistState(G.human);
+        if (!list) return;
+        for (const w of list) {
+          const target = findTradeTarget(w.kind, w.sym);
+          if (!target) { w.stale = true; continue; }
+          w.stale = false;
+          w.lastPrice = target.price;
+          if (w.targetPrice == null || !w.direction) { w.lastSide = null; continue; }
+          const side = target.price >= w.targetPrice ? 'ABOVE' : 'BELOW';
+          const prevSide = w.lastSide;
+          w.lastSide = side;
+          if (prevSide === null || prevSide === side) continue;
+          const crossedInto = (w.direction === 'ABOVE' && side === 'ABOVE') || (w.direction === 'BELOW' && side === 'BELOW');
+          if (!crossedInto) continue;
+          w.lastAlertDay = G.day;
+          const dirWord = w.direction === 'ABOVE' ? 'rose above' : 'fell below';
+          G.newsFeed.unshift({
+            day: G.day, cat: 'ALERT', tag: '🔔 PRICE ALERT',
+            text: `${w.sym} ${dirWord} your target of $${w.targetPrice.toFixed(2)} — now $${target.price.toFixed(2)} (${w.kind === 'ETF' ? target.name : target.name}).`
+          });
+          G.human.logs.unshift(`Day ${G.day}: 🔔 Price alert: ${w.sym} ${dirWord} $${w.targetPrice.toFixed(2)} (now $${target.price.toFixed(2)}).`);
+          showToast(`🔔 Price Alert — ${w.sym}`, `${w.sym} ${dirWord} $${w.targetPrice.toFixed(2)} and now trades at $${target.price.toFixed(2)}.`, w.direction === 'ABOVE');
+        }
+      }
+
+      window.addWatchlistEntry = function() {
+        if (!G || !G.human) return;
+        const list = ensureWatchlistState(G.human);
+        if (list.length >= SIXFEAT_WATCH_MAX) {
+          showToast('Watchlist Full', `You can watch up to ${SIXFEAT_WATCH_MAX} symbols.`, false);
+          return;
+        }
+        const symEl = document.getElementById('watchSymInput');
+        const tgtEl = document.getElementById('watchTargetInput');
+        const dirEl = document.getElementById('watchDirSelect');
+        const rawSym = (symEl ? symEl.value : '').trim().toUpperCase();
+        if (!rawSym) { showToast('Enter a Symbol', 'Type a stock ticker or ETF symbol to watch.', false); return; }
+        let kind = null;
+        if ((G.stocks || []).some(s => s.ticker === rawSym)) kind = 'STOCK';
+        else if ((G.etfs || []).some(e => e.sym === rawSym)) kind = 'ETF';
+        if (!kind) { showToast('Symbol Not Found', `${rawSym} is not a listed stock or ETF.`, false); return; }
+        if (list.some(w => w.kind === kind && w.sym === rawSym)) {
+          showToast('Already Watching', `${rawSym} is already on your watchlist.`, false);
+          return;
+        }
+        const rawTgt = tgtEl ? Number(tgtEl.value) : 0;
+        const targetPrice = rawTgt > 0 ? sixfeatRound2(rawTgt) : null;
+        const direction = (dirEl && (dirEl.value === 'ABOVE' || dirEl.value === 'BELOW')) ? dirEl.value : null;
+        list.push({ kind, sym: rawSym, targetPrice: targetPrice, direction: (targetPrice != null ? direction : null), lastSide: null, stale: false, lastAlertDay: 0, lastPrice: null });
+        showToast('Added to Watchlist', targetPrice != null
+          ? `${rawSym} will alert you when it ${direction === 'ABOVE' ? 'rises above' : 'falls below'} $${targetPrice.toFixed(2)}.`
+          : `${rawSym} added to your watchlist (no price alert set).`, true);
+        renderAll();
+      };
+      window.toggleWatchlistSymbol = function(kind, sym) {
+        if (!G || !G.human) return;
+        const list = ensureWatchlistState(G.human);
+        const idx = list.findIndex(w => w.kind === kind && w.sym === sym);
+        if (idx >= 0) {
+          list.splice(idx, 1);
+          showToast('Removed from Watchlist', `${sym} is no longer watched.`, true);
+        } else {
+          if (list.length >= SIXFEAT_WATCH_MAX) { showToast('Watchlist Full', `You can watch up to ${SIXFEAT_WATCH_MAX} symbols.`, false); return; }
+          list.push({ kind, sym, targetPrice: null, direction: null, lastSide: null, stale: false, lastAlertDay: 0, lastPrice: null });
+          showToast('Added to Watchlist', `${sym} added. Set a price alert for it in Portfolio → Watchlist.`, true);
+        }
+        renderAll();
+      };
+      window.removeWatchlistEntry = function(kind, sym) {
+        if (!G || !G.human) return;
+        const list = ensureWatchlistState(G.human);
+        const idx = list.findIndex(w => w.kind === kind && w.sym === sym);
+        if (idx >= 0) list.splice(idx, 1);
+        renderAll();
+      };
+      function isOnWatchlist(kind, sym) {
+        if (typeof G === 'undefined' || !G || !G.human) return false;
+        return ensureWatchlistState(G.human).some(w => w.kind === kind && w.sym === sym);
+      }
+
+      // ---------- 3. GOALS & MILESTONES ----------
+      function checkGoalMilestones() {
+        if (typeof G === 'undefined' || !G || !G.human) return;
+        const g = ensureGoalState(G.human);
+        if (!g) return;
+        const nw = sixfeatNum(G.human.netWorth, 0);
+        if (nw > (g.lifetimeBest || 0)) g.lifetimeBest = sixfeatRound2(nw);
+        for (const m of GOAL_MILESTONES) {
+          if (nw >= m && !g.celebrated[m]) {
+            g.celebrated[m] = true;
+            const label = fmtMoney(m);
+            showToast(`🏆 Milestone Reached — ${label}!`, `Your net worth crossed ${label} (now ${fmtMoney(nw)}). Keep compounding!`, true);
+            G.newsFeed.unshift({ day: G.day, cat: 'MILESTONE', tag: '🏆 NET WORTH MILESTONE', text: `You crossed ${label} net worth! Now at ${fmtMoney(nw)} — onward to the next milestone.` });
+            G.human.logs.unshift(`Day ${G.day}: 🏆 Milestone: net worth crossed ${label}!`);
+          }
+        }
+        if (nw >= g.target && !g.goalCelebrated) {
+          g.goalCelebrated = true;
+          showToast('🎯 GOAL REACHED!', `You hit your ${fmtMoney(g.target)} net worth goal (now ${fmtMoney(nw)})! Set your next target in Portfolio → Goals.`, true);
+          G.newsFeed.unshift({ day: G.day, cat: 'MILESTONE', tag: '🎯 GOAL REACHED', text: `You reached your net worth goal of ${fmtMoney(g.target)}! Time to set a bigger one.` });
+          G.human.logs.unshift(`Day ${G.day}: 🎯 Goal reached: net worth hit ${fmtMoney(g.target)}!`);
+        }
+      }
+      window.setNetWorthGoal = function(targetOpt) {
+        if (!G || !G.human) return;
+        const g = ensureGoalState(G.human);
+        let target = sixfeatNum(targetOpt, 0);
+        if (!(target > 0)) {
+          const inp = document.getElementById('goalTargetInput');
+          target = inp ? sixfeatRound2(Number(inp.value)) : 0;
+        }
+        if (!(target > 0)) { showToast('Enter a Goal', 'Your net worth goal must be above $0.', false); return; }
+        target = sixfeatRound2(target);
+        if (target !== g.target) {
+          g.target = target;
+          g.goalCelebrated = false;
+          showToast('Goal Set', `Your net worth goal is now ${fmtMoney(target)}. Progress shows on the Home screen.`, true);
+        }
+        renderAll();
+      };
+
+      // ---------- DAILY AUTOMATION HOOKS ----------
+      function processDailyAutomation() {
+        processAutoBuys();
+        processPendingOrders();
+        processWatchlistAlerts();
+      }
+
+      // ---------- 6. MULTI-LEG OPTIONS STRATEGIES ----------
+      // Legs are offsets from the ATM strike (index 4 of the 9-strike chain).
+      // Every leg prices through computeBlackScholes — the same vol smile,
+      // term structure and Greeks as single options. Legs are stored as
+      // ordinary option positions tagged with strategyId/strategyType, so
+      // expiry, settlement and repricing use the existing engine untouched.
+      const OPTION_STRATEGIES = {
+        BULL_CALL_SPREAD: { name: 'Bull Call Spread', desc: 'Buy a lower call, sell a higher call. Capped risk, capped reward — profits if the stock rises.',
+          legs: [{ type: 'CALL', side: 'LONG', off: -1, qty: 1 }, { type: 'CALL', side: 'SHORT', off: 1, qty: 1 }] },
+        BEAR_PUT_SPREAD: { name: 'Bear Put Spread', desc: 'Buy a higher put, sell a lower put. Capped risk, capped reward — profits if the stock falls.',
+          legs: [{ type: 'PUT', side: 'LONG', off: 1, qty: 1 }, { type: 'PUT', side: 'SHORT', off: -1, qty: 1 }] },
+        BEAR_CALL_SPREAD: { name: 'Bear Call Spread', desc: 'Sell a lower call, buy a higher call. Collect a credit — profits if the stock stays below the short strike.',
+          legs: [{ type: 'CALL', side: 'SHORT', off: -1, qty: 1 }, { type: 'CALL', side: 'LONG', off: 1, qty: 1 }] },
+        BULL_PUT_SPREAD: { name: 'Bull Put Spread', desc: 'Sell a higher put, buy a lower put. Collect a credit — profits if the stock stays above the short strike.',
+          legs: [{ type: 'PUT', side: 'SHORT', off: 1, qty: 1 }, { type: 'PUT', side: 'LONG', off: -1, qty: 1 }] },
+        LONG_STRADDLE: { name: 'Long Straddle', desc: 'Buy an at-the-money call AND put. Unlimited upside either way — profits on a big move in either direction.',
+          legs: [{ type: 'CALL', side: 'LONG', off: 0, qty: 1 }, { type: 'PUT', side: 'LONG', off: 0, qty: 1 }] },
+        LONG_STRANGLE: { name: 'Long Strangle', desc: 'Buy an out-of-the-money call AND put. Cheaper than a straddle, needs a bigger move — unlimited upside either way.',
+          legs: [{ type: 'CALL', side: 'LONG', off: 1, qty: 1 }, { type: 'PUT', side: 'LONG', off: -1, qty: 1 }] },
+        IRON_CONDOR: { name: 'Iron Condor', desc: 'Sell a put spread + sell a call spread. Collect a credit — profits if the stock stays in range through expiration.',
+          legs: [{ type: 'PUT', side: 'LONG', off: -2, qty: 1 }, { type: 'PUT', side: 'SHORT', off: -1, qty: 1 }, { type: 'CALL', side: 'SHORT', off: 1, qty: 1 }, { type: 'CALL', side: 'LONG', off: 2, qty: 1 }] },
+        CALL_BUTTERFLY: { name: 'Call Butterfly', desc: 'Buy 1 lower call, sell 2 middle calls, buy 1 higher call. Tiny debit for a big payout if the stock pins the middle strike.',
+          legs: [{ type: 'CALL', side: 'LONG', off: -1, qty: 1 }, { type: 'CALL', side: 'SHORT', off: 0, qty: 2 }, { type: 'CALL', side: 'LONG', off: 1, qty: 1 }] }
+      };
+      let selectedStrategySpec = { type: 'IRON_CONDOR', expiryDays: 30, lotSize: 10, contracts: 1 };
+
+      // Prices every leg and derives net premium, max profit/loss,
+      // breakevens and aggregated Greeks. Max P/L and breakevens come from
+      // sampling the exact expiry payoff curve (no per-strategy formulas).
+      function calcStrategyPricing(spec, st) {
+        if (!st) return null;
+        const def = OPTION_STRATEGIES[spec.type];
+        if (!def) return null;
+        const strikes = getOptionStrikesForStock(st);
+        const dte = Math.max(1, Number(spec.expiryDays) || 30);
+        const lotSize = Number(spec.lotSize) === 100 ? 100 : 10;
+        const contracts = Math.max(1, Math.floor(Number(spec.contracts) || 1));
+        const r = G.macro.fedRate / 100;
+        const legs = [];
+        for (const legDef of def.legs) {
+          const idx = 4 + legDef.off;
+          const K = strikes[idx];
+          if (!(K > 0)) return null;
+          const bs = computeBlackScholes(st.price, K, dte, r, st.annualVol, st.divYield);
+          const price = legDef.type === 'CALL' ? bs.callPrice : bs.putPrice;
+          legs.push({
+            type: legDef.type, side: legDef.side, strike: K, qty: legDef.qty, price,
+            delta: legDef.type === 'CALL' ? bs.callDelta : bs.putDelta,
+            gamma: bs.gamma, vega: bs.vega,
+            theta: legDef.type === 'CALL' ? bs.callTheta : bs.putTheta
+          });
+        }
+        const signOf = l => (l.side === 'LONG' ? 1 : -1);
+        const netPerShare = legs.reduce((sum, l) => sum + signOf(l) * l.qty * l.price, 0);
+        const netTotal = Number((netPerShare * lotSize * contracts).toFixed(2));
+        const greeks = {
+          delta: legs.reduce((s, l) => s + signOf(l) * l.qty * l.delta, 0),
+          gamma: legs.reduce((s, l) => s + signOf(l) * l.qty * l.gamma, 0),
+          vega: legs.reduce((s, l) => s + signOf(l) * l.qty * l.vega, 0),
+          theta: legs.reduce((s, l) => s + signOf(l) * l.qty * l.theta, 0)
+        };
+        const payoffPerShare = s => legs.reduce((sum, l) => {
+          const intrinsic = l.type === 'CALL' ? Math.max(0, s - l.strike) : Math.max(0, l.strike - s);
+          return sum + signOf(l) * l.qty * (intrinsic - l.price);
+        }, 0);
+        const S = st.price;
+        const sMin = S * 0.5, sMax = S * 1.5, N = 1201;
+        const step = (sMax - sMin) / (N - 1);
+        // Sample the grid PLUS every leg strike: the payoff curve is
+        // piecewise-linear with kinks at the strikes, so extrema and
+        // breakevens land exactly (a grid-only sample understates a
+        // straddle's max loss by the distance to the nearest grid point).
+        const ptsSet = new Set();
+        for (let i = 0; i < N; i++) ptsSet.add(Number((sMin + i * step).toFixed(6)));
+        for (const l of legs) { if (l.strike > sMin && l.strike < sMax) ptsSet.add(l.strike); }
+        const pts = [...ptsSet].sort((a, b) => a - b);
+        let minPay = Infinity, maxPay = -Infinity;
+        let prevS = pts[0], prevP = payoffPerShare(pts[0]);
+        const breakevens = [];
+        const samples = [prevP];
+        if (prevP < minPay) minPay = prevP;
+        if (prevP > maxPay) maxPay = prevP;
+        for (let i = 1; i < pts.length; i++) {
+          const s = pts[i];
+          const p = payoffPerShare(s);
+          samples.push(p);
+          if (p < minPay) minPay = p;
+          if (p > maxPay) maxPay = p;
+          if ((prevP < 0 && p >= 0) || (prevP > 0 && p <= 0)) {
+            const seg = s - prevS;
+            const frac = Math.abs(p - prevP) < 1e-12 ? 0.5 : Math.abs(prevP) / Math.abs(p - prevP);
+            const be = prevS + frac * seg;
+            if (!breakevens.some(b => Math.abs(b - be) < S * 0.005)) breakevens.push(Number(be.toFixed(2)));
+          }
+          prevS = s; prevP = p;
+        }
+        const risingAtTop = samples[samples.length - 1] > samples[samples.length - 2] + 1e-9;
+        const risingAtBottom = samples[0] > samples[1] + 1e-9;
+        const maxProfit = (risingAtTop || risingAtBottom) ? Infinity : Number((maxPay * lotSize * contracts).toFixed(2));
+        const maxLoss = Number((Math.max(0, -minPay) * lotSize * contracts).toFixed(2));
+        return { def, legs, dte, lotSize, contracts, netPerShare: Number(netPerShare.toFixed(2)), netTotal, maxProfit, maxLoss, breakevens: breakevens.sort((a, b) => a - b), greeks };
+      }
+
+      window.setStrategyField = function(field, value) {
+        if (field === 'type' && OPTION_STRATEGIES[value]) selectedStrategySpec.type = value;
+        else if (field === 'expiryDays') selectedStrategySpec.expiryDays = Math.max(1, Number(value) || 30);
+        else if (field === 'lotSize') selectedStrategySpec.lotSize = Number(value) === 100 ? 100 : 10;
+        else if (field === 'contracts') selectedStrategySpec.contracts = Math.max(1, Math.min(500, Math.floor(Number(value) || 1)));
+        renderOptionsTab();
+      };
+
+      function executeStrategyOrder() {
+        if (!checkNotWorkingAtCasinoForInvesting()) return;
+        if (!checkOptionsMarketOpenForTrading()) return;
+        const st = G.stocks.find(s => s.ticker === G.activeTicker) || G.stocks[0];
+        if (!st) return;
+        const calc = calcStrategyPricing(selectedStrategySpec, st);
+        if (!calc) return;
+        const total = calc.netTotal;
+        if (total > 0) {
+          if (!deductCashOrMargin(total)) {
+            showToast('Insufficient Buying Power', `Strategy costs ${fmtMoney(total)}, Buying Power: ${fmtMoney(getHumanBuyingPower())}.`, false);
+            return;
+          }
+        } else if (total < 0) {
+          // Net-credit strategies are defined-risk: collateral = max loss.
+          if (getHumanBuyingPower() < calc.maxLoss) {
+            showToast('Insufficient Collateral', `This credit strategy risks up to ${fmtMoney(calc.maxLoss)} — Buying Power: ${fmtMoney(getHumanBuyingPower())}.`, false);
+            return;
+          }
+          G.human.cash = sixfeatRound2(G.human.cash + (-total));
+        }
+        const sid = 'STRAT_' + Date.now() + '_' + Math.floor(Math.random() * 99999);
+        for (const leg of calc.legs) {
+          G.human.options.push({
+            id: 'OPT_' + Date.now() + '_' + Math.floor(Math.random() * 999999),
+            ticker: st.ticker,
+            type: leg.type,
+            side: leg.side,
+            strike: leg.strike,
+            dte: calc.dte,
+            contracts: calc.contracts * leg.qty,
+            lotSize: calc.lotSize,
+            entryPrice: leg.price,
+            markPrice: leg.price,
+            strategyId: sid,
+            strategyType: selectedStrategySpec.type,
+            strategyName: calc.def.name
+          });
+        }
+        const debitCredit = total >= 0 ? `Net Debit ${fmtMoney(total)}` : `Net Credit ${fmtMoney(-total)}`;
+        G.human.logs.unshift(`Day ${G.day}: ⚡ Strategy opened: ${calc.contracts}x ${calc.def.name} on ${st.ticker} (${calc.dte}d, ${calc.lotSize} sh/contract) — ${debitCredit}; max profit ${calc.maxProfit === Infinity ? 'Unlimited' : fmtMoney(calc.maxProfit)}, max loss ${fmtMoney(calc.maxLoss)}.`);
+        showToast(`Strategy Opened — ${calc.def.name}`, `${calc.contracts}x on ${st.ticker} (${calc.dte}d). ${debitCredit}. Max profit: ${calc.maxProfit === Infinity ? 'Unlimited' : fmtMoney(calc.maxProfit)} • Max loss: ${fmtMoney(calc.maxLoss)}.`, true);
+        recalculateAllNetWorths(G);
+        renderAll();
+      }
+      window.executeStrategyOrder = executeStrategyOrder;
+
+      function renderStrategyBox() {
+        if (typeof G === 'undefined' || !G || !G.human) return '';
+        const st = G.stocks.find(s => s.ticker === G.activeTicker) || G.stocks[0];
+        if (!st) return '';
+        const calc = calcStrategyPricing(selectedStrategySpec, st);
+        if (!calc) return '';
+        const typeOpts = Object.entries(OPTION_STRATEGIES).map(([key, d]) =>
+          `<option value="${key}"${selectedStrategySpec.type === key ? ' selected' : ''}>${d.name}</option>`).join('');
+        const expOpts = [7, 14, 30, 60, 90, 180, 360, 720].map(d =>
+          `<option value="${d}"${selectedStrategySpec.expiryDays === d ? ' selected' : ''}>${d} Days</option>`).join('');
+        const legRows = calc.legs.map(l => {
+          const signed = (l.side === 'LONG' ? 1 : -1) * l.qty * l.price;
+          return `<div class="flex items-center justify-between gap-2 py-1 border-b border-[#1E2227] last:border-0">
+            <span class="font-bold ${l.side === 'LONG' ? 'text-[#00C805]' : 'text-[#FF5000]'}">${l.side === 'LONG' ? 'BUY' : 'SELL'} ${l.qty > 1 ? l.qty + '× ' : ''}${st.ticker} $${l.strike.toFixed(2)} ${l.type}</span>
+            <span class="font-mono font-bold text-white">$${l.price.toFixed(2)}/sh <span class="${signed >= 0 ? 'text-[#00C805]' : 'text-[#FF5000]'}">(${signed >= 0 ? '+' : ''}${fmtMoney(signed * calc.lotSize * calc.contracts)})</span></span>
+          </div>`;
+        }).join('');
+        const isDebit = calc.netTotal >= 0;
+        const beText = calc.breakevens.length ? calc.breakevens.map(b => '$' + b.toFixed(2)).join(' • ') : '—';
+        return `
+          <div class="rh-card p-5 flex flex-col gap-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="text-base font-extrabold text-white">⚡ Multi-Leg Options Strategies</h3>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-violet-500/15 text-violet-300">One ticket • One confirm • Same Black-Scholes pricing</span>
+            </div>
+            <p class="text-[11px] text-[#8A919E]">${calc.def.desc} Legs settle through the normal options engine at expiration.</p>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <label class="flex flex-col gap-1"><span class="text-[#8A919E] font-semibold">Strategy</span>
+                <select onchange="setStrategyField('type', this.value)" class="bg-[#1C2024] border border-[#2E343B] rounded-lg px-2 py-1.5 text-white font-semibold">${typeOpts}</select></label>
+              <label class="flex flex-col gap-1"><span class="text-[#8A919E] font-semibold">Expiration</span>
+                <select onchange="setStrategyField('expiryDays', this.value)" class="bg-[#1C2024] border border-[#2E343B] rounded-lg px-2 py-1.5 text-white font-semibold">${expOpts}</select></label>
+              <label class="flex flex-col gap-1"><span class="text-[#8A919E] font-semibold">Contract Size</span>
+                <select onchange="setStrategyField('lotSize', this.value)" class="bg-[#1C2024] border border-[#2E343B] rounded-lg px-2 py-1.5 text-white font-semibold">
+                  <option value="10"${calc.lotSize === 10 ? ' selected' : ''}>Mini (10 shares)</option>
+                  <option value="100"${calc.lotSize === 100 ? ' selected' : ''}>Standard (100 shares)</option>
+                </select></label>
+              <label class="flex flex-col gap-1"><span class="text-[#8A919E] font-semibold">Strategies (× legs)</span>
+                <input type="number" min="1" max="500" value="${calc.contracts}" onchange="setStrategyField('contracts', this.value)" class="bg-[#0C0E10] border border-[#2E343B] rounded-lg px-2 py-1.5 text-right font-mono font-bold text-white" /></label>
+            </div>
+            <div class="p-3 rounded-xl bg-[#0C0E10] border border-[#24282D] text-xs">${legRows}</div>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="p-2.5 rounded-lg bg-[#0C0E10] border border-[#24282D]"><div class="text-[10px] text-[#8A919E]">${isDebit ? 'Net Debit (you pay)' : 'Net Credit (you collect)'}</div><div class="font-mono font-extrabold text-white text-sm">${fmtMoney(Math.abs(calc.netTotal))}</div></div>
+              <div class="p-2.5 rounded-lg bg-[#0C0E10] border border-[#24282D]"><div class="text-[10px] text-[#8A919E]">Max Profit / Max Loss</div><div class="font-mono font-extrabold text-sm"><span class="text-[#00C805]">${calc.maxProfit === Infinity ? 'Unlimited' : fmtMoney(calc.maxProfit)}</span> <span class="text-[#8A919E]">/</span> <span class="text-[#FF5000]">${fmtMoney(calc.maxLoss)}</span></div></div>
+              <div class="p-2.5 rounded-lg bg-[#0C0E10] border border-[#24282D]"><div class="text-[10px] text-[#8A919E]">Breakeven${calc.breakevens.length > 1 ? 's' : ''} at Expiration</div><div class="font-mono font-extrabold text-white text-sm">${beText}</div></div>
+              <div class="p-2.5 rounded-lg bg-[#0C0E10] border border-[#24282D]"><div class="text-[10px] text-[#8A919E]">Net Greeks / share (Δ / Γ / Vega / Θ)</div><div class="font-mono font-extrabold text-white text-sm">${calc.greeks.delta.toFixed(2)} / ${calc.greeks.gamma.toFixed(3)} / ${calc.greeks.vega.toFixed(2)} / ${calc.greeks.theta.toFixed(2)}</div></div>
+            </div>
+            ${!isDebit ? `<div class="text-[11px] text-amber-300">Credit strategy: requires ${fmtMoney(calc.maxLoss)} buying power as collateral (your maximum possible loss).</div>` : ''}
+            <button type="button" onclick="executeStrategyOrder()" class="w-full py-3 rounded-full bg-violet-500 hover:bg-violet-400 text-white font-extrabold text-sm transition shadow-lg">Open ${calc.def.name} — ${isDebit ? 'Pay ' + fmtMoney(calc.netTotal) : 'Collect ' + fmtMoney(-calc.netTotal)}</button>
+          </div>`;
+      }
+
+      // ---------- RENDER: portfolio automation cards, goal bar, watch buttons ----------
+      function renderDripCard() {
+        if (typeof G === 'undefined' || !G || !G.human) return '';
+        const d = ensureDripState(G.human);
+        const rows = [];
+        const stockMap = new Map((G.stocks || []).map(s => [s.ticker, s]));
+        const etfMap = new Map((G.etfs || []).map(e => [e.sym, e]));
+        const prMap = new Map((G.privateReFunds || []).map(f => [f.sym, f]));
+        const pushRow = (kind, sym, name, yld, shares) => {
+          const eff = isDripEffective(kind, sym);
+          const key = kind + ':' + sym;
+          const hasOverride = Boolean(d.on[key] || d.off[key]);
+          rows.push(`<div class="flex flex-wrap items-center justify-between gap-2 py-1.5 border-b border-[#1E2227] last:border-0">
+            <div><span class="font-extrabold text-white text-xs">${sym}</span> <span class="text-[11px] text-[#8A919E]">${name} • ${yld.toFixed(2)}% yield • ${shares.toFixed(4)} sh</span></div>
+            <div class="flex items-center gap-1.5">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${eff ? 'bg-[#00C805]/15 text-[#00C805]' : 'bg-[#1C2024] text-[#8A919E]'}">${eff ? 'DRIP ON' : 'CASH'}${hasOverride ? ' • override' : ''}</span>
+              <button type="button" onclick="toggleDripHolding('${kind}', '${sym}')" class="px-2.5 py-1 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-white font-bold text-[11px]">${eff ? 'Pay to Cash' : 'Reinvest'}</button>
+              ${hasOverride ? `<button type="button" onclick="clearDripHoldingOverride('${kind}', '${sym}')" class="px-2 py-1 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-amber-300 font-bold text-[11px]" title="Follow the master switch">↩ Master</button>` : ''}
+            </div>
+          </div>`);
+        };
+        for (const [ticker, pos] of Object.entries(G.human.stocks || {})) {
+          const st = stockMap.get(ticker);
+          if (st && pos.shares > 0 && st.divYield > 0) pushRow('STOCK', ticker, st.name, st.divYield, pos.shares);
+        }
+        for (const [sym, pos] of Object.entries(G.human.etfs || {})) {
+          const etf = etfMap.get(sym);
+          if (etf && pos.shares > 0 && etf.divYield > 0) pushRow('ETF', sym, etf.name, etf.divYield, pos.shares);
+        }
+        for (const [sym, pos] of Object.entries(G.human.privateRe || {})) {
+          const pr = prMap.get(sym);
+          if (pr && pos.shares > 0 && pr.divYield > 0) pushRow('PRIVRE', sym, pr.name, pr.divYield, pos.shares);
+        }
+        return `
+          <div class="rh-card p-5 flex flex-col gap-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h2 class="text-base font-extrabold text-white">💧 Dividend Reinvestment (DRIP)</h2>
+              <button type="button" onclick="toggleDripMaster()" class="px-3 py-1.5 rounded-full text-xs font-extrabold ${d.enabled ? 'bg-[#00C805] text-black' : 'bg-[#1C2024] text-[#8A919E]'}">Master: ${d.enabled ? 'ON' : 'OFF'}</button>
+            </div>
+            <p class="text-[11px] text-[#8A919E]">When ON, dividends buy more shares of the same holding instead of sitting as cash (fractional shares, no fees — still taxed as income, like a real DRIP). Master OFF + a holding switched ON reinvests just that holding.</p>
+            ${rows.length ? rows.join('') : '<div class="text-xs text-[#8A919E] py-2">No dividend-paying holdings yet. Buy a stock or ETF with a yield and it appears here.</div>'}
+            <div class="text-[11px] text-[#8A919E] pt-1 border-t border-[#1E2227]">Lifetime reinvested: <strong class="text-white font-mono">${fmtMoney(d.totalReinvested || 0)}</strong></div>
+          </div>`;
+      }
+
+      function renderDcaCard() {
+        if (typeof G === 'undefined' || !G || !G.human) return '';
+        const list = ensureAutoBuysState(G.human);
+        const rows = list.map(s => {
+          const target = findTradeTarget(s.kind, s.sym);
+          const status = s.stale
+            ? '<span class="text-rose-400 font-bold">⚠️ Delisted — retired</span>'
+            : (s.active ? `<span class="text-[#00C805] font-bold">Active • next Day ${s.nextDay}</span>` : '<span class="text-amber-300 font-bold">Paused</span>');
+          return `<div class="flex flex-wrap items-center justify-between gap-2 py-1.5 border-b border-[#1E2227] last:border-0">
+            <div><span class="font-extrabold text-white text-xs">${s.sym}</span> <span class="text-[11px] text-[#8A919E]">${s.kind} • ${fmtMoney(s.amount)} ${s.freq === 'WEEKLY' ? 'weekly' : 'daily'} • invested ${fmtMoney(s.totalInvested || 0)}${s.skips ? ` • ${s.skips} skipped (short cash)` : ''}${target ? ` • now $${target.price.toFixed(2)}` : ''}</span><div class="text-[11px]">${status}</div></div>
+            <div class="flex items-center gap-1.5">
+              ${!s.stale ? `<button type="button" onclick="toggleAutoBuySchedule('${s.id}')" class="px-2.5 py-1 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-white font-bold text-[11px]">${s.active ? 'Pause' : 'Resume'}</button>` : ''}
+              <button type="button" onclick="deleteAutoBuySchedule('${s.id}')" class="px-2.5 py-1 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-rose-300 font-bold text-[11px]">Delete</button>
+            </div>
+          </div>`;
+        }).join('');
+        return `
+          <div class="rh-card p-5 flex flex-col gap-3">
+            <h2 class="text-base font-extrabold text-white">🔁 Scheduled Auto-Buys (Dollar-Cost Averaging)</h2>
+            <p class="text-[11px] text-[#8A919E]">Set it once — buys execute on their own at each day rollover, cash-only (a short-cash day is skipped, never overdrafted). Runs even while working at the Casino.</p>
+            <div class="flex flex-wrap items-end gap-2 text-xs">
+              <label class="flex flex-col gap-1"><span class="text-[#8A919E] font-semibold">Symbol</span>
+                <input id="dcaSymInput" type="text" placeholder="AAPL or SPY" class="w-28 bg-[#0C0E10] border border-[#2E343B] rounded-lg px-2.5 py-1.5 font-mono font-bold text-white uppercase" /></label>
+              <label class="flex flex-col gap-1"><span class="text-[#8A919E] font-semibold">Amount ($)</span>
+                <input id="dcaAmtInput" type="number" min="1" step="any" value="100" class="w-24 bg-[#0C0E10] border border-[#2E343B] rounded-lg px-2.5 py-1.5 text-right font-mono font-bold text-white" /></label>
+              <label class="flex flex-col gap-1"><span class="text-[#8A919E] font-semibold">Schedule</span>
+                <select id="dcaFreqSelect" class="bg-[#1C2024] border border-[#2E343B] rounded-lg px-2.5 py-1.5 text-white font-semibold"><option value="DAILY">Daily</option><option value="WEEKLY">Weekly (7 days)</option></select></label>
+              <button type="button" onclick="addAutoBuySchedule()" class="px-4 py-1.5 rounded-lg bg-[#00C805] hover:bg-[#00E006] text-black font-extrabold">Add Schedule</button>
+            </div>
+            ${rows || '<div class="text-xs text-[#8A919E] py-2">No schedules yet. Dollar-cost averaging beats timing the market — start with $100/day into an ETF.</div>'}
+          </div>`;
+      }
+
+      function renderGoalCard() {
+        if (typeof G === 'undefined' || !G || !G.human) return '';
+        const g = ensureGoalState(G.human);
+        const nw = sixfeatNum(G.human.netWorth, 0);
+        const pct = Math.min(100, (nw / Math.max(1, g.target)) * 100);
+        const presets = [100000, 250000, 500000, 1000000, 5000000, 10000000];
+        const presetBtns = presets.map(p => `<button type="button" onclick="setNetWorthGoal(${p})" class="px-3 py-1.5 rounded-full text-xs font-bold ${g.target === p ? 'bg-[#00C805] text-black' : 'bg-[#1C2024] text-white hover:bg-[#262B31]'}">${fmtCompact(p)}</button>`).join('');
+        const msRows = GOAL_MILESTONES.map(m => {
+          const hit = Boolean(g.celebrated[m]);
+          const next = !hit && m > nw;
+          return `<div class="flex items-center justify-between py-1 border-b border-[#1E2227] last:border-0 text-xs">
+            <span class="${hit ? 'text-[#00C805] font-bold' : 'text-[#8A919E]'}">${hit ? '🏆' : (next ? '🎯 NEXT' : '○')} ${fmtMoney(m)}</span>
+            <span class="font-mono text-[11px] ${hit ? 'text-[#00C805]' : 'text-[#8A919E]'}">${hit ? 'REACHED' : fmtMoney(Math.max(0, m - nw)) + ' to go'}</span>
+          </div>`;
+        }).join('');
+        return `
+          <div class="rh-card p-5 flex flex-col gap-3">
+            <h2 class="text-base font-extrabold text-white">🎯 Net Worth Goal &amp; Milestones</h2>
+            <div>
+              <div class="flex justify-between text-xs mb-1"><span class="text-[#8A919E]">Progress to <strong class="text-white">${fmtMoney(g.target)}</strong></span><span class="font-mono font-bold text-white">${pct.toFixed(1)}% • ${fmtMoney(nw)}</span></div>
+              <div class="h-3 rounded-full bg-[#1C2024] overflow-hidden"><div class="h-full rounded-full bg-[#00C805] transition-all" style="width:${pct.toFixed(1)}%"></div></div>
+            </div>
+            <div class="flex flex-wrap gap-1.5">${presetBtns}</div>
+            <div class="flex flex-wrap items-end gap-2 text-xs">
+              <label class="flex flex-col gap-1"><span class="text-[#8A919E] font-semibold">Custom goal ($)</span>
+                <input id="goalTargetInput" type="number" min="1" step="any" value="${g.target}" class="w-36 bg-[#0C0E10] border border-[#2E343B] rounded-lg px-2.5 py-1.5 text-right font-mono font-bold text-white" /></label>
+              <button type="button" onclick="setNetWorthGoal()" class="px-4 py-1.5 rounded-lg bg-[#00C805] hover:bg-[#00E006] text-black font-extrabold">Set Goal</button>
+              <span class="text-[11px] text-[#8A919E]">Lifetime best: <strong class="text-white font-mono">${fmtMoney(g.lifetimeBest || 0)}</strong></span>
+            </div>
+            <div class="pt-1">${msRows}</div>
+          </div>`;
+      }
+
+      function renderOrdersCard() {
+        if (typeof G === 'undefined' || !G || !G.human) return '';
+        const list = ensurePendingOrdersState(G.human);
+        const rows = list.map(o => {
+          const target = findTradeTarget(o.kind, o.sym);
+          const cur = target ? target.price : null;
+          const dist = cur != null ? (((cur - o.targetPrice) / o.targetPrice) * 100) : null;
+          return `<div class="flex flex-wrap items-center justify-between gap-2 py-1.5 border-b border-[#1E2227] last:border-0">
+            <div><span class="font-extrabold text-white text-xs">${o.sym}</span> <span class="text-[11px] text-[#8A919E]">${o.otype} ${o.side} • ${fmtMoney(o.amount)} @ $${o.targetPrice.toFixed(2)}${cur != null ? ` • now $${cur.toFixed(2)} (${dist >= 0 ? '+' : ''}${dist.toFixed(1)}% away)` : ' • delisted?'}</span><div class="text-[11px] text-[#8A919E]">Placed Day ${o.createdDay} • fills at the close when triggered</div></div>
+            <button type="button" onclick="cancelPendingOrder('${o.id}')" class="px-2.5 py-1 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-rose-300 font-bold text-[11px]">Cancel</button>
+          </div>`;
+        }).join('');
+        return `
+          <div class="rh-card p-5 flex flex-col gap-3">
+            <h2 class="text-base font-extrabold text-white">⏳ Open Conditional Orders (Limit / Stop)</h2>
+            <p class="text-[11px] text-[#8A919E]">Place limit &amp; stop orders from any stock or ETF page. They fill automatically at the day's close when the price triggers — even while working at the Casino. Buy fills are cash-only.</p>
+            ${rows || '<div class="text-xs text-[#8A919E] py-2">No open orders. Open a stock or ETF page and place a limit buy below the price, or a stop-loss under a holding you own.</div>'}
+          </div>`;
+      }
+
+      function renderWatchlistCard() {
+        if (typeof G === 'undefined' || !G || !G.human) return '';
+        const list = ensureWatchlistState(G.human);
+        const rows = list.map(w => {
+          const target = findTradeTarget(w.kind, w.sym);
+          const priceTxt = target ? `$${target.price.toFixed(2)}` : '—';
+          const alertTxt = w.targetPrice != null
+            ? `Alert ${w.direction === 'ABOVE' ? 'above' : 'below'} $${w.targetPrice.toFixed(2)}${w.lastAlertDay ? ` • last fired Day ${w.lastAlertDay}` : ' • not fired yet'}`
+            : 'Tracking only (no alert)';
+          return `<div class="flex flex-wrap items-center justify-between gap-2 py-1.5 border-b border-[#1E2227] last:border-0">
+            <div><span class="font-extrabold text-white text-xs">${w.sym}</span> <span class="text-[11px] text-[#8A919E]">${w.kind} • ${priceTxt} • ${alertTxt}</span>${w.stale ? '<div class="text-[11px] text-rose-400 font-bold">⚠️ No longer listed</div>' : ''}</div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="${w.kind === 'STOCK' ? `openStockPage('${w.sym}')` : `openEtfPage('${w.sym}')`}" class="px-2.5 py-1 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-white font-bold text-[11px]">Open</button>
+              <button type="button" onclick="removeWatchlistEntry('${w.kind}', '${w.sym}')" class="px-2.5 py-1 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-rose-300 font-bold text-[11px]">Remove</button>
+            </div>
+          </div>`;
+        }).join('');
+        return `
+          <div class="rh-card p-5 flex flex-col gap-3">
+            <h2 class="text-base font-extrabold text-white">👁️ Watchlist &amp; Price Alerts</h2>
+            <p class="text-[11px] text-[#8A919E]">Alerts ping the Notification Center (and a toast) once per crossing — the price must cross back before the same alert fires again.</p>
+            <div class="flex flex-wrap items-end gap-2 text-xs">
+              <label class="flex flex-col gap-1"><span class="text-[#8A919E] font-semibold">Symbol</span>
+                <input id="watchSymInput" type="text" placeholder="AAPL or SPY" class="w-28 bg-[#0C0E10] border border-[#2E343B] rounded-lg px-2.5 py-1.5 font-mono font-bold text-white uppercase" /></label>
+              <label class="flex flex-col gap-1"><span class="text-[#8A919E] font-semibold">Target $ (optional)</span>
+                <input id="watchTargetInput" type="number" min="0" step="any" placeholder="—" class="w-28 bg-[#0C0E10] border border-[#2E343B] rounded-lg px-2.5 py-1.5 text-right font-mono font-bold text-white" /></label>
+              <label class="flex flex-col gap-1"><span class="text-[#8A919E] font-semibold">Alert when</span>
+                <select id="watchDirSelect" class="bg-[#1C2024] border border-[#2E343B] rounded-lg px-2.5 py-1.5 text-white font-semibold"><option value="ABOVE">Rises above</option><option value="BELOW">Falls below</option></select></label>
+              <button type="button" onclick="addWatchlistEntry()" class="px-4 py-1.5 rounded-lg bg-[#00C805] hover:bg-[#00E006] text-black font-extrabold">Watch</button>
+            </div>
+            ${rows || '<div class="text-xs text-[#8A919E] py-2">Nothing watched yet. Add a symbol — or tap 👁 Watch on any stock or ETF page.</div>'}
+          </div>`;
+      }
+
+      function renderGoalBar() {
+        if (typeof G === 'undefined' || !G || !G.human) return '';
+        const g = ensureGoalState(G.human);
+        const nw = sixfeatNum(G.human.netWorth, 0);
+        const pct = Math.min(100, (nw / Math.max(1, g.target)) * 100);
+        const nextMs = GOAL_MILESTONES.find(m => m > nw);
+        return `
+          <div class="rh-card px-4 py-3 flex flex-col gap-1.5 cursor-pointer hover:border-[#00C805]/50 transition" onclick="switchMainTab('portfolio')">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+              <span class="font-extrabold text-white">🎯 Goal: <span class="text-[#00C805]">${fmtMoney(g.target)}</span></span>
+              <span class="font-mono text-[#8A919E]">${fmtMoney(nw)} • ${pct.toFixed(1)}%${nextMs ? ` • Next milestone ${fmtMoney(nextMs)}` : ' • All milestones reached 🏆'}</span>
+            </div>
+            <div class="h-2.5 rounded-full bg-[#1C2024] overflow-hidden"><div class="h-full rounded-full bg-[#00C805] transition-all" style="width:${pct.toFixed(1)}%"></div></div>
+          </div>`;
+      }
+
+      // Compact goal line for the shell home screen (Net Worth widget).
+      // Same state/math as renderGoalBar; the shell styles .ph-goal-*.
+      function renderGoalBarCompact() {
+        if (typeof G === 'undefined' || !G || !G.human) return '';
+        const g = ensureGoalState(G.human);
+        const nw = sixfeatNum(G.human.netWorth, 0);
+        const pct = Math.min(100, (nw / Math.max(1, g.target)) * 100);
+        return `<div class="ph-goal-text">🎯 ${fmtMoney(nw)} / ${fmtMoney(g.target)} • ${pct.toFixed(1)}%</div>`
+          + `<div class="ph-goal-track"><div class="ph-goal-fill" style="width:${pct.toFixed(1)}%"></div></div>`;
+      }
+      window.renderGoalBarCompact = renderGoalBarCompact;
+
+      function renderStockWatchBtnBox() {
+        if (typeof G === 'undefined' || !G || !G.human) return '';
+        const watching = isOnWatchlist('STOCK', G.activeTicker);
+        return `<button type="button" onclick="toggleWatchlistSymbol('STOCK', G.activeTicker)" class="w-full py-2 rounded-xl ${watching ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-[#1E2227] hover:bg-[#2A2F36] text-white'} text-xs font-bold transition">${watching ? '👁️ Watching — tap to unwatch' : '👁 Watch this stock (alerts in Portfolio → Watchlist)'}</button>`;
+      }
+      function renderEtfWatchBtnBox() {
+        if (typeof G === 'undefined' || !G || !G.human) return '';
+        const watching = isOnWatchlist('ETF', G.activeEtfSym);
+        return `<button type="button" onclick="toggleWatchlistSymbol('ETF', G.activeEtfSym)" class="w-full py-2 rounded-xl ${watching ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-[#1E2227] hover:bg-[#2A2F36] text-white'} text-xs font-bold transition">${watching ? '👁️ Watching — tap to unwatch' : '👁 Watch this ETF (alerts in Portfolio → Watchlist)'}</button>`;
       }
 
       // =========================================================================
@@ -13962,7 +15028,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           if (!st) continue;
           if (pos.shares > 0 && st.divYield > 0) {
             const div = (pos.shares * st.price * (st.divYield / 100)) / 252;
-            G.human.cash += div;
+            if (!applyDripReinvestment('STOCK', ticker, div, st.price)) G.human.cash += div;
             G.human.taxLedger.ordinaryIncome += div;
             humanPassiveToday += div;
           } else if (pos.shares < 0) {
@@ -13984,7 +15050,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             G.human.etfFeesPaid = (G.human.etfFeesPaid || 0) + dailyFee;
             if (etf.divYield > 0) {
               const etfDiv = (posVal * (etf.divYield / 100)) / 252;
-              G.human.cash += etfDiv;
+              if (!applyDripReinvestment('ETF', sym, etfDiv, etf.price)) G.human.cash += etfDiv;
               G.human.taxLedger.ordinaryIncome += etfDiv;
               humanPassiveToday += etfDiv;
             }
@@ -13998,7 +15064,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             const pr = prMap.get(sym);
             if (!pr || pPos.shares <= 0) continue;
             const div = (pPos.shares * pr.navPrice * (pr.divYield / 100)) / 252;
-            G.human.cash += div;
+            if (!applyDripReinvestment('PRIVRE', sym, div, pr.navPrice)) G.human.cash += div;
             G.human.taxLedger.ordinaryIncome += div;
             humanPassiveToday += div;
           }
@@ -14462,9 +15528,11 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           }
         }
 
+        processDailyAutomation();
         runAiDailyTurn(G, rng);
         recalculateAllNetWorths(G);
         checkMarginMaintenance(G);
+        checkGoalMilestones();
         // Rotate the 3 Casino AI Players at the start of every new month (every 21 trading days) with cash scaled 80%–120% of Human Cash!
         if (G.day % 21 === 0 && typeof refreshMonthlyCasinoAiPlayers === 'function') {
           refreshMonthlyCasinoAiPlayers(true);
@@ -16657,6 +17725,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         const diffDollar = nw - G.startingCapital;
         const isUp = diffDollar >= 0;
         document.getElementById('headerNetWorth').textContent = fmtMoney(nw);
+        const goalBox = document.getElementById('goalProgressBox');
+        if (goalBox) goalBox.innerHTML = renderGoalBar();
         const dEl = document.getElementById('headerReturnDollar');
         const pEl = document.getElementById('headerReturnPct');
         dEl.textContent = (diffDollar >= 0 ? '+' : '') + fmtMoney(diffDollar);
@@ -17104,6 +18174,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         document.getElementById('resQuickTicker').textContent = st.ticker;
         document.getElementById('spOrderPrice').textContent = `$${st.price.toFixed(2)}`;
         document.getElementById('spBuyingPower').textContent = fmtMoney(getHumanBuyingPower());
+        const stockWatchBox = document.getElementById('stockWatchBtnBox');
+        if (stockWatchBox) stockWatchBox.innerHTML = renderStockWatchBtnBox();
         const topSym = document.getElementById('topTradeSymLabel');
         if (topSym) topSym.textContent = st.ticker;
         const topPrc = document.getElementById('topTradePriceLabel');
@@ -18220,6 +19292,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         document.getElementById('optBreakEvenLabel').textContent = `Breakeven $${bePrice.toFixed(2)}`;
 
         drawOptionPayoff(st.price, selK, selPrem, isCall, isBuy, contracts * lotSize);
+        const stratBox = document.getElementById('optStrategyBox');
+        if (stratBox) stratBox.innerHTML = renderStrategyBox();
       }
 
       window.selectOptionStrike = function(idx) {
@@ -18835,6 +19909,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         document.getElementById('etfTopTradeEr').textContent = `(ER ${etf.expenseRatio.toFixed(2)}%/yr • Yield ${etf.divYield.toFixed(2)}%)`;
         document.getElementById('etfTopTradeBp').textContent = fmtMoney(bp);
         document.getElementById('etfTopTradeOwned').textContent = `Owned: ${mySh.toFixed(4)} sh (${fmtMoney(mySh * etf.price)})`;
+        const etfWatchBox = document.getElementById('etfWatchBtnBox');
+        if (etfWatchBox) etfWatchBox.innerHTML = renderEtfWatchBtnBox();
         if (window.updateEtfTradePreview) window.updateEtfTradePreview();
 
         document.getElementById('etfCardQuickSym').textContent = etf.sym;
@@ -22231,6 +23307,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           return;
         }
         casinoState.activeGame = cleanKey;
+        closeChessPromotionPicker();
         ensureAllCasinoAiTables();
         const inp = document.getElementById('casinoBetInput');
         if (inp) {
@@ -23493,7 +24570,11 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
               const promRow  = color === 'w' ? 0 : 7;
               const r1 = r + dir;
               if (r1 >= 0 && r1 < 8 && !board[r1][c]) {
-                pseudo.push({ fromR: r, fromC: c, toR: r1, toC: c, promoteTo: r1 === promRow ? color + 'Q' : null });
+                if (r1 === promRow) {
+                  for (const pp of ['Q', 'R', 'B', 'N']) pseudo.push({ fromR: r, fromC: c, toR: r1, toC: c, promoteTo: color + pp });
+                } else {
+                  pseudo.push({ fromR: r, fromC: c, toR: r1, toC: c, promoteTo: null });
+                }
                 const r2 = r + dir * 2;
                 if (r === startRow && !board[r2][c]) {
                   pseudo.push({ fromR: r, fromC: c, toR: r2, toC: c, promoteTo: null });
@@ -23504,7 +24585,11 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
                 if (r1 >= 0 && r1 < 8 && nc >= 0 && nc < 8) {
                   const occ = board[r1][nc];
                   if (occ && occ[0] === opp) {
-                    pseudo.push({ fromR: r, fromC: c, toR: r1, toC: nc, promoteTo: r1 === promRow ? color + 'Q' : null });
+                    if (r1 === promRow) {
+                      for (const pp of ['Q', 'R', 'B', 'N']) pseudo.push({ fromR: r, fromC: c, toR: r1, toC: nc, promoteTo: color + pp });
+                    } else {
+                      pseudo.push({ fromR: r, fromC: c, toR: r1, toC: nc, promoteTo: null });
+                    }
                   } else if (enPassant && enPassant.r === r1 && enPassant.c === nc) {
                     pseudo.push({ fromR: r, fromC: c, toR: r1, toC: nc, isEnPassant: true, promoteTo: null });
                   }
@@ -23626,7 +24711,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         const attacker = board[m.fromR][m.fromC];
         let s = 0;
         if (victim) s += 10 * (CHESS_PIECE_VALUES[victim[1]] || 100) - ((CHESS_PIECE_VALUES[attacker ? attacker[1] : 'P'] || 100) / 10);
-        if (m.promoteTo) s += 800;
+        if (m.promoteTo) s += (CHESS_PIECE_VALUES[m.promoteTo[1]] || 800);
         if (m.castleSide) s += 60;
         return s;
       }
@@ -23703,7 +24788,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         const cap = board[move.toR][move.toC] || move.isEnPassant ? 'x' : '';
         const fromFile = (piece[1] === 'P' && cap) ? files[move.fromC] : '';
         const destSq = files[move.toC] + String(8 - move.toR);
-        const prom = move.promoteTo ? '=Q' : '';
+        const prom = move.promoteTo ? '=' + move.promoteTo[1] : '';
         const inChk = isChessKingInCheck(nextBoard, nextTurn);
         const nextLegal = generateLegalChessMoves(nextBoard, nextTurn, null, null);
         const chkSym = inChk ? (nextLegal.length === 0 ? '#' : '+') : '';
@@ -23778,6 +24863,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         ch.winner = null;
         ch.turn = 'w';
         ch.board = createStartingChessBoard();
+        closeChessPromotionPicker();
         ch.castling = { wK: true, wQ: true, bK: true, bQ: true };
         ch.enPassant = null;
         ch.halfMoveClock = 0;
@@ -23804,6 +24890,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
 
       function settleChessMatchOutcome(ch, resultType, reasonText) {
         initChessBoardIfNeeded();
+        closeChessPromotionPicker();
         const gm = ch.gm;
         const bet = ch.currentBet || Math.min(MAX_CHESS_BET, casinoState.betAmount || 100);
         const humanCol = ch.humanColor || 'w';
@@ -23957,9 +25044,73 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         settleChessMatchOutcome(ch, 'AI_WIN', 'You Resigned');
       };
 
+      // -----------------------------------------------------------------------
+      // CHESS PROMOTION PICKER (Nov 17, 2026): pawn moves reaching the last
+      // rank offer Q/R/B/N instead of auto-queening. The picker opens from a
+      // mousedown/touchstart tap on the canvas, so the SAME tap's trailing
+      // click must not cancel it or choose instantly — the 350ms timestamp
+      // guard (Chess Quest promotion-picker lesson, Nov 15) ignores every
+      // picker click within 350ms of opening. State is module-level (never
+      // saved); the pending move keeps its from/to and the color from the
+      // generated Q variant.
+      // -----------------------------------------------------------------------
+      let chessPromoPending = null;
+      let chessPromoOpenedAt = 0;
+      const CHESS_PROMO_GUARD_MS = 350;
+
+      function openChessPromotionPicker(move) {
+        chessPromoPending = { fromR: move.fromR, fromC: move.fromC, toR: move.toR, toC: move.toC, promoteTo: move.promoteTo };
+        chessPromoOpenedAt = Date.now();
+        renderChessPromoPicker();
+      }
+      function closeChessPromotionPicker() {
+        chessPromoPending = null;
+        const slot = document.getElementById('chessPromoPickerSlot');
+        if (slot) slot.innerHTML = '';
+      }
+      function renderChessPromoPicker() {
+        const slot = document.getElementById('chessPromoPickerSlot');
+        if (!slot) return;
+        if (!chessPromoPending) { slot.innerHTML = ''; return; }
+        const color = chessPromoPending.promoteTo ? chessPromoPending.promoteTo[0] : 'w';
+        const glyphs = color === 'w'
+          ? { Q: '♕', R: '♖', B: '♗', N: '♘' }
+          : { Q: '♛', R: '♜', B: '♝', N: '♞' };
+        const names = { Q: 'Queen', R: 'Rook', B: 'Bishop', N: 'Knight' };
+        const outline = color === 'w'
+          ? 'text-shadow: 0 0 3px #0F172A, 0 0 3px #0F172A;'
+          : 'text-shadow: 0 0 3px #F8FAFC, 0 0 3px #F8FAFC;';
+        const btns = ['Q', 'R', 'B', 'N'].map(p =>
+          `<button type="button" onclick="chooseChessPromotion('${p}')" aria-label="Promote to ${names[p]}" class="flex flex-col items-center gap-0.5 w-[64px] py-3 rounded-2xl bg-[#1C2024] hover:bg-[#262B31] border border-[#2E343B] transition">` +
+            `<span class="text-[38px] leading-none ${color === 'w' ? 'text-white' : 'text-[#111827]'}" style="${outline}">${glyphs[p]}</span>` +
+            `<span class="text-[11px] font-bold text-white">${names[p]}</span></button>`).join('');
+        slot.innerHTML =
+          `<div class="absolute inset-0 z-20 flex items-center justify-center">` +
+            `<div class="absolute inset-0 bg-black/70" onclick="dismissChessPromotionPicker()"></div>` +
+            `<div class="relative mx-3 p-4 rounded-2xl bg-[#11151B] border-2 border-amber-500/50 shadow-2xl flex flex-col items-center gap-3">` +
+              `<div class="text-sm font-extrabold text-white">♟️ Promote your pawn to:</div>` +
+              `<div class="flex items-center gap-2">${btns}</div>` +
+              `<button type="button" onclick="dismissChessPromotionPicker()" class="px-4 py-1.5 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-[#8A919E] font-bold text-xs">Cancel — pick another move</button>` +
+            `</div>` +
+          `</div>`;
+      }
+      window.chooseChessPromotion = function(piece) {
+        if (Date.now() - chessPromoOpenedAt < CHESS_PROMO_GUARD_MS) return;
+        const m = chessPromoPending;
+        if (!m) return;
+        const color = m.promoteTo ? m.promoteTo[0] : 'w';
+        closeChessPromotionPicker();
+        executeChessMoveAndCheckState({ fromR: m.fromR, fromC: m.fromC, toR: m.toR, toC: m.toC, promoteTo: color + piece });
+      };
+      window.dismissChessPromotionPicker = function() {
+        if (Date.now() - chessPromoOpenedAt < CHESS_PROMO_GUARD_MS) return;
+        closeChessPromotionPicker();
+      };
+
       function handleChessCanvasTap(clientX, clientY) {
         const ch = casinoState.chess;
         initChessBoardIfNeeded();
+        if (chessPromoPending) return;
         if (!ch.inMatch) {
           if (!window.startCasinoChessMatch()) return;
         }
@@ -23984,6 +25135,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         if (ch.selectedSq && Array.isArray(ch.legalMoves)) {
           const chosenMove = ch.legalMoves.find(m => m.toR === row && m.toC === col);
           if (chosenMove) {
+            if (chosenMove.promoteTo) { openChessPromotionPicker(chosenMove); return; }
             executeChessMoveAndCheckState(chosenMove);
             return;
           }
@@ -30499,6 +31651,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             base.human.taxLedger = { shortTermGains: 0, longTermGains: 0, ordinaryIncome: 0, depreciationShield: 0, accruedTax: 0, totalTaxesPaid: 0 };
           }
           ensurePayrollEtfState(base.human);
+          ensureSixFeaturesState(base.human);
         }
 
         if (snap.nextAiPlayerId) base.nextAiPlayerId = snap.nextAiPlayerId;
@@ -30767,6 +31920,17 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             : 'px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30';
         }
 
+        const dripBox = document.getElementById('myPortfolioDripBox');
+        if (dripBox) dripBox.innerHTML = renderDripCard();
+        const dcaBox = document.getElementById('myPortfolioDcaBox');
+        if (dcaBox) dcaBox.innerHTML = renderDcaCard();
+        const goalCardBox = document.getElementById('myPortfolioGoalsBox');
+        if (goalCardBox) goalCardBox.innerHTML = renderGoalCard();
+        const ordersBox = document.getElementById('myPortfolioOrdersBox');
+        if (ordersBox) ordersBox.innerHTML = renderOrdersCard();
+        const watchBox = document.getElementById('myPortfolioWatchlistBox');
+        if (watchBox) watchBox.innerHTML = renderWatchlistCard();
+
         const kpiBox = document.getElementById('myPortfolioSummaryKpis');
         if (kpiBox) {
           const totRet = h.netWorth - G.startingCapital;
@@ -30878,7 +32042,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
               return `
                 <div class="py-3 flex flex-wrap items-center justify-between gap-2">
                   <div onclick="G.activeTicker='${opt.ticker}'; switchMainTab('options');" class="cursor-pointer group">
-                    <div class="font-extrabold text-white group-hover:text-[#00C805] text-sm transition">${opt.ticker} $${opt.strike.toFixed(2)} ${opt.type} <span class="text-xs text-[#8A919E] font-normal">(${opt.side} • ${opt.contracts}x • ${opt.dte}d DTE)</span></div>
+                    <div class="font-extrabold text-white group-hover:text-[#00C805] text-sm transition">${opt.ticker} $${opt.strike.toFixed(2)} ${opt.type}${opt.strategyName ? ' <span class="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 font-bold">⚡ ' + opt.strategyName + '</span>' : ''} <span class="text-xs text-[#8A919E] font-normal">(${opt.side} • ${opt.contracts}x • ${opt.dte}d DTE)</span></div>
                     <div class="font-mono text-[11px] text-[#8A919E]">Entry $${opt.entryPrice.toFixed(2)} → Live Mark <strong class="text-white">$${opt.markPrice.toFixed(2)}</strong></div>
                   </div>
                   <div class="flex items-center gap-2">
@@ -33317,7 +34481,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       } else if (HOSTS[app.id]) {
         body = '<div class="ph-scroll">' + heroHtml(app) +
           (app.id === 'stocks' ? '<div class="ph-subtabs" id="ph-stocks-subtabs"><button type="button" data-stab="stocks">Stocks</button><button type="button" data-stab="etfs">ETFs</button><button type="button" data-stab="options">Options</button></div>' : '') +
-          '<div id="' + HOSTS[app.id] + '" class="ph-host"></div></div>';
+          '<div id="' + HOSTS[app.id] + '" class="ph-host"></div>' +
+          (app.id === 'job' ? '<div id="ph-job-payroll"></div>' : '') + '</div>';
       } else if (app.id === 'news') {
         body = '<div class="ph-scroll" id="ph-news-scroll"><div class="ph-app-banner" id="ph-banner-news" aria-hidden="true"></div><div id="news-wire-host" class="ph-host"></div><div id="news-monitor-host" class="ph-host"></div></div>';
       } else if (app.id === 'settings') {
@@ -33843,6 +35008,14 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     $('ph-tk-cash').textContent = 'Cash ' + fmtMoney(cash);
     $('ph-w-nw').textContent = fmtMoney(nw);
     $('ph-w-nw-sub').innerHTML = '<span class="' + upCls + '">' + fmtSigned(diff, '').replace(/^([+-])/, '$1$') + ' today</span> &nbsp;&middot;&nbsp; Cash ' + esc(fmtMoney(cash));
+    var gl = $('ph-goal-line');
+    if (gl) {
+      if (!gl.dataset.goalBound) { gl.dataset.goalBound = '1'; gl.addEventListener('click', function () { if (!editing) openApp('portfolio'); }); }
+      if (typeof window.renderGoalBarCompact === 'function') {
+        var gh = window.renderGoalBarCompact();
+        if (gl.innerHTML !== gh) gl.innerHTML = gh;
+      }
+    }
     var fg = $('fearGreedBadge');
     if (fg && fg.textContent) {
       var m = fg.textContent.match(/(\d+)\s*\(([^)]+)\)/);
@@ -33914,6 +35087,19 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     var day = (typeof window.getCasinoDailyWage === 'function') ? window.getCasinoDailyWage(exp) : 80;
     big.textContent = working ? (fmtMoney(day) + ' / day') : 'Off duty';
     row.innerHTML = heroStat('Wage', fmtMoney(hr) + '/hr') + heroStat('Experience', exp + ' days') + heroStat('Status', working ? 'On shift' : 'Not working');
+    renderJobPayroll();
+  }
+  /* ---------- Job-app payroll ETF block: second instance of the Casino desk
+     card's renderPayrollEtfBlock(), namespaced ('job') so no IDs duplicate.
+     Guarded write: only touches the DOM when the HTML actually changed, so
+     the 1s hero refresh never disturbs an open select. Single source of
+     truth is G.human.payrollEtf; both instances re-render from it. ---------- */
+  function renderJobPayroll() {
+    var c = $('ph-job-payroll');
+    if (!c || typeof window.renderPayrollEtfBlock !== 'function') return;
+    var html;
+    try { html = window.renderPayrollEtfBlock('job'); } catch (e) { return; }
+    if (c.innerHTML !== html) c.innerHTML = html;
   }
   /* ---------- player name (shell-only; never touches game state/saves) ---------- */
   /* All name rendering uses textContent only — never innerHTML with the name. */
