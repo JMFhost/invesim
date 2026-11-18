@@ -33603,7 +33603,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
 </script>
 <script>
 /* ================= ph-music.js — InveSim Phone music engine =================
-   Five distinct generative WebAudio compositions. Code-only: NO audio files.
+   Fifteen distinct generative WebAudio compositions. Code-only: NO audio files.
    Pure logic/audio module: makes NO DOM writes. The shell UI wires it later.
 
    API (attached to window.__phMusic):
@@ -33637,7 +33637,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
      getAudioContext()         The lazily created AudioContext, or null if not
                                created yet / unavailable. NEVER creates one.
                                Intended for ph-sfx.js context sharing.
-     TRACKS                    [{ name, key, bpm, timbre }, ...] (5 entries).
+     TRACKS                    [{ name, key, bpm, timbre }, ...] (15 entries).
      _debug()                  { schedulers, liveNodes, fadingChains,
                                audibleChains, ctxState, generation, masterGain }
                                Diagnostic snapshot for harness verification.
@@ -33646,7 +33646,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
    INVESIM_PHONE_PREFS in ph-shell.js):
      music        boolean, default false (EXISTING key: on/off, same as the
                   old single-loop toggle — old saves keep working).
-     musicTrack   integer 0-4, default 0 (NEW key).
+     musicTrack   integer 0-14, default 0 (NEW key).
      musicShuffle boolean, default false (NEW key).
    The module tolerates missing keys (defaults apply) and a missing prefs
    object entirely (internal state only, nothing persisted). NOTE for the
@@ -33691,7 +33691,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     return i;
   }
 
-  /* ---------- the five compositions ----------
+  /* ---------- the fifteen compositions ----------
      Each track: own key, tempo, chord progression, timbre AND renderer.
      chords are MIDI note numbers. stepsPerChord is in eighth notes. */
   var TRACKS = [
@@ -33721,7 +33721,56 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       timbre: 'Mellow fingerstyle plucks + soft pad',
       voice: 'pluck', stepsPerChord: 8,
       chords: [[52, 55, 59, 64], [55, 60, 64, 67], [55, 59, 62, 67], [54, 57, 62, 66]],
-      bass: [[40, 47], [48, 55], [43, 50], [42, 57]] }
+      bass: [[40, 47], [48, 55], [43, 50], [42, 57]] },
+    { name: 'Willow Shade', key: 'F major', bpm: 58,
+      timbre: 'Slow bowed string swells + soft bass',
+      voice: 'strings', stepsPerChord: 16,
+      chords: [[53, 57, 60], [50, 53, 57], [58, 62, 65], [55, 60, 64]],
+      bass: [41, 38, 46, 43] },
+    { name: 'Moonlit Harbor', key: 'B-flat major', bpm: 63,
+      timbre: 'Soft flute melody over a warm pad',
+      voice: 'flute', stepsPerChord: 8,
+      chords: [[58, 62, 65], [55, 58, 62], [53, 57, 60], [57, 60, 65]],
+      melody: [[70, 72, 74, 72], [69, 70, 72, 70], [65, 67, 69, 67], [69, 72, 74, 77]] },
+    { name: 'Rain on Glass', key: 'G minor', bpm: 76,
+      timbre: 'Sparse high droplets over a low pad',
+      voice: 'drops', stepsPerChord: 8,
+      chords: [[55, 58, 62], [53, 58, 62], [51, 55, 58], [54, 58, 62]],
+      drops: [[79, 0, 82, 77], [77, 82, 0, 79], [76, 0, 79, 82], [78, 81, 0, 79]] },
+    { name: 'Golden Meadow', key: 'D major', bpm: 68,
+      timbre: 'Rolling harp arpeggios + soft bass',
+      voice: 'harp', stepsPerChord: 8,
+      chords: [[62, 66, 69, 74], [57, 61, 66, 69], [59, 62, 66, 71], [61, 66, 69, 73]],
+      arp: [0, 2, 1, 3, 2, 3, 1, 2] },
+    { name: 'Night Garden', key: 'F-sharp minor', bpm: 56,
+      timbre: 'Detuned choir voices, very slow',
+      voice: 'choir', stepsPerChord: 16,
+      chords: [[54, 57, 61], [52, 54, 57], [57, 61, 64], [55, 59, 62]] },
+    { name: 'Silver Creek', key: 'E major', bpm: 78,
+      timbre: 'Soft mallet tones + gentle bass',
+      voice: 'marimba', stepsPerChord: 8,
+      chords: [[52, 56, 59, 64], [49, 52, 56, 61], [54, 57, 59, 64], [51, 56, 59, 63]],
+      bass: [40, 37, 42, 39],
+      pat: [0, -1, 1, 2, -1, 3, 2, 1] },
+    { name: 'Drifting Clouds', key: 'A major', bpm: 50,
+      timbre: 'Chorused vibraphone + low pedal',
+      voice: 'vibes', stepsPerChord: 16,
+      chords: [[57, 61, 64], [54, 57, 61], [52, 57, 61], [56, 59, 61]],
+      vibes: [[76, 79, 81, 79], [74, 76, 79, 76], [73, 76, 78, 76], [76, 78, 81, 78]] },
+    { name: 'Cedar & Sage', key: 'C minor', bpm: 62,
+      timbre: 'Mellow nylon-guitar figures + bass',
+      voice: 'guitar', stepsPerChord: 8,
+      chords: [[48, 51, 55], [53, 55, 60], [46, 51, 55], [50, 53, 55]],
+      bass: [36, 41, 34, 38] },
+    { name: 'Starlit Porch', key: 'E-flat major', bpm: 70,
+      timbre: 'High celesta sparkles over a soft pad',
+      voice: 'celesta', stepsPerChord: 8,
+      chords: [[51, 55, 58], [48, 53, 56], [53, 58, 62], [55, 58, 62]],
+      sparkle: [[82, 79, 84, 82], [79, 82, 79, 77], [80, 84, 82, 79], [82, 84, 86, 84]] },
+    { name: 'Still Waters', key: 'B minor', bpm: 48,
+      timbre: 'Soft flute-organ chords + pedal tone',
+      voice: 'organ', stepsPerChord: 16,
+      chords: [[47, 50, 54], [45, 50, 54], [52, 55, 59], [50, 54, 57]] }
   ];
 
   /* ---------- state ---------- */
@@ -33847,7 +33896,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     } catch (e) {}
   }
 
-  /* ---------- the five renderers ----------
+  /* ---------- the fifteen renderers ----------
      Each renders one eighth-note step of its track at audio time t into the
      per-track gain node dest. ci = chord index, si = step within the chord. */
   function renderPad(tr, ci, si, t, dest, gen, stepDur) {
@@ -33929,7 +33978,137 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         'triangle', gen, isBass ? 900 : 1700, 0);
     }
   }
-  var RENDER = { pad: renderPad, piano: renderPiano, rhodes: renderRhodes, bells: renderBells, pluck: renderPluck };
+  /* Staggered string entrances: bass + chord tones swell in across the bar. */
+  function renderStrings(tr, ci, si, t, dest, gen, stepDur) {
+    var chord = tr.chords[ci];
+    var chordDur = tr.stepsPerChord * stepDur;
+    if (si === 0) {
+      padNote(dest, midi(tr.bass[ci]), t, chordDur + 2, 0.07, 'sine', gen, 3.0, 3.0, 0);
+      padNote(dest, midi(chord[0]), t, chordDur + 2, 0.09, 'triangle', gen, 3.0, 3.0, -5);
+    }
+    if (si === 2) {
+      padNote(dest, midi(chord[1]), t, chordDur + 1, 0.09, 'triangle', gen, 3.0, 3.0, 4);
+    }
+    if (si === 4) {
+      padNote(dest, midi(chord[2]), t, chordDur, 0.08, 'triangle', gen, 3.0, 3.0, -3);
+    }
+  }
+  /* Flute: low pad + a soft sine melody on even steps. */
+  function renderFlute(tr, ci, si, t, dest, gen, stepDur) {
+    var chord = tr.chords[ci];
+    if (si === 0) {
+      for (var i = 0; i < chord.length; i++) {
+        padNote(dest, midi(chord[i] - 12), t, tr.stepsPerChord * stepDur + 1, 0.05, 'sine', gen, 1.5, 1.5, 0);
+      }
+    }
+    if (si % 2 === 0) {
+      var f = midi(tr.melody[ci][si / 2]);
+      decayNote(dest, f, t, 1.6, 0.09, 'sine', gen, 2600, 0);
+      decayNote(dest, f, t, 1.6, 0.03, 'triangle', gen, 2600, 0);
+    }
+  }
+  /* Drops: low pad + sparse high sine droplets (0 = rest). */
+  function renderDrops(tr, ci, si, t, dest, gen, stepDur) {
+    if (si === 0) {
+      padNote(dest, midi(tr.chords[ci][0] - 12), t, tr.stepsPerChord * stepDur + 1, 0.07, 'sine', gen, 2.0, 2.0, 0);
+      padNote(dest, midi(tr.chords[ci][0]), t, tr.stepsPerChord * stepDur + 1, 0.04, 'triangle', gen, 2.0, 2.0, 0);
+    }
+    if (si % 2 === 0) {
+      var d = tr.drops[ci][si / 2];
+      if (d) { decayNote(dest, midi(d), t, 2.2, 0.08, 'sine', gen, 0, 0); }
+    }
+  }
+  /* Harp: rolling arpeggio with a soft bass anchor. */
+  function renderHarp(tr, ci, si, t, dest, gen, stepDur) {
+    var chord = tr.chords[ci];
+    if (si === 0) {
+      decayNote(dest, midi(chord[0] - 12), t, 1.8, 0.10, 'sine', gen, 0, 0);
+    }
+    var f = midi(chord[tr.arp[si]]);
+    decayNote(dest, f, t, 1.5, 0.14, 'triangle', gen, 2800, 0);
+    decayNote(dest, f * 2, t, 0.8, 0.03, 'sine', gen, 0, 0);
+  }
+  /* Choir: detuned sine pairs per chord tone, very slow attack. */
+  function renderChoir(tr, ci, si, t, dest, gen, stepDur) {
+    var chord = tr.chords[ci];
+    var chordDur = tr.stepsPerChord * stepDur;
+    if (si === 0) {
+      for (var i = 0; i < chord.length; i++) {
+        padNote(dest, midi(chord[i]), t, chordDur + 2, 0.055, 'sine', gen, 4.0, 3.5, -6);
+        padNote(dest, midi(chord[i]), t, chordDur + 2, 0.055, 'sine', gen, 4.0, 3.5, 6);
+      }
+      padNote(dest, midi(chord[0] - 12), t, chordDur + 2, 0.06, 'sine', gen, 4.0, 3.5, 0);
+    }
+  }
+  /* Marimba: short mallet hits on a sparse pattern (-1 = rest). */
+  function renderMarimba(tr, ci, si, t, dest, gen, stepDur) {
+    var chord = tr.chords[ci];
+    if (si === 0) {
+      decayNote(dest, midi(tr.bass[ci]), t, 1.2, 0.11, 'sine', gen, 0, 0);
+    }
+    var tone = tr.pat[si];
+    if (tone >= 0) {
+      var f = midi(chord[tone]);
+      decayNote(dest, f, t, 0.5, 0.15, 'triangle', gen, 1500, 0);
+      decayNote(dest, f * 2, t, 0.3, 0.05, 'sine', gen, 0, 0);
+    }
+  }
+  /* Vibes: chorused sine pairs with long decay, low pedal underneath. */
+  function renderVibes(tr, ci, si, t, dest, gen, stepDur) {
+    var chord = tr.chords[ci];
+    if (si === 0) {
+      padNote(dest, midi(chord[0] - 12), t, tr.stepsPerChord * stepDur + 1, 0.05, 'sine', gen, 2.5, 2.5, 0);
+    }
+    if (si % 4 === 0) {
+      var f = midi(tr.vibes[ci][si / 4]);
+      decayNote(dest, f, t, 3.2, 0.10, 'sine', gen, 0, -4);
+      decayNote(dest, f, t, 3.2, 0.10, 'sine', gen, 0, 4);
+    }
+  }
+  /* Guitar: bass + alternating chord figures, double-stop on si 4. */
+  function renderGuitar(tr, ci, si, t, dest, gen, stepDur) {
+    var chord = tr.chords[ci];
+    if (si === 0) {
+      decayNote(dest, midi(tr.bass[ci]), t, 1.0, 0.14, 'triangle', gen, 700, 0);
+    }
+    var tone = -1;
+    if (si === 2 || si === 6) { tone = chord[0]; }
+    else if (si === 3 || si === 7) { tone = chord[1]; }
+    else if (si === 5) { tone = chord[2]; }
+    if (tone >= 0) {
+      decayNote(dest, midi(tone), t, 0.8, 0.14, 'triangle', gen, 1900, 0);
+    }
+    if (si === 4) {
+      decayNote(dest, midi(chord[1]), t, 0.8, 0.10, 'triangle', gen, 1900, 0);
+      decayNote(dest, midi(chord[2]), t, 0.8, 0.10, 'triangle', gen, 1900, 0);
+    }
+  }
+  /* Celesta: high sparkles on odd steps + low pad. */
+  function renderCelesta(tr, ci, si, t, dest, gen, stepDur) {
+    var chord = tr.chords[ci];
+    if (si === 0) {
+      padNote(dest, midi(chord[0] - 12), t, tr.stepsPerChord * stepDur + 1, 0.06, 'sine', gen, 1.5, 1.5, 0);
+    }
+    if (si % 2 === 1) {
+      var f = midi(tr.sparkle[ci][(si - 1) / 2]);
+      decayNote(dest, f, t, 1.8, 0.09, 'sine', gen, 0, 0);
+      decayNote(dest, f * 2, t, 1.2, 0.035, 'sine', gen, 0, 0);
+    }
+  }
+  /* Organ: flute-organ chord stacks (fundamental + octave + fifth) + pedal. */
+  function renderOrgan(tr, ci, si, t, dest, gen, stepDur) {
+    var chord = tr.chords[ci];
+    var chordDur = tr.stepsPerChord * stepDur;
+    if (si === 0) {
+      for (var i = 0; i < chord.length; i++) {
+        padNote(dest, midi(chord[i]), t, chordDur + 1.5, 0.05, 'sine', gen, 2.0, 2.0, 0);
+        padNote(dest, midi(chord[i] + 12), t, chordDur + 1.5, 0.022, 'sine', gen, 2.0, 2.0, 0);
+        padNote(dest, midi(chord[i] + 7), t, chordDur + 1.5, 0.015, 'sine', gen, 2.0, 2.0, 0);
+      }
+      padNote(dest, midi(chord[0] - 12), t, chordDur + 1.5, 0.07, 'sine', gen, 2.0, 2.0, 0);
+    }
+  }
+  var RENDER = { pad: renderPad, piano: renderPiano, rhodes: renderRhodes, bells: renderBells, pluck: renderPluck, strings: renderStrings, flute: renderFlute, drops: renderDrops, harp: renderHarp, choir: renderChoir, marimba: renderMarimba, vibes: renderVibes, guitar: renderGuitar, celesta: renderCelesta, organ: renderOrgan };
 
   /* ---------- scheduler: one timer, lookahead, continuous step grid ---------- */
   function tick() {
@@ -34112,7 +34291,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     getAudioContext: getAudioContext,
     TRACKS: META,
     _debug: debug,
-    version: '1.0'
+    version: '1.1'
   };
 })();
 
@@ -34501,7 +34680,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   }
   var PREFS_KEY = 'INVESIM_PHONE_PREFS';
   var prefs = { music: false, order: null, stocksTab: 'stocks', playerName: '', musicTrack: 0, musicShuffle: false, sfxOn: true, wallpaper: 0 };
-  try { var raw = localStorage.getItem(PREFS_KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p.music === 'boolean') prefs.music = p.music; if (p && Array.isArray(p.order)) prefs.order = p.order; if (p && (p.stocksTab === 'stocks' || p.stocksTab === 'etfs' || p.stocksTab === 'options')) prefs.stocksTab = p.stocksTab; if (p && typeof p.playerName === 'string') prefs.playerName = normalizeName(p.playerName); if (p && typeof p.musicTrack === 'number' && isFinite(p.musicTrack)) prefs.musicTrack = Math.max(0, Math.min(4, Math.floor(p.musicTrack))); if (p && typeof p.musicShuffle === 'boolean') prefs.musicShuffle = p.musicShuffle; if (p && typeof p.sfxOn === 'boolean') prefs.sfxOn = p.sfxOn; if (p && typeof p.wallpaper === 'number' && isFinite(p.wallpaper)) prefs.wallpaper = Math.max(0, Math.min(4, Math.floor(p.wallpaper))); } } catch (e) {}
+  try { var raw = localStorage.getItem(PREFS_KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p.music === 'boolean') prefs.music = p.music; if (p && Array.isArray(p.order)) prefs.order = p.order; if (p && (p.stocksTab === 'stocks' || p.stocksTab === 'etfs' || p.stocksTab === 'options')) prefs.stocksTab = p.stocksTab; if (p && typeof p.playerName === 'string') prefs.playerName = normalizeName(p.playerName); if (p && typeof p.musicTrack === 'number' && isFinite(p.musicTrack)) prefs.musicTrack = Math.max(0, Math.min(14, Math.floor(p.musicTrack))); if (p && typeof p.musicShuffle === 'boolean') prefs.musicShuffle = p.musicShuffle; if (p && typeof p.sfxOn === 'boolean') prefs.sfxOn = p.sfxOn; if (p && typeof p.wallpaper === 'number' && isFinite(p.wallpaper)) prefs.wallpaper = Math.max(0, Math.min(14, Math.floor(p.wallpaper))); } } catch (e) {}
   function savePrefs() { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {} }
   function validOrder(o) {
     if (!Array.isArray(o) || o.length !== APPS.length) return false;
@@ -35506,7 +35685,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     for (var j = 0; j < wps.length; j++) { wps[j].style.backgroundImage = 'url("' + uri + '")'; wps[j].classList.add('ph-wallpaper-art'); }
   }
   function setWallpaper(idx) {
-    prefs.wallpaper = Math.max(0, Math.min(4, Math.floor(idx) || 0));
+    prefs.wallpaper = Math.max(0, Math.min(14, Math.floor(idx) || 0));
     savePrefs();
     applyWallpaper(prefs.wallpaper);
     renderWallpaperPicker();
@@ -35688,7 +35867,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
    cache (never localStorage). Fetch failure = current look, no error.
 
    Groups (files written by ship-art.js from art-staging/):
-     wallpapers : wallpapers.json  (4 JPEGs, base64)
+     wallpapers : wallpapers.json  (14 JPEGs, base64)
      photos     : photos-p1.json (10 property photos) + photos-p2.json (8 biz)
      portraits  : portraits.json   (9 rival + 5 manager portraits, base64 JPEG)
      svg        : svg.json         (16 hero SVGs + 6 felt SVGs, raw markup)
@@ -35697,7 +35876,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
      ensureWallpapers/ensurePhotos/ensurePortraits/ensureSvg() -> Promise
      ensureForApp(appId)   loads the groups an app needs
      wallpapersReady/photosReady/portraitsReady/svgReady() -> bool
-     wallpaperList()       [{name}] — 5 entries, index 0 = Original (no fetch)
+     wallpaperList()       [{name}] — 15 entries, index 0 = Original (no fetch)
      getWallpaper(idx)     data URI or null (idx 0 -> null: CSS orbs)
      getPropertyPhoto(artCat)   data URI or null (artCat from datasets' ac map)
      getBizPhoto(catIndex)      data URI or null (0-7, SMALL_BIZ_CATEGORIES id)
@@ -35736,7 +35915,17 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     { name: 'Ocean', key: 'ocean' },
     { name: 'Dusk', key: 'dusk' },
     { name: 'Aurora', key: 'aurora' },
-    { name: 'Geometric', key: 'geometric' }
+    { name: 'Geometric', key: 'geometric' },
+    { name: 'Meadow', key: 'meadow' },
+    { name: 'Forest', key: 'forest' },
+    { name: 'Desert', key: 'desert' },
+    { name: 'Mountains', key: 'mountains' },
+    { name: 'Lake', key: 'lake' },
+    { name: 'Clouds', key: 'clouds' },
+    { name: 'Blossom', key: 'blossom' },
+    { name: 'Canyon', key: 'canyon' },
+    { name: 'Snowfall', key: 'snow' },
+    { name: 'Reef', key: 'reef' }
   ];
   /* SMALL_BIZ_CATEGORIES order (id 0-7); keys are the manifest photo keys
      (category names without the emoji prefix). */
