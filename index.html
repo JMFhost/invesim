@@ -6407,6 +6407,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
 
       // Owner Re-Lists an Owned Small Business For Sale at a Discount (-30% to -5%) or Premium (+5% to +50%)
       window.listSmallBusinessForSale = function(bizId, markupPctOpt) {
+        if (!checkNotWorkingAtCasinoForInvesting()) return false;
         if (!G || !G.human) return false;
         ensureSmallBusinessesState(G);
         const biz = G.smallBusinesses[bizId - 1];
@@ -9347,6 +9348,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.firePortfolioManager = function(pmIdOpt) {
+        if (!checkNotWorkingAtCasinoForInvesting()) return false;
         if (!G || !G.human || !G.human.managedAccounts) return false;
         const targetId = pmIdOpt || G.human.hiredManagerId || Object.keys(G.human.managedAccounts)[0];
         if (!targetId || !G.human.managedAccounts[targetId]) return false;
@@ -10493,6 +10495,82 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       const CASINO_HOURS_PER_DAY = 8;      // 8-hour daily shift ($80/day base before tax and after living expenses)
       const CASINO_ANNUAL_RAISE_PER_HOUR = 1; // +$1.00/hour raise once a year
       const CASINO_MAX_DAILY_WAGE = 1000;  // Capped at $1,000/day ($125/hr)
+      // Night-shift window (Nov 18, 2026): the Casino job runs 7:00 PM-3:00 AM game time.
+      const CASINO_SHIFT_START_MIN = 1140; // 19:00
+      const CASINO_SHIFT_END_MIN = 180;    // 03:00 (next morning; the window wraps midnight)
+      const FULL_TIME_INVESTOR_THRESHOLD = 300000; // Net worth: retire from the Casino job for good.
+
+      function isCasinoShiftWindow(minuteOfDay) {
+        const m = ((Number(minuteOfDay) || 0) % 1440 + 1440) % 1440;
+        return m >= CASINO_SHIFT_START_MIN || m < CASINO_SHIFT_END_MIN;
+      }
+      window.isCasinoShiftWindow = isCasinoShiftWindow;
+
+      function ensureFullTimeInvestorState(human) {
+        if (!human || typeof human !== 'object') return false;
+        if (typeof human.fullTimeInvestor !== 'boolean') human.fullTimeInvestor = false;
+        return human.fullTimeInvestor;
+      }
+      window.ensureFullTimeInvestorState = ensureFullTimeInvestorState;
+
+      // Full-Time Investor retirement: fires ONCE, the moment net worth
+      // crosses $300K on any recalculation (trades, daily steps, save loads).
+      // Wages are paid incrementally by the hourly hook, so no wages are ever
+      // owed at this moment — clocking out here settles nothing and steals
+      // nothing. The lock is permanent: dropping back below $300K never
+      // restores the job.
+      function checkFullTimeInvestorRetirement(state) {
+        const st = state || (typeof G !== 'undefined' ? G : null);
+        if (!st || !st.human) return false;
+        const human = st.human;
+        ensureFullTimeInvestorState(human);
+        if (human.fullTimeInvestor) return false;
+        const nw = Number(human.netWorth) || 0;
+        if (!(nw >= FULL_TIME_INVESTOR_THRESHOLD)) return false;
+        human.fullTimeInvestor = true;
+        human.isWorkingAtCasino = false;
+        showToast('🌴 Full-Time Investor!', `Your net worth crossed ${fmtMoney(FULL_TIME_INVESTOR_THRESHOLD)} (now ${fmtMoney(nw)}) — you've retired from the Casino job for good. Investing is your full-time career now!`, true);
+        if (Array.isArray(st.newsFeed)) st.newsFeed.unshift({ day: st.day, cat: 'MILESTONE', tag: '🌴 FULL-TIME INVESTOR', text: `You crossed ${fmtMoney(FULL_TIME_INVESTOR_THRESHOLD)} net worth and retired from the Casino job forever! Investing is now your full-time career.` });
+        if (Array.isArray(human.logs)) human.logs.unshift(`Day ${st.day}: 🌴 Retired as a Full-Time Investor (net worth crossed ${fmtMoney(FULL_TIME_INVESTOR_THRESHOLD)}) — the Casino job is closed for good.`);
+        return true;
+      }
+      window.checkFullTimeInvestorRetirement = checkFullTimeInvestorRetirement;
+
+      // Pay one completed hour of Casino wages. Shared by the hourly hook,
+      // the midnight wrap, and the 3 AM auto-end; the payroll ETF plan
+      // follows this wage path, so contributions only ever come from
+      // night-shift paychecks.
+      function payCasinoHourlyWage() {
+        if (!G || !G.human || !G.human.isWorkingAtCasino || G.human.inJail) return 0;
+        const hrsWorked = G.human.casinoHoursWorkedToday || 0;
+        if (hrsWorked >= CASINO_HOURS_PER_DAY) return 0;
+        const hrPay = getCasinoHourlyWage(G.human.workExpDays || 0);
+        G.human.cash = Number((G.human.cash + hrPay).toFixed(2));
+        G.human.totalCasinoWagesEarned = Number(((G.human.totalCasinoWagesEarned || 0) + hrPay).toFixed(2));
+        G.human.taxLedger.jobIncomeYtd = Number(((G.human.taxLedger.jobIncomeYtd || 0) + hrPay).toFixed(2));
+        G.human.casinoHoursWorkedToday = hrsWorked + 1;
+        recomputeTaxLiability(G.human.taxLedger);
+        applyPayrollEtfContributions(hrPay);
+        return hrPay;
+      }
+
+      // Night-shift auto-end: the shift ends WITHOUT the quit penalty —
+      // experience is kept. Called at 3:00 AM and on +1 Day mid-shift.
+      function endCasinoShiftAuto(reason) {
+        if (!G || !G.human || !G.human.isWorkingAtCasino) return false;
+        G.human.isWorkingAtCasino = false;
+        G.human.casinoHoursWorkedToday = 0;
+        const expDays = G.human.workExpDays || 0;
+        if (reason === 'daystep') {
+          showToast('🌙 Night Shift Ended', `The day advanced past your Casino night shift. You kept your ${expDays}d of experience — clock in again tonight to keep building seniority. Investing is unlocked!`, true);
+          G.human.logs.unshift(`Day ${G.day}: 🌙 Casino night shift ended when the day advanced (kept ${expDays}d experience).`);
+        } else {
+          showToast('🌙 Night Shift Ended (3:00 AM)', `Your Casino shift ended automatically at 3:00 AM. You kept your ${expDays}d of experience — clock in again tomorrow night to keep building seniority. Investing is unlocked!`, true);
+          G.human.logs.unshift(`Day ${G.day}: 🌙 Casino night shift ended automatically at 3:00 AM (kept ${expDays}d experience).`);
+        }
+        return true;
+      }
+      window.endCasinoShiftAuto = endCasinoShiftAuto;
       const ANNUAL_TAX_RATE = 0.30;        // 30% annual tax on Job Salary + Net Investment Profits (Profits minus Losses)
       const TAX_GRACE_PERIOD_DAYS = 84;    // 4 months (4 * 21 = 84 trading days) after tax due date before asset seizure + 20% penalty
       const TAX_PENALTY_MULT = 1.20;       // +20% penalty on unpaid overdue taxes after 4 months
@@ -10711,8 +10789,9 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         if (!root) return false;
         const plan = ensurePayrollEtfState(G.human);
         const isWorking = Boolean(G.human.isWorkingAtCasino);
-        const expDays = isWorking ? (G.human.workExpDays || 0) : 0;
+        const expDays = G.human.workExpDays || 0;
         const dailyWage = getCasinoDailyWage(expDays);
+        const retired = Boolean(G.human.fullTimeInvestor);
         const totalPct = getPayrollEtfTotalPct(G.human);
         const etfs = G.etfs || [];
         const busy = stableFormBusy(root);
@@ -10738,8 +10817,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           const pctEl = document.getElementById('payrollEtfPct_' + idNs + i);
           if (pctEl && pctEl.value !== String(slot.pct)) pctEl.value = String(slot.pct);
           const estEl = document.getElementById('payrollEtfEst_' + idNs + i);
-          const estTxt = (etf && slot.pct > 0) ? fmtMoney(dailyWage * slot.pct / 100) + '/day @ ' + fmtMoney(etf.price) : '—';
-          const estCls = 'text-[11px] font-mono font-bold ' + ((etf && slot.pct > 0) ? 'text-[#00C805]' : 'text-[#8A919E]') + ' whitespace-nowrap';
+          const estTxt = (etf && slot.pct > 0 && !retired) ? fmtMoney(dailyWage * slot.pct / 100) + '/day @ ' + fmtMoney(etf.price) : '—';
+          const estCls = 'text-[11px] font-mono font-bold ' + ((etf && slot.pct > 0 && !retired) ? 'text-[#00C805]' : 'text-[#8A919E]') + ' whitespace-nowrap';
           if (estEl) {
             if (estEl.textContent !== estTxt) estEl.textContent = estTxt;
             if (estEl.className !== estCls) estEl.className = estCls;
@@ -10755,13 +10834,15 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           }
         }
         const totalEl = document.getElementById('payrollEtfTotal' + suf);
-        const totalTxt = 'TOTAL ' + totalPct + '% / 20% • ≈ ' + fmtMoney(dailyWage * totalPct / 100) + '/day';
+        const totalTxt = retired ? 'TOTAL ' + totalPct + '% / 20% • Retired — no paychecks' : 'TOTAL ' + totalPct + '% / 20% • ≈ ' + fmtMoney(dailyWage * totalPct / 100) + '/day';
         if (totalEl && totalEl.textContent !== totalTxt) totalEl.textContent = totalTxt;
         const statusEl = document.getElementById('payrollEtfStatus' + suf);
-        const statusTxt = isWorking
+        const statusTxt = retired
+          ? '🌴 Retired — Full-Time Investor: no paychecks, no new contributions (plan and shares stay saved)'
+          : isWorking
           ? '✅ Active — deducts from each paycheck (next payday included)'
           : '⏸️ Paused — clock in to resume contributions (plan stays saved)';
-        const statusCls = isWorking ? 'text-[#00C805] font-bold' : 'text-amber-300 font-bold';
+        const statusCls = retired ? 'text-emerald-300 font-bold' : isWorking ? 'text-[#00C805] font-bold' : 'text-amber-300 font-bold';
         if (statusEl) {
           if (statusEl.textContent !== statusTxt) statusEl.textContent = statusTxt;
           if (statusEl.className !== statusCls) statusEl.className = statusCls;
@@ -10779,8 +10860,9 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         if (typeof G === 'undefined' || !G || !G.human) return '';
         const plan = ensurePayrollEtfState(G.human);
         const isWorking = Boolean(G.human.isWorkingAtCasino);
-        const expDays = isWorking ? (G.human.workExpDays || 0) : 0;
+        const expDays = G.human.workExpDays || 0;
         const dailyWage = getCasinoDailyWage(expDays);
+        const retired = Boolean(G.human.fullTimeInvestor);
         const totalPct = getPayrollEtfTotalPct(G.human);
         const etfs = G.etfs || [];
         const optSig = payrollEtfOptSig(plan, etfs);
@@ -10791,7 +10873,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           const delistedOpt = (slot.sym && !listed)
             ? `<option value="${slot.sym}" selected disabled>⚠️ ${slot.sym} — no longer listed</option>` : '';
           const pctOpts = PAYROLL_ETF_PCT_STEPS.map(p => `<option value="${p}"${slot.pct === p ? ' selected' : ''}>${p}%</option>`).join('');
-          const est = (etf && slot.pct > 0) ? fmtMoney(dailyWage * slot.pct / 100) + '/day @ ' + fmtMoney(etf.price) : '—';
+          const est = (etf && slot.pct > 0 && !retired) ? fmtMoney(dailyWage * slot.pct / 100) + '/day @ ' + fmtMoney(etf.price) : '—';
           const warnTxt = (slot.sym && !listed)
             ? `⚠️ Delisted — pick another ETF (share stays as cash wages meanwhile)`
             : (slot.pct > 0 && !slot.sym ? `Pick an ETF to activate this ${slot.pct}%` : '');
@@ -10805,20 +10887,22 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
               <select id="payrollEtfPct_${idNs}${i}" aria-label="Payroll percent slot ${i + 1}" onchange="setPayrollEtfSlotPct(${i}, Number(this.value))" class="bg-[#0C0E10] border border-[#2A2E33] rounded-lg px-2 py-1.5 text-white text-xs font-bold focus:outline-none focus:border-[#00C805]">
                 ${pctOpts}
               </select>
-              <span id="payrollEtfEst_${idNs}${i}" class="text-[11px] font-mono font-bold ${etf && slot.pct > 0 ? 'text-[#00C805]' : 'text-[#8A919E]'} whitespace-nowrap">${est}</span>
+              <span id="payrollEtfEst_${idNs}${i}" class="text-[11px] font-mono font-bold ${etf && slot.pct > 0 && !retired ? 'text-[#00C805]' : 'text-[#8A919E]'} whitespace-nowrap">${est}</span>
               <span id="payrollEtfWarn_${idNs}${i}" class="text-[10px] ${warnCls}">${warnTxt}</span>
             </div>`;
         }).join('');
-        const statusLine = isWorking
+        const statusLine = retired
+          ? `<span id="payrollEtfStatus${suf}" class="text-emerald-300 font-bold">🌴 Retired — Full-Time Investor: no paychecks, no new contributions (plan and shares stay saved)</span>`
+          : isWorking
           ? `<span id="payrollEtfStatus${suf}" class="text-[#00C805] font-bold">✅ Active — deducts from each paycheck (next payday included)</span>`
           : `<span id="payrollEtfStatus${suf}" class="text-amber-300 font-bold">⏸️ Paused — clock in to resume contributions (plan stays saved)</span>`;
         return `
           <div id="payrollEtfBlock${suf}" data-payroll-opt-sig="${optSig}" class="mt-1 p-3 rounded-xl bg-[#141820] border border-emerald-500/30 flex flex-col gap-2">
             <div class="flex flex-wrap items-center justify-between gap-2">
               <span class="font-extrabold text-emerald-300 text-xs sm:text-sm">📈 Payroll ETF Plan — Auto-Invest Your Paycheck</span>
-              <span id="payrollEtfTotal${suf}" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#1C2024] text-white">TOTAL ${totalPct}% / 20% • ≈ ${fmtMoney(dailyWage * totalPct / 100)}/day</span>
+              <span id="payrollEtfTotal${suf}" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#1C2024] text-white">${retired ? `TOTAL ${totalPct}% / 20% • Retired — no paychecks` : `TOTAL ${totalPct}% / 20% • ≈ ${fmtMoney(dailyWage * totalPct / 100)}/day`}</span>
             </div>
-            <div class="text-[11px] text-[#8A919E]">Direct <strong class="text-white">5%–20%</strong> of every paycheck into up to <strong class="text-white">4 ETFs</strong> (5% steps). Deducted before your pay hits cash — it works even while investing is locked. <strong class="text-white">ETF only.</strong> Changes apply from the next paycheck. Quitting pauses contributions; your plan and ETF shares stay saved.</div>
+            <div class="text-[11px] text-[#8A919E]">Direct <strong class="text-white">5%–20%</strong> of every paycheck into up to <strong class="text-white">4 ETFs</strong> (5% steps). Deducted before your pay hits cash — it works even while investing is locked. <strong class="text-white">ETF only.</strong> Changes apply from the next paycheck. Quitting pauses contributions; your plan and ETF shares stay saved. Retiring as a Full-Time Investor stops contributions for good — the plan stays for the record.</div>
             ${slotRows}
             <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5">
               <div class="text-[11px] text-[#8A919E]">${statusLine} <span class="text-[#8A919E]">• Lifetime payroll contributions: <strong id="payrollEtfLifetime${suf}" class="text-white font-mono">${fmtMoney(plan.totalContributed || 0)}</strong></span></div>
@@ -12690,6 +12774,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       window.unlockStockAnalysisReport = function(ticker) {
+        if (!checkNotWorkingAtCasinoForInvesting()) return;
         if (!G || !G.human) return;
         const st = G.stocks.find(s => s.ticker === (ticker || G.activeTicker));
         if (!st) return;
@@ -15178,8 +15263,9 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         const marginBorrowApr = G.macro.fedRate + 2.50;
 
         // ===================================================================
-        // 4A. HUMAN CASINO EMPLOYMENT ($5/DAY NET + $2/DAY RAISE EVERY 3 MOS,
-        //     OR 1:1 DAILY EXPERIENCE DECAY WHEN NOT WORKING!)
+        // 4A. HUMAN CASINO EMPLOYMENT — NIGHT SHIFT (7 PM–3 AM, 8 hrs max).
+        //     Experience is preserved across shifts; quitting mid-shift or
+        //     jail resets it. +1 Day mid-shift pays the rest of the night.
         // ===================================================================
         if (G.human.inJail) {
           G.human.isWorkingAtCasino = false;
@@ -15187,18 +15273,25 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           G.human.casinoHoursWorkedToday = 0;
         } else if (G.human.isWorkingAtCasino) {
           G.human.workExpDays = (G.human.workExpDays || 0) + 1;
-          const hrWage = getCasinoHourlyWage(G.human.workExpDays);
-          const hrsAlreadyPaidToday = Math.min(CASINO_HOURS_PER_DAY, G.human.casinoHoursWorkedToday || 0);
-          const remHours = Math.max(0, CASINO_HOURS_PER_DAY - hrsAlreadyPaidToday);
-          const wageToday = Number((remHours * hrWage).toFixed(2));
-          G.human.casinoHoursWorkedToday = 0;
-          if (wageToday > 0) {
-            G.human.cash = Number((G.human.cash + wageToday).toFixed(2));
-            G.human.totalCasinoWagesEarned = Number(((G.human.totalCasinoWagesEarned || 0) + wageToday).toFixed(2));
-            G.human.taxLedger.jobIncomeYtd = Number(((G.human.taxLedger.jobIncomeYtd || 0) + wageToday).toFixed(2));
-            humanPassiveToday += wageToday;
-            applyPayrollEtfContributions(wageToday);
+          if (!fromClockWrap) {
+            // +1 Day clicked mid-shift: the rest of the night is skipped —
+            // pay the remaining hours of the 8-hour shift now, then the
+            // shift ends (experience kept).
+            const hrWage = getCasinoHourlyWage(G.human.workExpDays);
+            const hrsAlreadyPaidToday = Math.min(CASINO_HOURS_PER_DAY, G.human.casinoHoursWorkedToday || 0);
+            const remHours = Math.max(0, CASINO_HOURS_PER_DAY - hrsAlreadyPaidToday);
+            const wageToday = Number((remHours * hrWage).toFixed(2));
+            if (wageToday > 0) {
+              G.human.cash = Number((G.human.cash + wageToday).toFixed(2));
+              G.human.totalCasinoWagesEarned = Number(((G.human.totalCasinoWagesEarned || 0) + wageToday).toFixed(2));
+              G.human.taxLedger.jobIncomeYtd = Number(((G.human.taxLedger.jobIncomeYtd || 0) + wageToday).toFixed(2));
+              humanPassiveToday += wageToday;
+              applyPayrollEtfContributions(wageToday);
+            }
+            endCasinoShiftAuto('daystep');
           }
+          // Clock-wrap (midnight) while working: the night shift CONTINUES
+          // past midnight — no top-up, no shift end; the 3 AM guard ends it.
           if (G.human.workExpDays % 252 === 0) {
             const roleNow = getCasinoJobTitle(G.human.workExpDays);
             const fullDayWage = getCasinoDailyWage(G.human.workExpDays);
@@ -15210,8 +15303,9 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             G.human.logs.unshift(`Day ${G.day}: 🎉 1-Year Casino Raise! Promoted to ${roleNow} ($${fullDayWage}/day pre-tax).`);
           }
         } else {
-          // The moment you are not working at the casino, all work experience is lost (0 days)!
-          G.human.workExpDays = 0;
+          // Not working: experience is PRESERVED across shifts now — it only
+          // resets when you quit mid-shift or go to jail. The hours counter
+          // resets every day.
           G.human.casinoHoursWorkedToday = 0;
         }
 
@@ -16103,25 +16197,29 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         // If 1,440 minutes (24 hours = 1 full day) have elapsed, wrap to 00:00 of the next day!
         if (G.minuteOfDay >= 1440) {
           G.minuteOfDay = 0;
+          // The 11 PM–midnight hour completes at 00:00: pay it before the
+          // day rolls over (the wrap returns before the hourly hook below).
+          if (G.human && G.human.isWorkingAtCasino && !G.human.inJail) payCasinoHourlyWage();
           stepSimulationDay(true);
           return;
+        }
+
+        // Night-shift window: a shift that reaches 3:00 AM ends automatically
+        // (experience kept). A shift found outside the window — e.g. an old
+        // save loaded in daytime — ends the same way on the first tick.
+        // Crossing 3:00 AM naturally means the 2 AM–3 AM hour just completed:
+        // pay it before ending the shift.
+        if (G.human && G.human.isWorkingAtCasino && !G.human.inJail && !isCasinoShiftWindow(G.minuteOfDay)) {
+          if (isCasinoShiftWindow(G.minuteOfDay - 1)) payCasinoHourlyWage();
+          endCasinoShiftAuto('3am');
         }
 
         const minRng = new SeededRNG(G.seed + G.day * 10007 + G.minuteOfDay * 31);
         const stockMktOpen = isStockMarketOpen(G.minuteOfDay);
 
-        // 1. Every 60 in-game minutes (1 hour), if working at the Casino (and not in Jail), pay 1 hour of Casino wages ($10/hr base pre-tax) up to 8 hours/day!
-        if (G.minuteOfDay % 60 === 0 && G.human && G.human.isWorkingAtCasino && !G.human.inJail) {
-          const hrsWorked = G.human.casinoHoursWorkedToday || 0;
-          if (hrsWorked < CASINO_HOURS_PER_DAY) {
-            const hrPay = getCasinoHourlyWage(G.human.workExpDays || 0);
-            G.human.cash = Number((G.human.cash + hrPay).toFixed(2));
-            G.human.totalCasinoWagesEarned = Number(((G.human.totalCasinoWagesEarned || 0) + hrPay).toFixed(2));
-            G.human.taxLedger.jobIncomeYtd = Number(((G.human.taxLedger.jobIncomeYtd || 0) + hrPay).toFixed(2));
-            G.human.casinoHoursWorkedToday = hrsWorked + 1;
-            recomputeTaxLiability(G.human.taxLedger);
-            applyPayrollEtfContributions(hrPay);
-          }
+        // 1. Every 60 in-game minutes (1 hour), if working the Casino night shift (and not in Jail), pay 1 hour of Casino wages ($10/hr base pre-tax) up to 8 hours/shift! Wages accrue ONLY inside the 7 PM–3 AM window.
+        if (G.minuteOfDay % 60 === 0 && G.human && G.human.isWorkingAtCasino && !G.human.inJail && isCasinoShiftWindow(G.minuteOfDay)) {
+          payCasinoHourlyWage();
         }
 
         // 2. 24-HOUR MARKETS UPDATE EVERY SINGLE MINUTE (Forex, Commodities, eREITs, Real Estate)
@@ -16418,6 +16516,9 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
 
         calcWorth(state.human, true);
         for (const ai of state.aiPlayers) calcWorth(ai, false);
+        // Full-Time Investor retirement: fires the moment net worth crosses
+        // $300K on ANY recalculation (trades, daily steps, save loads).
+        checkFullTimeInvestorRetirement(state);
       }
 
       function getHumanBuyingPower() {
@@ -16472,27 +16573,40 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         if (!G || !G.human) return;
         const nextState = forceStateOpt !== null ? Boolean(forceStateOpt) : !Boolean(G.human.isWorkingAtCasino);
         const oldExp = G.human.workExpDays || 0;
-        G.human.isWorkingAtCasino = nextState;
-        if (nextState && G.human.inJail) {
-          G.human.isWorkingAtCasino = false;
-          showToast('🚓 In Jail for Unpaid Taxes', 'You cannot work at the Casino while in Jail (earning $50/day tax credit toward owed taxes).', false);
-          return;
-        }
         if (nextState) {
-          // Starting work always starts over at 0 days experience ($10.00/hour = $80.00/day pre-tax & after living expenses)!
-          G.human.workExpDays = 0;
+          if (G.human.isWorkingAtCasino) { renderAll(); return; }
+          // Retired Full-Time Investors can never work again (permanent).
+          ensureFullTimeInvestorState(G.human);
+          if (G.human.fullTimeInvestor) {
+            showToast('🌴 Retired — Full-Time Investor', `Your net worth crossed ${fmtMoney(FULL_TIME_INVESTOR_THRESHOLD)} — you retired from the Casino job for good. Investing is your career now!`, false);
+            return;
+          }
+          if (G.human.inJail) {
+            showToast('🚓 In Jail for Unpaid Taxes', 'You cannot work at the Casino while in Jail (earning $50/day tax credit toward owed taxes).', false);
+            return;
+          }
+          // Night shift only: 7:00 PM – 3:00 AM game time.
+          if (!isCasinoShiftWindow(G.minuteOfDay)) {
+            showToast('🌙 Night Shift Only (7:00 PM – 3:00 AM)', 'The Casino job is a night shift — clock in between 7:00 PM and 3:00 AM game time. Your days are free to invest!', false);
+            return;
+          }
+          G.human.isWorkingAtCasino = true;
+          // Experience is PRESERVED across shifts now (no reset on clock-in).
+          // It only resets when you quit mid-shift or go to jail.
           G.human.casinoHoursWorkedToday = 0;
-          const hrNow = getCasinoHourlyWage(0);
-          const wageNow = getCasinoDailyWage(0);
-          const roleNow = getCasinoJobTitle(0);
+          const hrNow = getCasinoHourlyWage(oldExp);
+          const wageNow = getCasinoDailyWage(oldExp);
+          const roleNow = getCasinoJobTitle(oldExp);
           showToast(
-            `💼 Clocked In: ${roleNow}`,
-            `You are now working at the Casino earning $${hrNow}/hour ($${wageNow.toFixed(2)}/day before 30% annual tax & after living expenses). Investing is locked while working.`,
+            `💼 Clocked In: ${roleNow} (Night Shift)`,
+            `You are now working the Casino night shift (7:00 PM – 3:00 AM) earning $${hrNow}/hour ($${wageNow.toFixed(2)}/day before 30% annual tax & after living expenses). Investing is locked while working — your shift ends automatically at 3:00 AM.`,
             true
           );
-          G.human.logs.unshift(`Day ${G.day}: 💼 Clocked in at the Casino at $${hrNow}/hr ($${wageNow}/day pre-tax, after living expenses).`);
+          G.human.logs.unshift(`Day ${G.day}: 💼 Clocked in for the Casino night shift at $${hrNow}/hr ($${wageNow}/day pre-tax, after living expenses).`);
         } else {
-          // Stopping work immediately resets all working experience to 0!
+          if (!G.human.isWorkingAtCasino) { renderAll(); return; }
+          G.human.isWorkingAtCasino = false;
+          // Quitting mid-shift immediately resets all working experience to 0!
           G.human.workExpDays = 0;
           G.human.casinoHoursWorkedToday = 0;
           showToast(
@@ -16858,6 +16972,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
 
       // Pay Extra Principal (Pay Off Faster) or Pay Off 100% Early!
       window.payDownPropertyMortgage = function(idx, amountOrMode) {
+        if (!checkNotWorkingAtCasinoForInvesting()) return;
         const rePos = G.human.realEstate[idx];
         if (!rePos || rePos.debt <= 0) {
           showToast('Already 100% Paid Off!', 'This property has $0.00 mortgage debt—you already own 100% free and clear!', true);
@@ -17002,6 +17117,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.refinancePropertyMortgage = function(idx) {
+        if (!checkNotWorkingAtCasinoForInvesting()) return;
         const rePos = G.human.realEstate[idx];
         if (!rePos || rePos.debt <= 0) {
           showToast('No Mortgage to Refinance', 'This property is already 100% paid off!', true);
@@ -17024,6 +17140,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.fixPropertyMaintenance = function(idx) {
+        if (!checkNotWorkingAtCasinoForInvesting()) return;
         const rePos = G.human.realEstate[idx];
         if (!rePos) return;
         const prop = G.properties[rePos.propId - 1];
@@ -17459,6 +17576,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.sellCommodity = function(sym, modeOrDollar = 'ALL') {
+        if (!checkNotWorkingAtCasinoForInvesting()) return;
         const pos = G.human.commodities[sym];
         const c = G.commodities.find(x => x.sym === sym);
         if (!pos || !c || pos.units <= 0) {
@@ -17513,6 +17631,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.closeCommodityPosition = function(sym) {
+        if (!checkNotWorkingAtCasinoForInvesting()) return;
         const pos = G.human.commodities[sym];
         const c = G.commodities.find(x => x.sym === sym);
         if (!pos || !c) return;
@@ -17633,6 +17752,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.closeForexPosition = function(pair, modeOrDollar = 'ALL', silent = false) {
+        if (!silent && !checkNotWorkingAtCasinoForInvesting()) return;
         if (!G || !G.human.forex) return;
         const pos = G.human.forex[pair];
         const fx = (G.forexPairs || []).find(x => x.pair === pair);
@@ -18015,7 +18135,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         const homeJobCard = document.getElementById('homeCasinoJobCard');
         if (homeJobCard) {
           const isWorking = Boolean(G.human.isWorkingAtCasino);
-          const expDays = isWorking ? (G.human.workExpDays || 0) : 0;
+          const expDays = G.human.workExpDays || 0;
           const curHr = getCasinoHourlyWage(expDays);
           const curWage = getCasinoDailyWage(expDays);
           const nextHr = Math.min(125, curHr + 1);
@@ -18024,21 +18144,24 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           const daysToNextRaise = 252 - daysIntoYear;
           const roleTitle = getCasinoJobTitle(expDays);
           const aiWorkingCount = (G.aiPlayers || []).filter(a => a.isWorkingAtCasino).length;
+          const retired = Boolean(G.human.fullTimeInvestor);
           homeJobCard.innerHTML = `
             <div class="flex flex-wrap items-center gap-2.5">
-              <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold ${isWorking ? 'bg-amber-400 text-black' : 'bg-[#1C2024] text-amber-300 border border-amber-500/30'}">
-                ${isWorking ? `💼 WORKING AT CASINO: $${curHr}/HR NET ($${curWage}/D)` : `💼 Casino Job Available ($10/hr Net • $80/d)`}
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold ${retired ? 'bg-emerald-400 text-black' : isWorking ? 'bg-amber-400 text-black' : 'bg-[#1C2024] text-amber-300 border border-amber-500/30'}">
+                ${retired ? '🌴 FULL-TIME INVESTOR • RETIRED' : isWorking ? `💼 WORKING AT CASINO: $${curHr}/HR NET ($${curWage}/D)` : `💼 Casino Night Job ($${curHr}/hr Net • $${curWage}/d)`}
               </span>
               <div class="text-[11px] text-[#8A919E]">
                 <strong class="text-white">${roleTitle}</strong> • Exp: <strong class="text-amber-300 font-mono">${expDays}d</strong> • <span class="text-sky-300 font-mono">🤖 ${aiWorkingCount} AI Working</span>
-                ${isWorking
-                  ? `• Next <strong class="text-[#00C805]">+$1/hr annual raise ($${nextHr}/hr • $${nextWage}/d, Max $1,000/d)</strong> in <strong class="text-white font-mono">${daysToNextRaise}d</strong> (Quitting resets exp to 0d!)`
-                  : `• Work at the Casino for $10/hour net ($80/day, subject to 30% annual tax). Quitting resets experience to 0d!`
+                ${retired
+                  ? `• Retired from the Casino night job (7:00 PM – 3:00 AM) at $300,000+ net worth — investing is your full-time career now!`
+                  : isWorking
+                  ? `• Next <strong class="text-[#00C805]">+$1/hr annual raise ($${nextHr}/hr • $${nextWage}/d, Max $1,000/d)</strong> in <strong class="text-white font-mono">${daysToNextRaise}d</strong> (Quitting mid-shift resets exp to 0d! Night shift 7:00 PM – 3:00 AM.)`
+                  : `• Night shift <strong class="text-white">7:00 PM – 3:00 AM</strong> game time ($${curHr}/hour net, subject to 30% annual tax). Days stay free to invest — quitting mid-shift resets experience to 0d!`
                 }
               </div>
             </div>
-            <button type="button" onclick="toggleWorkAtCasino()" class="px-3.5 py-1.5 rounded-xl font-extrabold text-xs transition ${isWorking ? 'bg-[#FF5000] hover:bg-[#ff6622] text-white' : 'bg-[#00C805] hover:bg-[#00E006] text-black'}">
-              ${isWorking ? '🛑 Quit Job (Resets Exp to 0d)' : `💼 Clock In: Work at Casino ($10/hr Net)`}
+            <button type="button" onclick="toggleWorkAtCasino()" class="px-3.5 py-1.5 rounded-xl font-extrabold text-xs transition ${retired ? 'bg-emerald-500 text-black' : isWorking ? 'bg-[#FF5000] hover:bg-[#ff6622] text-white' : 'bg-[#00C805] hover:bg-[#00E006] text-black'}">
+              ${retired ? '🌴 Retired — Full-Time Investor' : isWorking ? '🛑 Quit Job (Resets Exp to 0d)' : `💼 Clock In: Night Shift ($${curHr}/hr Net)`}
             </button>
           `;
         }
@@ -29345,7 +29468,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         const jobDeskEl = document.getElementById('casinoJobDeskCard');
         if (jobDeskEl && G && G.human) {
           const isWorking = Boolean(G.human.isWorkingAtCasino);
-          const expDays = isWorking ? (G.human.workExpDays || 0) : 0;
+          const expDays = G.human.workExpDays || 0;
           const curHr = getCasinoHourlyWage(expDays);
           const curWage = getCasinoDailyWage(expDays);
           const nextHr = Math.min(125, curHr + 1);
@@ -29355,6 +29478,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           const cyclePct = Math.min(100, Math.round((daysIntoYear / 252) * 100));
           const roleTitle = getCasinoJobTitle(expDays);
           const aiWorkingCount = (G.aiPlayers || []).filter(a => a.isWorkingAtCasino).length;
+          const retired = Boolean(G.human.fullTimeInvestor);
 
           if (stableFormBusy(jobDeskEl)) {
             // A payroll select is open/focused: never rebuild the desk card
@@ -29368,17 +29492,17 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
               <div>
                 <div class="flex flex-wrap items-center gap-2">
                   <span class="font-extrabold text-amber-300 text-xs sm:text-sm">💼 Casino Employment &amp; Comeback Career Desk</span>
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${isWorking ? 'bg-[#00C805] text-black' : 'bg-[#1C2024] text-[#8A919E]'}">
-                    ${isWorking ? `ACTIVE SHIFT • $${curHr}/HR NET ($${curWage}/D)` : 'OFF DUTY (INVESTING UNLOCKED)'}
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${retired ? 'bg-emerald-400 text-black' : isWorking ? 'bg-[#00C805] text-black' : 'bg-[#1C2024] text-[#8A919E]'}">
+                    ${retired ? '🌴 FULL-TIME INVESTOR • RETIRED' : isWorking ? `ACTIVE SHIFT • $${curHr}/HR NET ($${curWage}/D)` : 'OFF DUTY (INVESTING UNLOCKED)'}
                   </span>
                   <span class="text-[10px] font-mono text-sky-300">🤖 ${aiWorkingCount} AI Rivals Working Here</span>
                 </div>
                 <div class="text-[11px] text-[#8A919E] mt-0.5">
-                  Work at the Casino for <strong class="text-[#00C805]">$${curHr}/hour net ($${curWage.toFixed(2)}/day)</strong> after living expenses (subject to 30% annual tax). Every <strong class="text-white">1 Year (252 trading days)</strong> gives a <strong class="text-amber-300">+$1/hour raise</strong> (<strong class="text-white">capped at $1,000/day</strong>). While working, <strong class="text-[#FF5000]">all new investments are locked</strong>. <strong class="text-rose-400">The moment you stop working, you lose all working experience (0d) and start over at $10/hour net next time!</strong>
+                  🌙 <strong class="text-white">Night shift: 7:00 PM – 3:00 AM game time.</strong> Work at the Casino for <strong class="text-[#00C805]">$${curHr}/hour net ($${curWage.toFixed(2)}/day)</strong> after living expenses (subject to 30% annual tax) — clock in only during shift hours; shifts end automatically at 3:00 AM and your days stay free to invest. Every <strong class="text-white">1 Year (252 trading days)</strong> gives a <strong class="text-amber-300">+$1/hour raise</strong> (<strong class="text-white">capped at $1,000/day</strong>). While working, <strong class="text-[#FF5000]">all new investments are locked</strong>. Experience is <strong class="text-white">kept across shifts</strong> — <strong class="text-rose-400">quitting mid-shift resets it to 0d!</strong> Cross <strong class="text-emerald-300">$300,000 net worth</strong> and you retire as a Full-Time Investor for good.
                 </div>
               </div>
-              <button type="button" id="btnToggleCasinoJob" onclick="toggleWorkAtCasino()" class="px-4 py-2 rounded-xl font-extrabold text-xs transition shadow-md ${isWorking ? 'bg-[#FF5000] hover:bg-[#ff6622] text-white' : 'bg-amber-400 hover:bg-amber-300 text-black'}">
-                ${isWorking ? '🛑 Quit Casino Job (Loses All Exp → Resume Investing)' : `💼 Clock In: Work at Casino ($10/hr Net Start)`}
+              <button type="button" id="btnToggleCasinoJob" onclick="toggleWorkAtCasino()" class="px-4 py-2 rounded-xl font-extrabold text-xs transition shadow-md ${retired ? 'bg-emerald-500 text-black' : isWorking ? 'bg-[#FF5000] hover:bg-[#ff6622] text-white' : 'bg-amber-400 hover:bg-amber-300 text-black'}">
+                ${retired ? '🌴 Retired — Full-Time Investor' : isWorking ? '🛑 Quit Casino Job (Loses All Exp → Resume Investing)' : `💼 Clock In: Night Shift ($${curHr}/hr Net)`}
               </button>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono text-[11px]">
@@ -29390,7 +29514,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
               <div class="p-2 rounded-lg bg-[#141820] border border-[#242A34]">
                 <div class="text-[9px] text-[#8A919E]">Current Streak Experience</div>
                 <div class="font-bold text-amber-300">${expDays} Days (${Math.floor(expDays / 252)} Yr)</div>
-                <div class="text-[10px] text-[#8A919E]">${isWorking ? '+1d/day (Resets to 0d if you quit!)' : '0d (Always starts at $10/hr net)'}</div>
+                <div class="text-[10px] text-[#8A919E]">${retired ? 'Retired 🌴' : isWorking ? '+1d/night (Resets to 0d if you quit mid-shift!)' : 'Kept across shifts (quit mid-shift → 0d)'}</div>
               </div>
               <div class="p-2 rounded-lg bg-[#141820] border border-[#242A34]">
                 <div class="text-[9px] text-[#8A919E]">Next +$1/hr (+$8/d) Annual Raise</div>
@@ -29402,7 +29526,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
               <div class="p-2 rounded-lg bg-[#141820] border border-[#242A34]">
                 <div class="text-[9px] text-[#8A919E]">Total Casino Wages Earned</div>
                 <div class="font-bold text-[#00C805]">${fmtMoney(G.human.totalCasinoWagesEarned || 0)}</div>
-                <div class="text-[10px] ${isWorking ? 'text-[#FF5000]' : 'text-[#00C805]'}">${isWorking ? '🔒 Investing Locked' : '✅ Investing Active'}</div>
+                <div class="text-[10px] ${retired ? 'text-emerald-300' : isWorking ? 'text-[#FF5000]' : 'text-[#00C805]'}">${retired ? '🌴 Full-Time Investor' : isWorking ? '🔒 Investing Locked' : '✅ Investing Active'}</div>
               </div>
             </div>
             ${renderPayrollEtfBlock()}
@@ -31865,6 +31989,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           }
           ensurePayrollEtfState(base.human);
           ensureSixFeaturesState(base.human);
+          ensureFullTimeInvestorState(base.human);
         }
 
         if (snap.nextAiPlayerId) base.nextAiPlayerId = snap.nextAiPlayerId;
@@ -33382,6 +33507,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           renderAll();
         });
         document.getElementById('btnBorrowFunds').addEventListener('click', () => {
+          if (!checkNotWorkingAtCasinoForInvesting()) return;
           const amt = Math.max(10, Number(document.getElementById('finLoanAmountInput').value) || 100);
           const maxBorrow = Math.max(0, G.human.netWorth * 1.5 - G.human.marginDebt);
           if (amt > maxBorrow) {
@@ -33396,6 +33522,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           renderAll();
         });
         document.getElementById('btnRepayFunds').addEventListener('click', () => {
+          if (!checkNotWorkingAtCasinoForInvesting()) return;
           const amt = Math.min(Math.max(0, G.human.cash), G.human.marginDebt, Math.max(1, Number(document.getElementById('finLoanAmountInput').value) || 100));
           if (amt <= 0) {
             showToast('No Debt or Cash', 'Either you have $0 margin debt or $0 cash.', false);
@@ -33408,6 +33535,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           renderAll();
         });
         document.getElementById('btnRepayAllDebt').addEventListener('click', () => {
+          if (!checkNotWorkingAtCasinoForInvesting()) return;
           const amt = Math.min(Math.max(0, G.human.cash), G.human.marginDebt);
           if (amt <= 0) {
             showToast('No Debt to Pay', 'Your margin debt is already $0.00 or cash is $0.', true);
@@ -33421,6 +33549,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         });
         document.getElementById('btnPayTaxesNow').addEventListener('click', () => payAccruedTaxes(true));
         document.getElementById('btnTaxLossHarvest').addEventListener('click', () => {
+          if (!checkNotWorkingAtCasinoForInvesting()) return;
           const stockMap = new Map(G.stocks.map(s => [s.ticker, s]));
           let harvested = 0;
           for (const [ticker, pos] of Object.entries(G.human.stocks)) {
@@ -35602,11 +35731,11 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   function renderJobHero() {
     var big = $('ph-hero-big-job'), row = $('ph-hero-row-job');
     var G = window.G; if (!big || !row || !G || !G.human) return;
-    var h = G.human, exp = Number(h.workExpDays) || 0, working = !!h.isWorkingAtCasino;
+    var h = G.human, exp = Number(h.workExpDays) || 0, working = !!h.isWorkingAtCasino, retired = !!h.fullTimeInvestor;
     var hr = (typeof window.getCasinoHourlyWage === 'function') ? window.getCasinoHourlyWage(exp) : 10;
     var day = (typeof window.getCasinoDailyWage === 'function') ? window.getCasinoDailyWage(exp) : 80;
-    big.textContent = working ? (fmtMoney(day) + ' / day') : 'Off duty';
-    row.innerHTML = heroStat('Wage', fmtMoney(hr) + '/hr') + heroStat('Experience', exp + ' days') + heroStat('Status', working ? 'On shift' : 'Not working');
+    big.textContent = retired ? 'Full-Time Investor' : (working ? (fmtMoney(day) + ' / day') : 'Off duty');
+    row.innerHTML = heroStat('Wage', fmtMoney(hr) + '/hr') + heroStat('Experience', exp + ' days') + heroStat('Status', retired ? 'Retired 🌴' : (working ? 'On shift' : 'Not working'));
     renderJobPayroll();
   }
   /* ---------- Job-app payroll ETF block: second instance of the Casino desk
