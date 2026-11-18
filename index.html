@@ -2119,7 +2119,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
               <button type="button" data-opt-type="CALL" class="opt-type-btn px-3.5 py-1.5 rounded-full bg-[#00C805] text-black">Calls</button>
               <button type="button" data-opt-type="PUT" class="opt-type-btn px-3.5 py-1.5 rounded-full text-[#8A919E]">Puts</button>
             </div>
-            <select id="optExpirySelect" aria-label="Expiration Date" onchange="renderOptionsTab()" class="bg-[#1C2024] border border-[#2E343B] rounded-full px-3.5 py-1.5 text-xs font-semibold text-white">
+            <select id="optExpirySelect" aria-label="Expiration Date" class="bg-[#1C2024] border border-[#2E343B] rounded-full px-3.5 py-1.5 text-xs font-semibold text-white">
               <option value="7">Exp: 7 Days</option>
               <option value="14">Exp: 14 Days</option>
               <option value="30" selected>Exp: 30 Days</option>
@@ -17035,7 +17035,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         const proceeds = Number((shToSell * etf.price).toFixed(2));
         const costSold = (pos.avgPrice || pos.avgCost || etf.price) * shToSell;
         const realizedPnl = proceeds - costSold;
-        recordRealizedTaxableGainLoss(realizedPnl);
+        G.human.taxLedger.shortTermGains += realizedPnl;
+        recomputeTaxLiability(G.human.taxLedger);
         pos.shares = Number((pos.shares - shToSell).toFixed(6));
         G.human.cash = Number((G.human.cash + proceeds).toFixed(2));
         G.human.tradesCount++;
