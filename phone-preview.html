@@ -523,6 +523,13 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
   display: flex; flex-direction: column;
   padding: 52px 0 14px;
 }
+/* Only #ph-pages may shrink in the home column: its flex base is its content
+   size, which at 150%/200% icon sizes exceeds the screen height. Without
+   this, the column's proportional flex-shrinking squishes the ticker,
+   greeting, widgets and controls (clipped greeting text, squashed pills)
+   instead of letting #ph-pages absorb the whole deficit while its grid
+   scrolls. Inert at sizes that fit (no overflow -> no shrinking). */
+#ph-home > :not(#ph-pages):not(.ph-wallpaper) { flex-shrink: 0; }
 #ph-ticker {
   margin: 0 16px; padding: 7px 12px; border-radius: 999px;
   background: rgba(6,10,14,.55); border: 1px solid rgba(255,255,255,.10);
@@ -562,6 +569,30 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
 .ph-pill-btn:active { transform: scale(.97); }
 .ph-pill-btn.ph-on { border-color: rgba(0,200,5,.6); color: #7dff8a; }
 
+/* ---- icon size scale (Settings; 100% = shipped size) ----
+   The height tiers below set the BASE sizes as custom properties; the
+   player's chosen scale multiplies them, so the tiers keep working at every
+   size and 100% renders exactly as before. Column counts adapt in portrait
+   at 150% (3) and 200% (2) so scaled icons never overlap their neighbours;
+   the landscape 8-column rule still wins in landscape (portrait scoping). */
+#phone-screen {
+  --ph-scale: 1;
+  --ph-icon-base: 50px;
+  --ph-icon-svg: 27px;
+  --ph-icon-radius: 13px;
+  --ph-label-size: 11px;
+  --ph-btn-gap: 6px;
+  --ph-grid-row-gap: 16px;
+}
+#phone-screen[data-icon-size="75"] { --ph-scale: .75; }
+#phone-screen[data-icon-size="125"] { --ph-scale: 1.25; }
+#phone-screen[data-icon-size="150"] { --ph-scale: 1.5; }
+#phone-screen[data-icon-size="200"] { --ph-scale: 2; }
+@media (orientation: portrait) {
+  #phone-screen[data-icon-size="150"] .ph-grid { grid-template-columns: repeat(3, 1fr); }
+  #phone-screen[data-icon-size="200"] .ph-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
 /* app pages + grid */
 #ph-pages { flex: 1 1 auto; min-height: 0; margin-top: 12px; overflow: hidden; touch-action: pan-y; }
 #ph-track { display: flex; height: 100%; transition: transform .32s cubic-bezier(.32,.72,.28,1); }
@@ -573,24 +604,41 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
    is identical: align-content:start keeps rows at the top. Scrollbar hidden:
    the phone aesthetic has no visible scrollbars. */
 .ph-page { min-width: 100%; height: 100%; display: flex; flex-direction: column; min-height: 0; }
-.ph-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px 8px; padding: 8px 18px 16px; align-content: start; flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+.ph-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: max-content; gap: calc(var(--ph-grid-row-gap) * var(--ph-scale)) 8px; padding: 8px 18px 20px; align-content: start; flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+/* grid-auto-rows: max-content — with plain auto rows, a definite-height
+   scroll container compresses the rows to ~fit instead of scrolling when the
+   content overflows (seen at 150%/200%: 54px-wide icons squashed to 30px tall
+   and buttons pinned at their 44px min-height). max-content forces every row
+   to its natural height so the grid scrolls instead. Identical at sizes that
+   fit, where rows were already content-sized. */
+/* 20px bottom padding: at maximum scroll the last row's bottom sits 20px above
+   the pages bottom = 34px above the screen bottom, clear of the 30px
+   home-indicator strip (same 34px rule verify-arrange asserts). */
 .ph-grid::-webkit-scrollbar { display: none; }
-.ph-app-btn { position: relative; background: none; border: none; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-family: inherit; }
+.ph-app-btn { position: relative; background: none; border: none; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: calc(var(--ph-btn-gap) * var(--ph-scale)); font-family: inherit; min-height: 44px; }
+/* min-height 44px: the tap-target floor at every icon size — at 75% on the
+   short height tiers the icon+gap+label stack is only ~39px tall. Inert at
+   100%+ (buttons are already 49px+ tall there). */
 .ph-app-btn:active .ph-icon { transform: scale(.88); }
 .ph-icon {
-  width: 50px; height: 50px; border-radius: 13px; display: flex; align-items: center; justify-content: center;
+  width: calc(var(--ph-icon-base) * var(--ph-scale)); height: calc(var(--ph-icon-base) * var(--ph-scale)); border-radius: calc(var(--ph-icon-radius) * var(--ph-scale)); display: flex; align-items: center; justify-content: center;
   box-shadow: 0 6px 16px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.25);
   transition: transform .15s ease;
 }
-.ph-icon svg { width: 27px; height: 27px; }
-.ph-app-label { font-size: 11px; font-weight: 500; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.8); max-width: 76px; text-align: center; line-height: 1.15; }
+.ph-icon svg { width: calc(var(--ph-icon-svg) * var(--ph-scale)); height: calc(var(--ph-icon-svg) * var(--ph-scale)); }
+.ph-app-label { font-size: calc(var(--ph-label-size) * var(--ph-scale)); font-weight: 500; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.8); max-width: calc(76px * var(--ph-scale)); text-align: center; line-height: 1.15; }
 .ph-badge {
-  position: absolute; top: -4px; right: calc(50% - 34px); min-width: 19px; height: 19px; padding: 0 5px;
+  position: absolute; top: -4px; right: calc(50% - var(--ph-icon-base) * var(--ph-scale) / 2 - 9px); min-width: 19px; height: 19px; padding: 0 5px;
   border-radius: 999px; background: #ff3b30; color: #fff; font-size: 11px; font-weight: 700;
   display: flex; align-items: center; justify-content: center; border: 2px solid rgba(10,14,18,.9);
 }
 .ph-badge.ph-hidden { display: none; }
-#ph-dots { display: flex; justify-content: center; gap: 7px; padding: 8px 0 10px; }
+#ph-dots { display: flex; justify-content: center; gap: 7px; padding: 8px 0 10px; margin-bottom: 16px; }
+/* margin-bottom lifts the dots clear of the 30px home-indicator strip, which
+   would otherwise intercept dot taps (the dots' box ends 14px above the
+   screen bottom via #ph-home's padding; with this margin the dot buttons sit
+   ~40px up, fully tappable). display:none collapses the margin too, so the
+   single-page layout is byte-identical to before. */
 #ph-dots button { width: 7px; height: 7px; border-radius: 50%; border: none; padding: 0; background: rgba(255,255,255,.35); cursor: pointer; }
 #ph-dots button.ph-active { background: #fff; }
 
@@ -609,10 +657,9 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
   #ph-w-nw { font-size: 22px; }
   #ph-controls { margin-top: 6px; }
   .ph-pill-btn { padding: 6px 4px; }
+  #phone-screen { --ph-icon-base: 42px; --ph-icon-svg: 23px; --ph-icon-radius: 12px; --ph-grid-row-gap: 10px; }
   #ph-pages { margin-top: 6px; }
-  .ph-grid { gap: 10px 8px; padding-top: 6px; }
-  .ph-icon { width: 42px; height: 42px; border-radius: 12px; }
-  .ph-icon svg { width: 23px; height: 23px; }
+  .ph-grid { padding-top: 6px; }
   /* goal line: bar only — the text line would push the 4th icon row into
      the home-indicator zone at 640px (verify-arrange short-viewport check:
      full line 594.6px vs 578px limit; bar-only 571.1px). */
@@ -642,12 +689,9 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
   .ph-pill-btn { padding: 4px 4px; }
   #ph-edit-bar { margin-top: 6px; }
   .ph-edit-btn { padding: 5px 4px; }
+  #phone-screen { --ph-icon-base: 36px; --ph-icon-svg: 20px; --ph-icon-radius: 10px; --ph-label-size: 10px; --ph-btn-gap: 4px; --ph-grid-row-gap: 6px; }
   #ph-pages { margin-top: 4px; }
-  .ph-grid { gap: 6px 8px; padding-top: 4px; }
-  .ph-app-btn { gap: 4px; }
-  .ph-icon { width: 36px; height: 36px; border-radius: 10px; }
-  .ph-icon svg { width: 20px; height: 20px; }
-  .ph-app-label { font-size: 10px; }
+  .ph-grid { padding-top: 4px; }
 }
 
 /* Shortest viewports (Nov 17 fit fix, new tier): at 568px the tier above
@@ -663,12 +707,9 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
   .ph-widget { padding: 4px 12px; }
   #ph-w-nw { font-size: 18px; }
   #ph-controls { margin-top: 4px; }
+  #phone-screen { --ph-icon-base: 33px; --ph-icon-svg: 18px; --ph-icon-radius: 9px; --ph-label-size: 9.5px; --ph-btn-gap: 3px; --ph-grid-row-gap: 4px; }
   #ph-pages { margin-top: 2px; }
-  .ph-grid { gap: 4px 8px; padding-top: 2px; }
-  .ph-app-btn { gap: 3px; }
-  .ph-icon { width: 33px; height: 33px; border-radius: 9px; }
-  .ph-icon svg { width: 18px; height: 18px; }
-  .ph-app-label { font-size: 9.5px; }
+  .ph-grid { padding-top: 2px; }
   #ph-dots { padding: 4px 0 6px; }
 }
 
@@ -689,7 +730,7 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
   #ph-lock-clock { font-size: 54px; }
   #ph-lock-hint { padding-bottom: 24px; }
   #ph-widgets, #ph-greeting { display: none; }
-  .ph-grid { grid-template-columns: repeat(8, 1fr); gap: 10px 6px; }
+  .ph-grid { grid-template-columns: repeat(8, 1fr); gap: calc(10px * var(--ph-scale, 1)) 6px; }
 }
 
 /* ---- arrange mode: long-press to jiggle, drag / tap-to-move, A-Z ---- */
@@ -703,9 +744,9 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
 @keyframes ph-jiggle { 0%,100% { transform: rotate(-1.6deg); } 50% { transform: rotate(1.6deg); } }
 #ph-track .ph-app-btn.ph-selected .ph-icon { box-shadow: 0 0 0 3px #fff, 0 6px 16px rgba(0,0,0,.45); transform: scale(1.06); }
 #ph-track .ph-app-btn.ph-drag-src { opacity: .35; }
-#ph-drag-ghost { position: absolute; z-index: 95; width: 76px; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
-#ph-drag-ghost .ph-icon { width: 64px; height: 64px; border-radius: 17px; box-shadow: 0 18px 34px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.25); }
-#ph-drag-ghost .ph-icon svg { width: 34px; height: 34px; }
+#ph-drag-ghost { position: absolute; z-index: 95; width: calc(76px * var(--ph-scale, 1)); display: flex; flex-direction: column; align-items: center; gap: calc(6px * var(--ph-scale, 1)); pointer-events: none; }
+#ph-drag-ghost .ph-icon { width: calc(64px * var(--ph-scale, 1)); height: calc(64px * var(--ph-scale, 1)); border-radius: calc(17px * var(--ph-scale, 1)); box-shadow: 0 18px 34px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.25); }
+#ph-drag-ghost .ph-icon svg { width: calc(34px * var(--ph-scale, 1)); height: calc(34px * var(--ph-scale, 1)); }
 
 /* ---- app windows ---- */
 #ph-app-layer { position: absolute; inset: 0; z-index: 20; pointer-events: none; }
@@ -971,6 +1012,9 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
 .ph-wp-sw { width: 56px; height: 78px; border-radius: 12px; border: 2px solid #2c3137; background-color: #0e2237; background-size: cover; background-position: center; position: relative; cursor: pointer; overflow: hidden; padding: 0; font-family: inherit; }
 .ph-wp-sw span { position: absolute; left: 0; right: 0; bottom: 0; display: block; font-size: 8.5px; font-weight: 600; line-height: 1.2; color: #fff; background: rgba(0,0,0,.6); padding: 3px 2px; }
 .ph-wp-sw.ph-wp-sel { border-color: #00c805; }
+.ph-size-picker { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 14px; }
+.ph-size-btn { flex: 1 1 0; min-width: 52px; border: 2px solid #2c3137; background: #1e2227; color: #fff; border-radius: 12px; padding: 10px 4px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.ph-size-btn.ph-size-sel { border-color: #00c805; background: #00c805; color: #000; }
 .ph-wallpaper { background-size: cover; background-position: center; }
 .ph-wallpaper.ph-wallpaper-art::before { display: none; }
 .ph-wallpaper.ph-wallpaper-art > * { display: none; }
@@ -34705,8 +34749,11 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   ];
   var APP_MAP = {};
   APPS.forEach(function (a) { APP_MAP[a.id] = a; });
-  var PAGE_SIZE = APPS.length; /* single home screen: every app on one page */
   var DEFAULT_ORDER = APPS.map(function (a) { return a.id; });
+  /* Icon sizes (percent of today's size): 100% is the exact shipped size and
+     the default; 200% is the largest Jesse asked for. Column counts adapt at
+     150% (3) and 200% (2) so icons never overlap their neighbours. */
+  var ICON_SIZES = [75, 100, 125, 150, 200];
 
   /* ---------- preferences (separate key; never touches game saves) ---------- */
   /* Player name: trimmed, max 20 characters counted as code points (emoji = 1). */
@@ -34716,8 +34763,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     return chars.length > 20 ? chars.slice(0, 20).join('') : s;
   }
   var PREFS_KEY = 'INVESIM_PHONE_PREFS';
-  var prefs = { music: false, order: null, stocksTab: 'stocks', playerName: '', musicTrack: 0, musicShuffle: false, sfxOn: true, wallpaper: 0 };
-  try { var raw = localStorage.getItem(PREFS_KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p.music === 'boolean') prefs.music = p.music; if (p && Array.isArray(p.order)) prefs.order = p.order; if (p && (p.stocksTab === 'stocks' || p.stocksTab === 'etfs' || p.stocksTab === 'options')) prefs.stocksTab = p.stocksTab; if (p && typeof p.playerName === 'string') prefs.playerName = normalizeName(p.playerName); if (p && typeof p.musicTrack === 'number' && isFinite(p.musicTrack)) prefs.musicTrack = Math.max(0, Math.min(14, Math.floor(p.musicTrack))); if (p && typeof p.musicShuffle === 'boolean') prefs.musicShuffle = p.musicShuffle; if (p && typeof p.sfxOn === 'boolean') prefs.sfxOn = p.sfxOn; if (p && typeof p.wallpaper === 'number' && isFinite(p.wallpaper)) prefs.wallpaper = Math.max(0, Math.min(14, Math.floor(p.wallpaper))); } } catch (e) {}
+  var prefs = { music: false, order: null, stocksTab: 'stocks', playerName: '', musicTrack: 0, musicShuffle: false, sfxOn: true, wallpaper: 0, iconSize: 100, pages: null };
+  try { var raw = localStorage.getItem(PREFS_KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p.music === 'boolean') prefs.music = p.music; if (p && Array.isArray(p.order)) prefs.order = p.order; if (p && (p.stocksTab === 'stocks' || p.stocksTab === 'etfs' || p.stocksTab === 'options')) prefs.stocksTab = p.stocksTab; if (p && typeof p.playerName === 'string') prefs.playerName = normalizeName(p.playerName); if (p && typeof p.musicTrack === 'number' && isFinite(p.musicTrack)) prefs.musicTrack = Math.max(0, Math.min(14, Math.floor(p.musicTrack))); if (p && typeof p.musicShuffle === 'boolean') prefs.musicShuffle = p.musicShuffle; if (p && typeof p.sfxOn === 'boolean') prefs.sfxOn = p.sfxOn; if (p && typeof p.wallpaper === 'number' && isFinite(p.wallpaper)) prefs.wallpaper = Math.max(0, Math.min(14, Math.floor(p.wallpaper))); if (p && ICON_SIZES.indexOf(p.iconSize) !== -1) prefs.iconSize = p.iconSize; if (p && Array.isArray(p.pages)) prefs.pages = p.pages; } } catch (e) {}
   function savePrefs() { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {} }
   function validOrder(o) {
     if (!Array.isArray(o) || o.length !== APPS.length) return false;
@@ -34725,8 +34772,6 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     for (var i = 0; i < o.length; i++) { if (!APP_MAP[o[i]] || seen[o[i]]) return false; seen[o[i]] = true; }
     return true;
   }
-  var appOrder = validOrder(prefs.order) ? prefs.order.slice() : (migrateOrder(prefs.order) || DEFAULT_ORDER.slice());
-  if (!validOrder(prefs.order)) persistOrder(); /* persist migrated orders so newly added apps keep the player's arrangement */
   function migrateOrder(o) {
     if (!Array.isArray(o)) return null;
     var seen = {}, out = [];
@@ -34734,9 +34779,54 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     DEFAULT_ORDER.forEach(function (id) { if (!seen[id]) out.push(id); });
     return out.length === APPS.length ? out : null;
   }
+  /* ---------- home pages: explicit arrays of app ids, one per slide ----------
+     A page may hold any number of apps (its grid scrolls if it overflows), so
+     page membership never changes when the icon size changes. Migration: an
+     order-only save becomes ONE page holding that exact order; a fresh save
+     gets the default single page. The flat `order` pref is kept as a mirror
+     of the flattened pages (existing harnesses read it); on load, a valid
+     `pages` value always wins over `order`. */
+  function validPages(pg) {
+    if (!Array.isArray(pg) || !pg.length) return false;
+    var seen = {}, n = 0;
+    for (var i = 0; i < pg.length; i++) {
+      if (!Array.isArray(pg[i]) || !pg[i].length) return false;
+      for (var j = 0; j < pg[i].length; j++) { if (!APP_MAP[pg[i][j]] || seen[pg[i][j]]) return false; seen[pg[i][j]] = true; n++; }
+    }
+    return n === APPS.length;
+  }
+  function flattenPages(pg) {
+    var out = [];
+    pg.forEach(function (page) { page.forEach(function (id) { out.push(id); }); });
+    return out;
+  }
+  var pages;
+  if (validPages(prefs.pages)) {
+    pages = prefs.pages.map(function (pg) { return pg.slice(); });
+  } else {
+    var flat = validOrder(prefs.order) ? prefs.order.slice() : (migrateOrder(prefs.order) || DEFAULT_ORDER.slice());
+    pages = [flat];
+  }
+  var appOrder = flattenPages(pages); /* flat mirror, kept in sync by syncFlatOrder */
+  function syncFlatOrder() { appOrder = flattenPages(pages); }
+  function persistOrder() {
+    prefs.pages = pages.map(function (pg) { return pg.slice(); });
+    prefs.order = appOrder.slice();
+    savePrefs();
+  }
+  /* Persist a migrated layout, or repair a stale/missing flat mirror, on load.
+     The player's arrangement itself is never changed here — only the stored
+     form gains the `pages` key (and a matching `order` mirror). */
+  if (!validPages(prefs.pages) || JSON.stringify(prefs.order) !== JSON.stringify(appOrder)) persistOrder();
   function orderedApps() { return appOrder.map(function (id) { return APP_MAP[id]; }); }
-  function pageCount() { return Math.max(1, Math.ceil(appOrder.length / PAGE_SIZE)); }
-  function persistOrder() { prefs.order = appOrder.slice(); savePrefs(); }
+  function pageCount() { return Math.max(1, pages.length); }
+  function findApp(id) {
+    for (var p = 0; p < pages.length; p++) {
+      var i = pages[p].indexOf(id);
+      if (i !== -1) return { page: p, index: i };
+    }
+    return null;
+  }
 
   /* ---------- state ---------- */
   var unlocked = false, currentApp = null, currentPage = 0, histPushed = false;
@@ -34783,25 +34873,27 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   function renderHomeGrid() {
     var track = $('ph-track');
     track.innerHTML = '';
-    var apps = orderedApps();
-    for (var p = 0; p < pageCount(); p++) {
+    pages.forEach(function (pageIds) {
       var page = document.createElement('div'); page.className = 'ph-page';
       var grid = document.createElement('div'); grid.className = 'ph-grid';
-      apps.slice(p * PAGE_SIZE, p * PAGE_SIZE + PAGE_SIZE).forEach(function (a) { grid.appendChild(iconEl(a, a.id === 'news')); });
+      pageIds.forEach(function (id) { grid.appendChild(iconEl(APP_MAP[id], id === 'news')); });
       page.appendChild(grid); track.appendChild(page);
-    }
+    });
     var dots = $('ph-dots');
     dots.innerHTML = '';
     for (var i = 0; i < pageCount(); i++) {
-      (function (idx) {
-        var d = document.createElement('button'); d.type = 'button'; d.setAttribute('aria-label', 'Page ' + (idx + 1));
-        d.addEventListener('click', function () { setPage(idx); });
-        dots.appendChild(d);
-      })(i);
+      var d = document.createElement('button'); d.type = 'button'; d.setAttribute('aria-label', 'Page ' + (i + 1));
+      d.addEventListener('click', function () { setPage(Array.prototype.indexOf.call(dots.children, this)); });
+      dots.appendChild(d);
     }
     setPage(currentPage);
-    dots.style.display = pageCount() > 1 ? '' : 'none';
+    syncDots();
     updateBadge();
+  }
+  function syncDots() {
+    var dots = $('ph-dots');
+    dots.style.display = pageCount() > 1 ? '' : 'none';
+    Array.prototype.forEach.call(dots.children, function (d, j) { d.className = j === currentPage ? 'ph-active' : ''; });
   }
   function buildHome() {
     renderHomeGrid();
@@ -34809,7 +34901,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   function setPage(i) {
     currentPage = Math.max(0, Math.min(pageCount() - 1, i));
     $('ph-track').style.transform = 'translateX(-' + (currentPage * 100) + '%)';
-    Array.prototype.forEach.call($('ph-dots').children, function (d, j) { d.className = j === currentPage ? 'ph-active' : ''; });
+    syncDots();
   }
   function buildWindows() {
     var layer = $('ph-app-layer');
@@ -34858,6 +34950,10 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             '<div class="ph-wallpaper-picker" id="ph-wallpaper-picker"></div>' +
           '</div>' +
           '<div class="ph-set-group">' +
+            '<div class="ph-set-row"><span class="ph-set-ic">🔍</span><span class="ph-set-tx"><b>App icon size</b><i id="ph-iconsize-name">100% — Default</i></span></div>' +
+            '<div class="ph-size-picker" id="ph-size-picker"></div>' +
+          '</div>' +
+          '<div class="ph-set-group">' +
             '<a class="ph-set-row" href="guide.html" target="_blank" rel="noopener"><span class="ph-set-ic">📖</span><span class="ph-set-tx"><b>Investing Guides</b><i>Learn to invest for real</i></span><span class="ph-set-chev">›</span></a>' +
             '<a class="ph-set-row" href="tutorial.html" target="_blank" rel="noopener"><span class="ph-set-ic">🎓</span><span class="ph-set-tx"><b>Tutorial</b><i>Your first day, step by step</i></span><span class="ph-set-chev">›</span></a>' +
             '<a class="ph-set-row" href="faq.html" target="_blank" rel="noopener"><span class="ph-set-ic">❓</span><span class="ph-set-tx"><b>FAQ</b><i>How every system works</i></span><span class="ph-set-chev">›</span></a>' +
@@ -34882,6 +34978,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     var ms = $('ph-music-shuffle'); if (ms) ms.addEventListener('click', function () { musicToggleShuffle(); playSfx('toggle'); });
     var sx = $('ph-settings-sfx-toggle'); if (sx) sx.addEventListener('click', function () { var on = prefs.sfxOn === false; setSfx(on); if (on) playSfx('toggle'); });
     var wp = $('ph-wallpaper-picker'); if (wp) wp.addEventListener('click', function (e) { var b = e.target.closest ? e.target.closest('[data-wp]') : null; if (b) { setWallpaper(parseInt(b.getAttribute('data-wp'), 10) || 0); playSfx('tap'); } });
+    var sp = $('ph-size-picker'); if (sp) sp.addEventListener('click', function (e) { var b = e.target.closest ? e.target.closest('[data-size]') : null; if (b) { setIconSize(parseInt(b.getAttribute('data-size'), 10) || 100); playSfx('tap'); } });
     var sv = $('ph-set-save'); if (sv) sv.addEventListener('click', function () { var b = $('btnSaveGame'); if (b) b.click(); });
     var ng = $('ph-set-newgame'); if (ng) ng.addEventListener('click', function () { var b = $('btnNewGame'); if (b) b.click(); });
     var th = $('ph-set-theme'); if (th) th.addEventListener('click', function () { try { if (typeof window.toggleAppTheme === 'function') window.toggleAppTheme(); } catch (e) {} setTimeout(renderSettingsState, 200); playSfx('toggle'); });
@@ -34914,29 +35011,42 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   }
   function exitEditMode() { setEditing(false); }
   function sortAZ() {
-    appOrder = orderedApps().slice().sort(function (a, b) { return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); }).map(function (a) { return a.id; });
+    /* Flatten all pages, sort, re-deal into the EXISTING page sizes: the page
+       count and each page's size never change, only which apps sit where. */
+    var sizes = pages.map(function (pg) { return pg.length; });
+    var flat = orderedApps().slice().sort(function (a, b) { return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); }).map(function (a) { return a.id; });
+    var out = [], k = 0;
+    sizes.forEach(function (n) { out.push(flat.slice(k, k + n)); k += n; });
+    pages = out;
+    syncFlatOrder();
     persistOrder(); renderHomeGrid();
   }
   function resetOrder() {
-    appOrder = DEFAULT_ORDER.slice();
+    pages = [DEFAULT_ORDER.slice()];
+    currentPage = 0;
+    syncFlatOrder();
     persistOrder(); renderHomeGrid();
   }
-  function moveApp(id, toIndex) {
-    var from = appOrder.indexOf(id);
-    if (from < 0) return;
-    toIndex = Math.max(0, Math.min(appOrder.length - 1, toIndex));
-    if (from === toIndex) return;
-    appOrder.splice(from, 1);
-    appOrder.splice(toIndex, 0, id);
+  /* Move an app to (page, position). The position is the index the target
+     occupied BEFORE removal (same semantic as the old flat moveApp: moving
+     forward lands after the target, moving back lands before it). */
+  function moveAppTo(id, pageIdx, posIdx) {
+    var loc = findApp(id);
+    if (!loc) return;
+    pages[loc.page].splice(loc.index, 1);
+    pageIdx = Math.max(0, Math.min(pages.length - 1, pageIdx));
+    posIdx = Math.max(0, Math.min(pages[pageIdx].length, posIdx));
+    pages[pageIdx].splice(posIdx, 0, id);
+    syncFlatOrder();
   }
   function applyOrderToDOM() {
     var btns = {};
     Array.prototype.forEach.call(document.querySelectorAll('#ph-track .ph-app-btn'), function (b) { btns[b.getAttribute('data-app-id')] = b; });
-    var pages = document.querySelectorAll('#ph-track .ph-page');
-    for (var p = 0; p < pages.length; p++) {
-      var grid = pages[p].querySelector('.ph-grid');
+    var pageEls = document.querySelectorAll('#ph-track .ph-page');
+    for (var p = 0; p < pageEls.length; p++) {
+      var grid = pageEls[p].querySelector('.ph-grid');
       if (!grid) continue;
-      appOrder.slice(p * PAGE_SIZE, p * PAGE_SIZE + PAGE_SIZE).forEach(function (id) { if (btns[id]) grid.appendChild(btns[id]); });
+      (pages[p] || []).forEach(function (id) { if (btns[id]) grid.appendChild(btns[id]); });
     }
   }
   function handleEditTap(id) {
@@ -34944,8 +35054,10 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     playSfx('tap');
     if (!selectedId) { selectedId = id; markSelected(); return; }
     if (selectedId === id) { selectedId = null; markSelected(); return; }
-    moveApp(selectedId, appOrder.indexOf(id));
+    var target = findApp(id);
+    moveAppTo(selectedId, target.page, target.index);
     selectedId = null;
+    pruneEmptyPages();
     persistOrder(); renderHomeGrid();
   }
   function markSelected() {
@@ -34963,24 +35075,56 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     Array.prototype.forEach.call(document.querySelectorAll('#ph-track .ph-drag-src'), function (b) { b.classList.remove('ph-drag-src'); });
   }
   function gridButtonsOnPage(pageIdx) {
-    var pages = document.querySelectorAll('#ph-track .ph-page');
-    var page = pages[pageIdx];
+    var pageEls = document.querySelectorAll('#ph-track .ph-page');
+    var page = pageEls[pageIdx];
     return page ? Array.prototype.slice.call(page.querySelectorAll('.ph-app-btn')) : [];
   }
-  function indexFromPoint(x, y) {
+  /* Append a new empty page, surgically: the DOM gains one .ph-page + one dot
+     WITHOUT rebuilding the existing buttons, so an in-progress drag keeps its
+     source element and ghost. Called only from the drag edge-dwell. */
+  function createPage() {
+    pages.push([]);
+    syncFlatOrder();
+    var track = $('ph-track');
+    var page = document.createElement('div'); page.className = 'ph-page';
+    var grid = document.createElement('div'); grid.className = 'ph-grid';
+    page.appendChild(grid); track.appendChild(page);
+    var dots = $('ph-dots');
+    var d = document.createElement('button'); d.type = 'button'; d.setAttribute('aria-label', 'Page ' + pages.length);
+    d.addEventListener('click', function () { setPage(Array.prototype.indexOf.call(dots.children, this)); });
+    dots.appendChild(d);
+    syncDots();
+  }
+  /* Drop pages left empty by a move; always keep at least one page. Runs only
+     at drag end / after tap-to-move — never mid-drag, so page indices can't
+     shift under the pointer. Returns true when a page was removed. */
+  function pruneEmptyPages() {
+    var kept = pages.filter(function (pg) { return pg.length > 0; });
+    if (!kept.length) kept = [[]];
+    var changed = kept.length !== pages.length;
+    pages = kept;
+    if (currentPage > pages.length - 1) currentPage = pages.length - 1;
+    if (changed) syncFlatOrder();
+    return changed;
+  }
+  /* Drop target for a point: the nearest button on the current page, or the
+     end of the current page when it has no buttons (freshly created page) and
+     the point is inside the pages area. Null when the point is outside. */
+  function targetFromPoint(x, y) {
     var pagesEl = $('ph-pages');
     if (pagesEl) {
       var pr = pagesEl.getBoundingClientRect();
-      if (y < pr.top - 30 || y > pr.bottom + 30 || x < pr.left - 30 || x > pr.right + 30) return -1;
+      if (y < pr.top - 30 || y > pr.bottom + 30 || x < pr.left - 30 || x > pr.right + 30) return null;
     }
     var btns = gridButtonsOnPage(currentPage);
+    if (!btns.length) return { page: currentPage, index: (pages[currentPage] || []).length };
     var best = -1, bestD = Infinity;
     btns.forEach(function (b, i) {
       var r = b.getBoundingClientRect();
       var d = Math.hypot(x - (r.left + r.width / 2), y - (r.top + r.height / 2));
       if (d < bestD) { bestD = d; best = i; }
     });
-    return best < 0 ? -1 : currentPage * PAGE_SIZE + best;
+    return best < 0 ? null : { page: currentPage, index: best };
   }
   function startGhost(s, e) {
     selectedId = null; markSelected();
@@ -34997,8 +35141,10 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   function moveGhost(e) {
     var s = dragSession; if (!s || !s.ghost) return;
     var sr = screenEl.getBoundingClientRect();
-    s.ghost.style.left = (e.clientX - sr.left - 38) + 'px';
-    s.ghost.style.top = (e.clientY - sr.top - 58) + 'px';
+    /* Measured offsets so the ghost stays centered under the finger at every
+       icon size (at 100% these equal the old fixed 38px / 58px). */
+    s.ghost.style.left = (e.clientX - sr.left - s.ghost.offsetWidth / 2) + 'px';
+    s.ghost.style.top = (e.clientY - sr.top - s.ghost.offsetHeight * 0.7) + 'px';
   }
   function onDragMove(e) {
     var s = dragSession; if (!s) return;
@@ -35013,17 +35159,38 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     var dir = 0;
     if (e.clientX - sr.left < 28) dir = -1; else if (sr.right - e.clientX < 28) dir = 1;
     var canTurn = (dir < 0 && currentPage > 0) || (dir > 0 && currentPage < pageCount() - 1);
-    if (dir !== 0 && canTurn) {
+    /* Past the last page, dwelling at the right edge creates a new page (at
+       most one per drag — holding longer must not spawn page after page). */
+    var canCreate = dir > 0 && currentPage === pageCount() - 1 && !s.createdPage;
+    if (dir !== 0 && (canTurn || canCreate)) {
       if (s.edgeDir !== dir) {
         s.edgeDir = dir; clearTimeout(s.edgeTimer);
-        s.edgeTimer = setTimeout(function () { setPage(currentPage + dir); if (dragSession) dragSession.edgeDir = 0; }, 550);
+        s.edgeTimer = setTimeout(function () {
+          if (!dragSession) return;
+          if (dir > 0 && currentPage === pageCount() - 1 && !dragSession.createdPage) {
+            dragSession.createdPage = true;
+            createPage();
+            setPage(currentPage + dir);
+            /* The new page holds the dragged app even if the finger never
+               moves again before release. */
+            moveAppTo(dragSession.id, currentPage, pages[currentPage].length);
+            applyOrderToDOM();
+            markDragSrc(dragSession.id);
+          } else {
+            setPage(currentPage + dir);
+          }
+          if (dragSession) dragSession.edgeDir = 0;
+        }, 550);
       }
     } else { s.edgeDir = 0; clearTimeout(s.edgeTimer); }
-    var idx = indexFromPoint(e.clientX, e.clientY);
-    if (idx >= 0 && appOrder[idx] !== s.id) {
-      moveApp(s.id, idx);
-      applyOrderToDOM();
-      markDragSrc(s.id);
+    var t = targetFromPoint(e.clientX, e.clientY);
+    if (t) {
+      var loc = findApp(s.id);
+      if (!loc || loc.page !== t.page || loc.index !== t.index) {
+        moveAppTo(s.id, t.page, t.index);
+        applyOrderToDOM();
+        markDragSrc(s.id);
+      }
     }
   }
   function onDragEnd() {
@@ -35033,11 +35200,16 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     document.removeEventListener('pointermove', onDragMove);
     document.removeEventListener('pointerup', onDragEnd);
     document.removeEventListener('pointercancel', onDragEnd);
-    if (s.active) { persistOrder(); armClickSuppress(); clearDragVisuals(); }
+    if (s.active) {
+      var pruned = pruneEmptyPages();
+      persistOrder();
+      if (pruned) renderHomeGrid();
+      armClickSuppress(); clearDragVisuals();
+    }
   }
   function attachDragListeners(id, startX, startY) {
     if (dragSession) return;
-    dragSession = { id: id, startX: startX, startY: startY, active: false, edgeDir: 0, edgeTimer: null, ghost: null };
+    dragSession = { id: id, startX: startX, startY: startY, active: false, edgeDir: 0, edgeTimer: null, ghost: null, createdPage: false };
     document.addEventListener('pointermove', onDragMove);
     document.addEventListener('pointerup', onDragEnd);
     document.addEventListener('pointercancel', onDragEnd);
@@ -35745,6 +35917,34 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
      picker gains real names + thumbnails. Safe to call anytime. */
   window.__phRenderWallpaperPicker = function () { renderWallpaperPicker(); applyWallpaper(prefs.wallpaper || 0); };
 
+  /* ---------- App icon size (Settings; persisted; applies immediately) ----------
+     The size is a data attribute on #phone-screen; CSS custom properties scale
+     the icon, label and gaps from the current height tier's base size, so the
+     fit tiers keep working and 100% renders exactly as before. Page membership
+     never changes with size — a page that overflows scrolls (scroll fallback). */
+  function applyIconSize() {
+    if (screenEl) screenEl.setAttribute('data-icon-size', String(prefs.iconSize || 100));
+    renderIconSizePicker();
+  }
+  function setIconSize(n) {
+    if (ICON_SIZES.indexOf(n) === -1) n = 100;
+    prefs.iconSize = n;
+    savePrefs();
+    applyIconSize();
+  }
+  function renderIconSizePicker() {
+    var picker = $('ph-size-picker'); if (!picker) return;
+    var cur = prefs.iconSize || 100;
+    var html = '';
+    ICON_SIZES.forEach(function (n) {
+      var sel = cur === n ? ' ph-size-sel' : '';
+      html += '<button type="button" class="ph-size-btn' + sel + '" data-size="' + n + '" aria-label="Icon size ' + n + ' percent">' + n + '%</button>';
+    });
+    picker.innerHTML = html;
+    var nameEl = $('ph-iconsize-name');
+    if (nameEl) nameEl.textContent = cur + '%' + (cur === 100 ? ' — Default' : cur === 200 ? ' — Largest' : cur === 75 ? ' — Smallest' : '');
+  }
+
   /* ---------- re-parenting + init ---------- */
   function moveNode(node, hostId) {
     var host = $(hostId);
@@ -35848,6 +36048,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   initAudio();
   applyWallpaper(prefs.wallpaper || 0);
   renderWallpaperPicker();
+  applyIconSize();
   updateLockClock();
   setInterval(updateLockClock, 10000);
   syncMusicUI();
@@ -35891,6 +36092,9 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     get editing() { return editing; },
     get order() { return appOrder.slice(); },
     get page() { return currentPage; },
+    get pageCount() { return pageCount(); },
+    get pages() { return pages.map(function (pg) { return pg.slice(); }); },
+    get iconSize() { return prefs.iconSize || 100; },
     get histPushed() { return histPushed; },
     get audioRunning() { try { var m = musicMod(); return !!(m && m.getState && m.getState().running); } catch (e) { return false; } }
   };
