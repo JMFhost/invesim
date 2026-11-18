@@ -565,8 +565,16 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
 /* app pages + grid */
 #ph-pages { flex: 1 1 auto; min-height: 0; margin-top: 12px; overflow: hidden; touch-action: pan-y; }
 #ph-track { display: flex; height: 100%; transition: transform .32s cubic-bezier(.32,.72,.28,1); }
-.ph-page { min-width: 100%; height: 100%; }
-.ph-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px 8px; padding: 8px 18px 0; align-content: start; }
+/* Scroll fallback (Nov 17 fit fix): the page is a flex column and the grid
+   flexes to the page height with its own vertical scroll, so if the grid ever
+   exceeds the available height at some size, the bottom row is reachable by
+   scrolling instead of clipped dead behind #ph-pages' overflow:hidden. When
+   the grid fits (every size in the fit matrix) nothing scrolls and rendering
+   is identical: align-content:start keeps rows at the top. Scrollbar hidden:
+   the phone aesthetic has no visible scrollbars. */
+.ph-page { min-width: 100%; height: 100%; display: flex; flex-direction: column; min-height: 0; }
+.ph-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px 8px; padding: 8px 18px 16px; align-content: start; flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+.ph-grid::-webkit-scrollbar { display: none; }
 .ph-app-btn { position: relative; background: none; border: none; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-family: inherit; }
 .ph-app-btn:active .ph-icon { transform: scale(.88); }
 .ph-icon {
@@ -586,8 +594,15 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
 #ph-dots button { width: 7px; height: 7px; border-radius: 50%; border: none; padding: 0; background: rgba(255,255,255,.35); cursor: pointer; }
 #ph-dots button.ph-active { background: #fff; }
 
-/* short viewports: shrink chrome so all 15 icons still fit on one screen */
-@media (max-height: 700px) {
+/* Compact tier (Nov 17 fit fix — breakpoint raised 700px -> 800px): the base
+   tier's stack (ticker + greeting + widgets + goal text + 50px icons) needs
+   ~795px of viewport height with a player name set, but the old 700px tier
+   switched off at 701px, leaving a 701-794px dead band where the 4th icon row
+   clipped behind #ph-pages with no scroll (Jesse's phone, ~412x725, clipped
+   41px). The compact tier now covers every height that cannot fit the base
+   stack. At 320px wide, labels wrap and the grid is ~13px taller, which is
+   why the boundary sits at 800px rather than 782px. */
+@media (max-height: 800px) {
   #ph-home { padding-top: 44px; }
   #ph-widgets { margin-top: 8px; gap: 6px; }
   .ph-widget { padding: 6px 12px; }
@@ -611,14 +626,14 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
   #ph-home.ph-editing #ph-controls { display: none; }
 }
 
-/* very short viewports (568px-tall phones): shrink further so the 4th icon
-   row stays inside #ph-pages and clear of the home indicator (Nov 15 fit
-   audit: at 568px the 700px tier still left the grid ~33-45px too tall, so
-   Portfolio/News/Settings/Games were clipped and untappable). Boundary 620px:
-   the 700px tier's slack runs out below ~613px at 320px wide (wrapped labels),
-   and no tested/passing size sits under 640px, so nothing that fits today
-   changes. */
-@media (max-height: 620px) {
+/* Very short viewports (Nov 17 fit fix — breakpoint raised 620px -> 675px):
+   the compact tier's slack runs out below ~672px at 320px wide (wrapped
+   labels) and below ~657px at wider sizes, and with a player name set the
+   greeting row costs ~28px the Nov 15 audit (no name set) never measured —
+   at 640px the compact tier clipped the 4th row by 2px (13px at 320px wide)
+   and ran 18px into the home-indicator zone. This tier now covers every
+   height the compact tier cannot. */
+@media (max-height: 675px) {
   #ph-ticker { padding: 5px 12px; }
   #ph-widgets { margin-top: 6px; gap: 4px; }
   .ph-widget { padding: 5px 12px; }
@@ -633,6 +648,28 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
   .ph-icon { width: 36px; height: 36px; border-radius: 10px; }
   .ph-icon svg { width: 20px; height: 20px; }
   .ph-app-label { font-size: 10px; }
+}
+
+/* Shortest viewports (Nov 17 fit fix, new tier): at 568px the tier above
+   still leaves the 4th row 16px into the home-indicator zone with a name set,
+   so squeeze once more — 33px icons (the button stays >=44px tall with its
+   label), tighter gaps and chrome. The grid scroll fallback above is the
+   backstop for anything shorter than the matrix. Placed before the landscape
+   block so the landscape rules still win on conflicts. */
+@media (max-height: 590px) {
+  #ph-ticker { padding: 4px 12px; }
+  #ph-greeting { margin-top: 4px; font-size: 12px; }
+  #ph-widgets { margin-top: 4px; gap: 4px; }
+  .ph-widget { padding: 4px 12px; }
+  #ph-w-nw { font-size: 18px; }
+  #ph-controls { margin-top: 4px; }
+  #ph-pages { margin-top: 2px; }
+  .ph-grid { gap: 4px 8px; padding-top: 2px; }
+  .ph-app-btn { gap: 3px; }
+  .ph-icon { width: 33px; height: 33px; border-radius: 9px; }
+  .ph-icon svg { width: 18px; height: 18px; }
+  .ph-app-label { font-size: 9.5px; }
+  #ph-dots { padding: 4px 0 6px; }
 }
 
 /* landscape phones: the framed 430/932 phone would shrink to ~156px wide and
