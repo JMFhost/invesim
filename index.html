@@ -10545,7 +10545,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         sym = (sym || '').trim();
         if (sym && !(G.etfs || []).some(e => e.sym === sym)) {
           showToast('ETF Not Found', `${sym} is not in the ETF universe.`, false);
-          renderCasinoTab();
+          renderCasinoTab(); syncPayrollEtfBlock(''); syncPayrollEtfBlock('job');
           return;
         }
         plan.slots[idx].sym = sym || null;
@@ -10553,7 +10553,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         if (sym && !plan.slots[idx].pct && getPayrollEtfTotalPct(G.human) + 5 <= PAYROLL_ETF_MAX_TOTAL_PCT) {
           plan.slots[idx].pct = 5;
         }
-        renderCasinoTab();
+        renderCasinoTab(); syncPayrollEtfBlock(''); syncPayrollEtfBlock('job');
       };
 
       window.setPayrollEtfSlotPct = function(idx, pct) {
@@ -10564,11 +10564,11 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         const others = plan.slots.reduce((sum, s, i) => sum + (i === idx ? 0 : (s.pct || 0)), 0);
         if (others + pct > PAYROLL_ETF_MAX_TOTAL_PCT) {
           showToast('Payroll Plan Capped at 20%', `Your other slots already use ${others}%. The max total is 20% — lower another slot first.`, false);
-          renderCasinoTab();
+          renderCasinoTab(); syncPayrollEtfBlock(''); syncPayrollEtfBlock('job');
           return;
         }
         plan.slots[idx].pct = pct;
-        renderCasinoTab();
+        renderCasinoTab(); syncPayrollEtfBlock(''); syncPayrollEtfBlock('job');
       };
 
       window.clearPayrollEtfPlan = function() {
@@ -10577,11 +10577,124 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         if (!plan) return;
         plan.slots = Array.from({ length: PAYROLL_ETF_MAX_SLOTS }, () => ({ sym: null, pct: 0 }));
         showToast('Payroll ETF Plan Cleared', 'No more paycheck deductions. Your ETF shares stay invested.', true);
-        renderCasinoTab();
+        renderCasinoTab(); syncPayrollEtfBlock(''); syncPayrollEtfBlock('job');
       };
+
+      // --- Stable-form guard (Nov 17, 2026): the game re-renders every tab on
+      // --- the 1s tick and the shell refreshes heroes every 2s. Rebuilding a
+      // --- container's innerHTML destroys any <select> inside it — including
+      // --- its open native popup on mobile (Jesse caught this in the Job
+      // --- payroll block). stableFormBusy() is true while a select/input
+      // --- inside the container is focused, or <600ms after a select blurred
+      // --- (covers the native popup dismiss lifecycle). Call sites skip the
+      // --- rebuild and let the next tick refresh instead; surgical syncs
+      // --- keep displays fresh in the meantime. Every write in the sync
+      // --- below is guarded by equality (MutationObserver lesson).
+      function trackStableFormBlur() {
+        if (trackStableFormBlur._done) return;
+        trackStableFormBlur._done = true;
+        document.addEventListener('focusout', function (ev) {
+          const t = ev.target;
+          if (t && t.tagName === 'SELECT') t.__sfBlurAt = Date.now();
+        }, true);
+      }
+      function stableFormBusy(container) {
+        trackStableFormBlur();
+        if (!container) return false;
+        const ae = document.activeElement;
+        if (ae && (ae.tagName === 'SELECT' || ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA') && container.contains(ae)) return true;
+        const sels = container.querySelectorAll('select');
+        for (let k = 0; k < sels.length; k++) {
+          if (Date.now() - (sels[k].__sfBlurAt || 0) < 600) return true;
+        }
+        return false;
+      }
+      function setSelectValueSafe(sel, val) {
+        if (!sel || sel.value === val) return;
+        for (let k = 0; k < sel.options.length; k++) {
+          if (sel.options[k].value === val) { sel.value = val; return; }
+        }
+      }
+      function payrollEtfOptSig(plan, etfs) {
+        return etfs.map(e => e.sym).join(',') + '|' + plan.slots.map(s => (s.sym && !etfs.some(e => e.sym === s.sym)) ? s.sym : '').join(',');
+      }
+      // Surgical refresh of one payroll block instance ('' = Casino desk card,
+      // 'job' = Job app). Never replaces nodes: updates select values + display
+      // text in place. Option lists rebuild only when the ETF universe /
+      // delisted set changed AND no select here is busy.
+      function syncPayrollEtfBlock(ns) {
+        if (typeof G === 'undefined' || !G || !G.human) return false;
+        const suf = ns ? '_' + ns : '';
+        const idNs = ns ? ns + '_' : '';
+        const root = document.getElementById('payrollEtfBlock' + suf);
+        if (!root) return false;
+        const plan = ensurePayrollEtfState(G.human);
+        const isWorking = Boolean(G.human.isWorkingAtCasino);
+        const expDays = isWorking ? (G.human.workExpDays || 0) : 0;
+        const dailyWage = getCasinoDailyWage(expDays);
+        const totalPct = getPayrollEtfTotalPct(G.human);
+        const etfs = G.etfs || [];
+        const busy = stableFormBusy(root);
+        const sig = payrollEtfOptSig(plan, etfs);
+        if (!busy && root.dataset.payrollOptSig !== sig) {
+          for (let i = 0; i < plan.slots.length; i++) {
+            const slot = plan.slots[i];
+            const sel = document.getElementById('payrollEtfSlot_' + idNs + i);
+            if (!sel) continue;
+            const listed = slot.sym ? etfs.some(e => e.sym === slot.sym) : false;
+            const delistedOpt = (slot.sym && !listed)
+              ? '<option value="' + slot.sym + '" disabled>\u26a0\ufe0f ' + slot.sym + ' — no longer listed</option>' : '';
+            sel.innerHTML = '<option value="">— No ETF —</option>' + delistedOpt
+              + etfs.map(e => '<option value="' + e.sym + '">' + e.sym + ' — ' + e.name + '</option>').join('');
+          }
+          root.dataset.payrollOptSig = sig;
+        }
+        for (let i = 0; i < plan.slots.length; i++) {
+          const slot = plan.slots[i];
+          const listed = slot.sym ? etfs.some(e => e.sym === slot.sym) : false;
+          const etf = listed ? etfs.find(e => e.sym === slot.sym) : null;
+          setSelectValueSafe(document.getElementById('payrollEtfSlot_' + idNs + i), slot.sym || '');
+          const pctEl = document.getElementById('payrollEtfPct_' + idNs + i);
+          if (pctEl && pctEl.value !== String(slot.pct)) pctEl.value = String(slot.pct);
+          const estEl = document.getElementById('payrollEtfEst_' + idNs + i);
+          const estTxt = (etf && slot.pct > 0) ? fmtMoney(dailyWage * slot.pct / 100) + '/day @ ' + fmtMoney(etf.price) : '—';
+          const estCls = 'text-[11px] font-mono font-bold ' + ((etf && slot.pct > 0) ? 'text-[#00C805]' : 'text-[#8A919E]') + ' whitespace-nowrap';
+          if (estEl) {
+            if (estEl.textContent !== estTxt) estEl.textContent = estTxt;
+            if (estEl.className !== estCls) estEl.className = estCls;
+          }
+          const warnEl = document.getElementById('payrollEtfWarn_' + idNs + i);
+          const warnTxt = (slot.sym && !listed)
+            ? '\u26a0\ufe0f Delisted — pick another ETF (share stays as cash wages meanwhile)'
+            : (slot.pct > 0 && !slot.sym ? 'Pick an ETF to activate this ' + slot.pct + '%' : '');
+          const warnCls = 'text-[10px] ' + ((slot.sym && !listed) ? 'text-rose-400 font-bold' : 'text-amber-300');
+          if (warnEl) {
+            if (warnEl.textContent !== warnTxt) warnEl.textContent = warnTxt;
+            if (warnEl.className !== warnCls) warnEl.className = warnCls;
+          }
+        }
+        const totalEl = document.getElementById('payrollEtfTotal' + suf);
+        const totalTxt = 'TOTAL ' + totalPct + '% / 20% • ≈ ' + fmtMoney(dailyWage * totalPct / 100) + '/day';
+        if (totalEl && totalEl.textContent !== totalTxt) totalEl.textContent = totalTxt;
+        const statusEl = document.getElementById('payrollEtfStatus' + suf);
+        const statusTxt = isWorking
+          ? '✅ Active — deducts from each paycheck (next payday included)'
+          : '⏸️ Paused — clock in to resume contributions (plan stays saved)';
+        const statusCls = isWorking ? 'text-[#00C805] font-bold' : 'text-amber-300 font-bold';
+        if (statusEl) {
+          if (statusEl.textContent !== statusTxt) statusEl.textContent = statusTxt;
+          if (statusEl.className !== statusCls) statusEl.className = statusCls;
+        }
+        const lifeEl = document.getElementById('payrollEtfLifetime' + suf);
+        const lifeTxt = fmtMoney(plan.totalContributed || 0);
+        if (lifeEl && lifeEl.textContent !== lifeTxt) lifeEl.textContent = lifeTxt;
+        return true;
+      }
+      window.syncPayrollEtfBlock = syncPayrollEtfBlock;
 
       function renderPayrollEtfBlock(ns) {
         const idNs = ns ? String(ns) + '_' : '';
+        const suf = ns ? '_' + ns : '';
         if (typeof G === 'undefined' || !G || !G.human) return '';
         const plan = ensurePayrollEtfState(G.human);
         const isWorking = Boolean(G.human.isWorkingAtCasino);
@@ -10589,17 +10702,19 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         const dailyWage = getCasinoDailyWage(expDays);
         const totalPct = getPayrollEtfTotalPct(G.human);
         const etfs = G.etfs || [];
+        const optSig = payrollEtfOptSig(plan, etfs);
         const slotRows = plan.slots.map((slot, i) => {
           const listed = slot.sym ? etfs.some(e => e.sym === slot.sym) : false;
           const etf = listed ? etfs.find(e => e.sym === slot.sym) : null;
-          const opts = etfs.map(e => `<option value="${e.sym}"${e.sym === slot.sym ? ' selected' : ''}>${e.sym} — ${e.name} ($${e.price.toFixed(2)})</option>`).join('');
+          const opts = etfs.map(e => `<option value="${e.sym}"${e.sym === slot.sym ? ' selected' : ''}>${e.sym} — ${e.name}</option>`).join('');
           const delistedOpt = (slot.sym && !listed)
             ? `<option value="${slot.sym}" selected disabled>⚠️ ${slot.sym} — no longer listed</option>` : '';
           const pctOpts = PAYROLL_ETF_PCT_STEPS.map(p => `<option value="${p}"${slot.pct === p ? ' selected' : ''}>${p}%</option>`).join('');
-          const est = (etf && slot.pct > 0) ? fmtMoney(dailyWage * slot.pct / 100) + '/day' : '—';
-          const warn = (slot.sym && !listed)
-            ? `<span class="text-[10px] text-rose-400 font-bold">⚠️ Delisted — pick another ETF (share stays as cash wages meanwhile)</span>`
-            : (slot.pct > 0 && !slot.sym ? `<span class="text-[10px] text-amber-300">Pick an ETF to activate this ${slot.pct}%</span>` : '');
+          const est = (etf && slot.pct > 0) ? fmtMoney(dailyWage * slot.pct / 100) + '/day @ ' + fmtMoney(etf.price) : '—';
+          const warnTxt = (slot.sym && !listed)
+            ? `⚠️ Delisted — pick another ETF (share stays as cash wages meanwhile)`
+            : (slot.pct > 0 && !slot.sym ? `Pick an ETF to activate this ${slot.pct}%` : '');
+          const warnCls = (slot.sym && !listed) ? 'text-rose-400 font-bold' : 'text-amber-300';
           return `
             <div class="flex flex-wrap items-center gap-2">
               <span class="text-[10px] font-mono font-bold text-[#8A919E] w-11">SLOT ${i + 1}</span>
@@ -10609,23 +10724,23 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
               <select id="payrollEtfPct_${idNs}${i}" aria-label="Payroll percent slot ${i + 1}" onchange="setPayrollEtfSlotPct(${i}, Number(this.value))" class="bg-[#0C0E10] border border-[#2A2E33] rounded-lg px-2 py-1.5 text-white text-xs font-bold focus:outline-none focus:border-[#00C805]">
                 ${pctOpts}
               </select>
-              <span class="text-[11px] font-mono font-bold ${etf && slot.pct > 0 ? 'text-[#00C805]' : 'text-[#8A919E]'} w-[74px]">${est}</span>
-              ${warn}
+              <span id="payrollEtfEst_${idNs}${i}" class="text-[11px] font-mono font-bold ${etf && slot.pct > 0 ? 'text-[#00C805]' : 'text-[#8A919E]'} whitespace-nowrap">${est}</span>
+              <span id="payrollEtfWarn_${idNs}${i}" class="text-[10px] ${warnCls}">${warnTxt}</span>
             </div>`;
         }).join('');
         const statusLine = isWorking
-          ? `<span class="text-[#00C805] font-bold">✅ Active — deducts from each paycheck (next payday included)</span>`
-          : `<span class="text-amber-300 font-bold">⏸️ Paused — clock in to resume contributions (plan stays saved)</span>`;
+          ? `<span id="payrollEtfStatus${suf}" class="text-[#00C805] font-bold">✅ Active — deducts from each paycheck (next payday included)</span>`
+          : `<span id="payrollEtfStatus${suf}" class="text-amber-300 font-bold">⏸️ Paused — clock in to resume contributions (plan stays saved)</span>`;
         return `
-          <div class="mt-1 p-3 rounded-xl bg-[#141820] border border-emerald-500/30 flex flex-col gap-2">
+          <div id="payrollEtfBlock${suf}" data-payroll-opt-sig="${optSig}" class="mt-1 p-3 rounded-xl bg-[#141820] border border-emerald-500/30 flex flex-col gap-2">
             <div class="flex flex-wrap items-center justify-between gap-2">
               <span class="font-extrabold text-emerald-300 text-xs sm:text-sm">📈 Payroll ETF Plan — Auto-Invest Your Paycheck</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#1C2024] text-white">TOTAL ${totalPct}% / 20% • ≈ ${fmtMoney(dailyWage * totalPct / 100)}/day</span>
+              <span id="payrollEtfTotal${suf}" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#1C2024] text-white">TOTAL ${totalPct}% / 20% • ≈ ${fmtMoney(dailyWage * totalPct / 100)}/day</span>
             </div>
             <div class="text-[11px] text-[#8A919E]">Direct <strong class="text-white">5%–20%</strong> of every paycheck into up to <strong class="text-white">4 ETFs</strong> (5% steps). Deducted before your pay hits cash — it works even while investing is locked. <strong class="text-white">ETF only.</strong> Changes apply from the next paycheck. Quitting pauses contributions; your plan and ETF shares stay saved.</div>
             ${slotRows}
             <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5">
-              <div class="text-[11px] text-[#8A919E]">${statusLine} <span class="text-[#8A919E]">• Lifetime payroll contributions: <strong class="text-white font-mono">${fmtMoney(plan.totalContributed || 0)}</strong></span></div>
+              <div class="text-[11px] text-[#8A919E]">${statusLine} <span class="text-[#8A919E]">• Lifetime payroll contributions: <strong id="payrollEtfLifetime${suf}" class="text-white font-mono">${fmtMoney(plan.totalContributed || 0)}</strong></span></div>
               <button type="button" onclick="clearPayrollEtfPlan()" class="px-3 py-1.5 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-rose-300 font-bold text-[11px] transition">Clear Plan</button>
             </div>
           </div>`;
@@ -10922,6 +11037,9 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           totalInvested: 0, skips: 0, active: true, stale: false
         });
         showToast('Auto-Buy Scheduled', `${fmtMoney(amt)} ${freq === 'WEEKLY' ? 'every 7 days' : 'every day'} into ${rawSym}, starting Day ${G.day + (freq === 'WEEKLY' ? 7 : 1)}.`, true);
+        if (symEl) symEl.value = '';
+        if (amtEl) amtEl.value = '100';
+        if (freqEl) freqEl.value = 'DAILY';
         renderAll();
       };
       window.toggleAutoBuySchedule = function(id) {
@@ -11138,6 +11256,9 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         showToast('Added to Watchlist', targetPrice != null
           ? `${rawSym} will alert you when it ${direction === 'ABOVE' ? 'rises above' : 'falls below'} $${targetPrice.toFixed(2)}.`
           : `${rawSym} added to your watchlist (no price alert set).`, true);
+        if (symEl) symEl.value = '';
+        if (tgtEl) tgtEl.value = '';
+        if (dirEl) dirEl.value = 'ABOVE';
         renderAll();
       };
       window.toggleWatchlistSymbol = function(kind, sym) {
@@ -11322,6 +11443,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         else if (field === 'expiryDays') selectedStrategySpec.expiryDays = Math.max(1, Number(value) || 30);
         else if (field === 'lotSize') selectedStrategySpec.lotSize = Number(value) === 100 ? 100 : 10;
         else if (field === 'contracts') selectedStrategySpec.contracts = Math.max(1, Math.min(500, Math.floor(Number(value) || 1)));
+        const __sfAe = document.activeElement;
+        if (__sfAe && (__sfAe.tagName === 'SELECT' || __sfAe.tagName === 'INPUT')) { __sfAe.blur(); __sfAe.__sfBlurAt = 0; }
         renderOptionsTab();
       };
 
@@ -19294,7 +19417,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
 
         drawOptionPayoff(st.price, selK, selPrem, isCall, isBuy, contracts * lotSize);
         const stratBox = document.getElementById('optStrategyBox');
-        if (stratBox) stratBox.innerHTML = renderStrategyBox();
+        if (stratBox && !stableFormBusy(stratBox)) stratBox.innerHTML = renderStrategyBox();
       }
 
       window.selectOptionStrike = function(idx) {
@@ -29152,7 +29275,14 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           const roleTitle = getCasinoJobTitle(expDays);
           const aiWorkingCount = (G.aiPlayers || []).filter(a => a.isWorkingAtCasino).length;
 
-          jobDeskEl.innerHTML = `
+          if (stableFormBusy(jobDeskEl)) {
+            // A payroll select is open/focused: never rebuild the desk card
+            // (it would destroy the select + its native popup). Refresh the
+            // payroll displays surgically instead; the desk refreshes on the
+            // next tick after the popup closes.
+            syncPayrollEtfBlock('');
+          } else {
+            jobDeskEl.innerHTML = `
             <div class="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <div class="flex flex-wrap items-center gap-2">
@@ -29196,6 +29326,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             </div>
             ${renderPayrollEtfBlock()}
           `;
+          }
         }
         const cashEl = document.getElementById('casinoCashBalanceLabel');
         if (cashEl) cashEl.textContent = fmtMoney(G.human.cash);
@@ -31922,15 +32053,15 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         }
 
         const dripBox = document.getElementById('myPortfolioDripBox');
-        if (dripBox) dripBox.innerHTML = renderDripCard();
+        if (dripBox && !stableFormBusy(dripBox)) dripBox.innerHTML = renderDripCard();
         const dcaBox = document.getElementById('myPortfolioDcaBox');
-        if (dcaBox) dcaBox.innerHTML = renderDcaCard();
+        if (dcaBox && !stableFormBusy(dcaBox)) dcaBox.innerHTML = renderDcaCard();
         const goalCardBox = document.getElementById('myPortfolioGoalsBox');
-        if (goalCardBox) goalCardBox.innerHTML = renderGoalCard();
+        if (goalCardBox && !stableFormBusy(goalCardBox)) goalCardBox.innerHTML = renderGoalCard();
         const ordersBox = document.getElementById('myPortfolioOrdersBox');
-        if (ordersBox) ordersBox.innerHTML = renderOrdersCard();
+        if (ordersBox && !stableFormBusy(ordersBox)) ordersBox.innerHTML = renderOrdersCard();
         const watchBox = document.getElementById('myPortfolioWatchlistBox');
-        if (watchBox) watchBox.innerHTML = renderWatchlistCard();
+        if (watchBox && !stableFormBusy(watchBox)) watchBox.innerHTML = renderWatchlistCard();
 
         const kpiBox = document.getElementById('myPortfolioSummaryKpis');
         if (kpiBox) {
@@ -35092,15 +35223,24 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   }
   /* ---------- Job-app payroll ETF block: second instance of the Casino desk
      card's renderPayrollEtfBlock(), namespaced ('job') so no IDs duplicate.
-     Guarded write: only touches the DOM when the HTML actually changed, so
-     the 1s hero refresh never disturbs an open select. Single source of
-     truth is G.human.payrollEtf; both instances re-render from it. ---------- */
+     Mount once, then surgical sync only (window.syncPayrollEtfBlock): the old
+     innerHTML-swap on every 2s hero refresh destroyed an open select's native
+     popup, because option labels embedded live prices and the string-equality
+     guard fired on ~every refresh (live bug Jesse caught Nov 17, 2026).
+     Single source of truth is G.human.payrollEtf. ---------- */
   function renderJobPayroll() {
     var c = $('ph-job-payroll');
     if (!c || typeof window.renderPayrollEtfBlock !== 'function') return;
-    var html;
-    try { html = window.renderPayrollEtfBlock('job'); } catch (e) { return; }
-    if (c.innerHTML !== html) c.innerHTML = html;
+    if (!document.getElementById('payrollEtfBlock_job')) {
+      var html;
+      try { html = window.renderPayrollEtfBlock('job'); } catch (e) { return; }
+      if (!html) return;
+      c.innerHTML = html;
+      return;
+    }
+    if (typeof window.syncPayrollEtfBlock === 'function') {
+      try { window.syncPayrollEtfBlock('job'); } catch (e) {}
+    }
   }
   /* ---------- player name (shell-only; never touches game state/saves) ---------- */
   /* All name rendering uses textContent only — never innerHTML with the name. */
