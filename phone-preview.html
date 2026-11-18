@@ -7660,6 +7660,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           showToast('🔒 In Jail for Unpaid Taxes', 'You cannot buy lottery tickets while in Jail paying off tax debt ($50/day credit).', false);
           return false;
         }
+        if (!checkNotWorkingAtCasinoForGambling()) return false;
         ensureLotteryState(G);
         const lt = casinoState.lottery;
 
@@ -16569,6 +16570,26 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         return true;
       }
 
+      // Casino-games shift lock (Nov 18, 2026): while clocked in, NO gambling —
+      // the player is on the clock. Working-only predicate: jail NEVER leaves
+      // isWorkingAtCasino set (jail entry + the day step both clear it, and
+      // clock-in is refused in jail), and the explicit !inJail keeps jail
+      // behavior exactly as-is even for a pathological restored save.
+      function isCasinoGamblingLockedForShift() {
+        return Boolean(G && G.human && G.human.isWorkingAtCasino && !G.human.inJail);
+      }
+      function checkNotWorkingAtCasinoForGambling() {
+        if (!isCasinoGamblingLockedForShift()) return true;
+        showToast(
+          '💼 Working at Casino (Casino Games Locked)',
+          'While working the Casino night shift, you cannot gamble! Your shift ends automatically at 3:00 AM — or quit the job to play.',
+          false
+        );
+        return false;
+      }
+      window.isCasinoGamblingLockedForShift = isCasinoGamblingLockedForShift;
+      window.checkNotWorkingAtCasinoForGambling = checkNotWorkingAtCasinoForGambling;
+
       window.toggleWorkAtCasino = function(forceStateOpt = null) {
         if (!G || !G.human) return;
         const nextState = forceStateOpt !== null ? Boolean(forceStateOpt) : !Boolean(G.human.isWorkingAtCasino);
@@ -21668,6 +21689,9 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         const sc = casinoState.scratch;
         // If current ticket is active & unrevealed, settle it before switching denomination
         if (sc.hasActiveTicket && !sc.payoutClaimed) {
+          // On shift the settle is locked AND the price switch must not run:
+          // it would overwrite the paid ticket without paying it out.
+          if (!checkNotWorkingAtCasinoForGambling()) return;
           finalizeScratchTicketReveal(true);
         }
         sc.ticketPrice = p;
@@ -21691,6 +21715,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.buyScratchTicket = function(forcedPrize = null, priceOverride = null) {
+        if (!checkNotWorkingAtCasinoForGambling()) return false;
+
         const sc = casinoState.scratch;
         if (priceOverride && [5, 10, 20, 50, 100].includes(Number(priceOverride))) {
           sc.ticketPrice = Number(priceOverride);
@@ -21736,6 +21762,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       function finalizeScratchTicketReveal(silentIfSwitching = false) {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const sc = casinoState.scratch;
         if (!sc.hasActiveTicket || sc.payoutClaimed) return;
         const spec = getScratchSpec(sc.ticketPrice);
@@ -21800,6 +21828,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       window.scratchTicketAnimated = function() {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const sc = casinoState.scratch;
         if (!sc.hasActiveTicket || sc.payoutClaimed) {
           if (!window.buyScratchTicket()) return;
@@ -21811,6 +21841,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.instantScratchTicket = function() {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const sc = casinoState.scratch;
         if (!sc.hasActiveTicket || sc.payoutClaimed) {
           if (!window.buyScratchTicket()) return;
@@ -21988,6 +22020,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       window.startHorseRace = function(instantFinish = false) {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const hs = casinoState.horses;
         if (hs.inRace) return;
         if (!hs.lineup || hs.lineup.length !== 6) generateRaceHorsesForNextRace();
@@ -22333,6 +22367,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       window.startFootballGame = function(instantFinish = false, forcedWinner = null) {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const fb = casinoState.football;
         if (fb.inGame) return;
 
@@ -22573,6 +22609,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       window.startNascarRace = function(instantFinish = false) {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const ns = casinoState.nascar;
         if (ns.inRace) return;
         if (!ns.lineup || ns.lineup.length !== 6) generateNascarLineup();
@@ -22983,6 +23021,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       window.startSportMatch = function(sportKey, instantFinish = false, forcedWinner = null) {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         if (sportKey === 'FOOTBALL') {
           window.startFootballGame(instantFinish, forcedWinner);
           return;
@@ -23088,6 +23128,13 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       // Interactive Pointer/Touch Scratching Handler on #casinoMainCanvas
       function handleScratchCanvasPointer(clientX, clientY, isClickTap = false) {
         if (casinoState.activeGame !== 'SCRATCH') return;
+        // On shift the foil must not move: silent on drag moves (no toast
+        // spam from pointermove), lock toast on discrete taps. The ticket
+        // state persists untouched for after the shift.
+        if (isCasinoGamblingLockedForShift()) {
+          if (isClickTap) checkNotWorkingAtCasinoForGambling();
+          return;
+        }
         const sc = casinoState.scratch;
         const canvas = document.getElementById('casinoMainCanvas');
         if (!canvas) return;
@@ -24074,6 +24121,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       window.casinoBjDeal = function() {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         ensureAllCasinoAiTables();
         const bj = casinoState.bj;
         if (bj.inProgress) return;
@@ -24148,6 +24197,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.casinoBjHit = function() {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const bj = casinoState.bj;
         if (!bj.inProgress) return;
         if (revealDealerNaturalIfPending(bj)) return;
@@ -24179,6 +24230,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.casinoBjStand = function(fromDouble = false) {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const bj = casinoState.bj;
         if (!bj.inProgress) return;
         if (revealDealerNaturalIfPending(bj)) return;
@@ -24192,6 +24245,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.casinoBjDouble = function() {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const bj = casinoState.bj;
         if (!bj.inProgress) return;
         if (revealDealerNaturalIfPending(bj)) return;
@@ -24220,6 +24275,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.casinoBjSplit = function() {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const bj = casinoState.bj;
         if (!bj.inProgress) return;
         if (revealDealerNaturalIfPending(bj)) return;
@@ -24278,6 +24335,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.casinoBjInsurance = function() {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const bj = casinoState.bj;
         if (!bj.inProgress || bj.insuranceTaken || !bj.dealerHand[0] || bj.dealerHand[0].rank !== 'A') return;
         const active = syncActiveBjHandRef(bj);
@@ -24302,6 +24361,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.casinoBjSurrender = function() {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const bj = casinoState.bj;
         if (!bj.inProgress) return;
         if (revealDealerNaturalIfPending(bj)) return;
@@ -24353,6 +24414,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.dealBaccaratHand = function() {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         ensureAllCasinoAiTables();
         const bc = casinoState.baccarat;
         if (bc.inProgress) return;
@@ -24532,6 +24595,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.launchCasinoRocket = function(instantForTest = false) {
+        if (!checkNotWorkingAtCasinoForGambling()) return false;
+
         ensureAllCasinoAiTables();
         const rk = casinoState.rocket;
         if (rk.inFlight) return false;
@@ -24642,6 +24707,11 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.cashOutCasinoRocket = function(forcedMult = null) {
+        // Manual cash-outs (button tap, no forced multiplier) are locked on
+        // shift; automatic flight resolutions (auto cash-out / 1000x exit)
+        // pass an explicit multiplier and keep running — pre-committed
+        // automation, like limit-order execution while working.
+        if (forcedMult == null && !checkNotWorkingAtCasinoForGambling()) return false;
         const rk = casinoState.rocket;
         if (!rk.inFlight || rk.cashedOut || rk.crashed) return false;
         const exitMult = Number(Math.min(1000.00, Math.max(1.01, forcedMult || rk.currentMult)).toFixed(2));
@@ -25161,6 +25231,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       window.startCasinoChessMatch = function() {
+        if (!checkNotWorkingAtCasinoForGambling()) return false;
+
         const ch = casinoState.chess;
         if (ch.inMatch) return false;
         initChessBoardIfNeeded();
@@ -25354,6 +25426,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       window.executeChessMoveAndCheckState = executeChessMoveAndCheckState;
 
       window.playSmartChessMoveForHuman = function() {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const ch = casinoState.chess;
         if (!ch.inMatch) {
           if (!window.startCasinoChessMatch()) return;
@@ -25367,6 +25441,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.resignCasinoChessMatch = function() {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const ch = casinoState.chess;
         if (!ch.inMatch) return;
         settleChessMatchOutcome(ch, 'AI_WIN', 'You Resigned');
@@ -25423,6 +25499,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           `</div>`;
       }
       window.chooseChessPromotion = function(piece) {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
         if (Date.now() - chessPromoOpenedAt < CHESS_PROMO_GUARD_MS) return;
         const m = chessPromoPending;
         if (!m) return;
@@ -25436,6 +25513,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       function handleChessCanvasTap(clientX, clientY) {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const ch = casinoState.chess;
         initChessBoardIfNeeded();
         if (chessPromoPending) return;
@@ -25646,6 +25725,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       window.startVikingSamuraiBattle = function() {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         ensureAllCasinoAiTables();
         const vs = casinoState.vikingSamurai;
         if (vs.inBattle) {
@@ -25748,6 +25829,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       window.betMoreVikingSamuraiStage = function(customAddAmt, autoContinue = true) {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const vs = casinoState.vikingSamurai;
         if (!vs.inBattle) {
           window.startVikingSamuraiBattle();
@@ -25778,6 +25861,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       window.proceedVikingSamuraiNextStage = function(addBetFirst = false) {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const vs = casinoState.vikingSamurai;
         if (!vs.inBattle || vs.stagePhase !== 'STAGE_BETTING') return;
         if (addBetFirst) {
@@ -25855,6 +25940,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       window.resignVikingSamuraiBattle = function() {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const vs = casinoState.vikingSamurai;
         if (!vs.inBattle) return;
         settleVikingSamuraiBattleOutcome(true);
@@ -26018,6 +26105,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       window.spinRouletteWheel = function() {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         if (casinoState.anim && casinoState.anim.active && casinoState.anim.type === 'ROULETTE_SPIN') return; // Double-spin guard (casino-fix#3): a second tap must not cancel the in-flight spin's settlement.
         ensureAllCasinoAiTables();
         const bet = getValidatedCasinoBet();
@@ -26223,6 +26312,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       window.startHoldemHand = function() {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         ensureAllCasinoAiTables();
         const pk = casinoState.poker;
         if (pk.inHand) return;
@@ -26431,6 +26522,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       window.holdemPlayerAction = function(actionType) {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         const pk = casinoState.poker;
         if (!pk.inHand) return;
         const baseUnit = Math.max(10, casinoState.betAmount);
@@ -26599,6 +26692,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       // GAME 4: 4-ROW ONLY ROYAL GOLD VEGAS SLOT MACHINE (4×4 • 10 PAYLINES)
       // -----------------------------------------------------------------------
       window.spinSlotMachine = function(isMaxBet = false, instantFinish = false) {
+        if (!checkNotWorkingAtCasinoForGambling()) return;
+
         if (casinoState.anim && casinoState.anim.active && casinoState.anim.type === 'SLOTS_SPIN') return; // Double-spin guard (casino-fix#3): a second tap must not cancel the in-flight spin's settlement.
         if (isMaxBet) {
           setCasinoQuickBet(Math.min(Math.max(100, Math.floor((G ? G.human.cash : 1000) * 0.25)), 25000));
