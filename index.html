@@ -1258,6 +1258,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         <div id="ph-controls">
           <button type="button" class="ph-pill-btn" id="ph-btn-autoplay">&#10073;&#10073; Pause time</button>
           <button type="button" class="ph-pill-btn" id="ph-btn-stepday">+1 Day</button>
+          <button type="button" class="ph-pill-btn" id="ph-btn-stephour">+1 Hour</button>
           <button type="button" class="ph-pill-btn" id="ph-btn-music">&#9834; Music: Off</button>
         </div>
         <div id="ph-edit-bar" role="toolbar" aria-label="Arrange apps">
@@ -1337,6 +1338,9 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             <span id="simDateDisplay" class="text-[10px] sm:text-[11px] font-mono text-white px-1.5 font-semibold">Day 1 • 08:30 AM</span> <span id="marketHoursTopBadge" class="hidden md:inline text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[#00C805]/20 text-[#00C805] font-bold">🟢 Stock Mkt Open (8:30A–7P)</span>
             <button id="btnStepDay" type="button" class="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-[#00C805] hover:bg-[#00E006] text-black transition" title="Manually Skip +1 Day (1W Skip Removed)">
               +1D
+            </button>
+            <button id="btnStepHour" type="button" class="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-[#22262A] hover:bg-[#2E3338] text-[#00C805] transition" title="Fast-Forward +1 Hour (60 in-game minutes)">
+              +1H
             </button>
             <button id="btnAutoPlay" type="button" class="px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-[#22262A] hover:bg-[#2E3338] text-[#00C805] transition" title="1 Real Second = 1 In-Game Minute Clock">
               <span id="autoPlayIcon">⏸</span> <span id="autoPlayLabel" class="hidden xl:inline">1m/s</span>
@@ -16190,6 +16194,15 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       // - Stock Market (Stocks, ETFs, Options): Open 8:30 AM to 7:00 PM (minute 510 to 1140)
       // - Real Estate, eREITs, Forex, Commodities & 24H Managers: Open 24 Hours (00:00 to 24:00)
       window.stepSimulationMinute = stepSimulationMinute;
+      // +1 Hour fast-forward (Nov 18, 2026): exactly 60 in-game minutes
+      // through the existing minute path — the same as letting the clock run
+      // for 60 real seconds. Every hook fires naturally: hourly wages, the
+      // 3 AM auto clock-out, midnight day rollover, jail tax credit.
+      window.stepSimulationHour = stepSimulationHour;
+      function stepSimulationHour(shouldRender = true) {
+        if (!G) return;
+        for (let i = 0; i < 60; i++) stepSimulationMinute(i === 59 ? shouldRender : false);
+      }
       function stepSimulationMinute(shouldRender = true) {
         if (!G) return;
         ensureWorldEconomyState(G);
@@ -33328,6 +33341,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         };
 
         document.getElementById('btnStepDay').addEventListener('click', () => stepSimulationDay(false));
+        document.getElementById('btnStepHour').addEventListener('click', () => stepSimulationHour(false));
         const runBackgroundAwareClockTick = () => {
           if (!autoPlayTimer || !G) return;
           const now = Date.now();
@@ -36244,6 +36258,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     });
     $('ph-btn-autoplay').addEventListener('click', function () { var b = $('btnAutoPlay'); if (b) b.click(); setTimeout(refreshHUD, 150); });
     $('ph-btn-stepday').addEventListener('click', function () { var b = $('btnStepDay'); if (b) b.click(); setTimeout(refreshHUD, 300); });
+    $('ph-btn-stephour').addEventListener('click', function () { var b = $('btnStepHour'); if (b) b.click(); setTimeout(refreshHUD, 300); });
     $('ph-btn-music').addEventListener('click', function () { setMusic(!prefs.music); playSfx('toggle'); });
     $('ph-edit-done').addEventListener('click', exitEditMode);
     $('ph-edit-az').addEventListener('click', sortAZ);
