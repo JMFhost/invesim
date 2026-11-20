@@ -35421,7 +35421,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   }
 
   /* ---------- navigation ---------- */
-  function openApp(id, originEl) {
+  function openApp(id, originEl, opts) {
     if (!unlocked) return;
     closeNotifCenter();
     closeSwitcher();
@@ -35431,7 +35431,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     currentApp = id;
     noteRecentApp(id);
     playSfx('appOpen');
-    if (!histPushed) { try { history.pushState({ phApp: id }, ''); histPushed = true; } catch (e) {} }
+    syncAppUrl(id, opts);
     var win = windows[id];
     if (originEl && screenEl) {
       var r = originEl.getBoundingClientRect(), s = screenEl.getBoundingClientRect();
@@ -35467,10 +35467,84 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     if (histPushed) { histPushed = false; try { history.back(); } catch (e) { closeCurrentApp(); } return; }
     closeCurrentApp();
   }
-  /* the phone's real Back button returns home from inside an app; from the home screen it leaves the site, as normal */
-  window.addEventListener('popstate', function () {
-    if (currentApp) { histPushed = false; closeCurrentApp(); }
-  });
+  /* ---------- deep links: one shareable hash per app (#portfolio, #stocks, …) ----------
+     Home is the bare URL (no hash); #home is accepted as an alias and normalized
+     away. Slugs are the app ids, so all 16 apps (including #games, which still
+     redirects to jmfgames.com) have distinct, human-readable links.
+     History model — one entry per app session, exactly as before, but the URL
+     always shows the current app:
+       * first app open from home: history.pushState({phApp:id}, '', '#'+id)
+       * switch while inside an app: history.replaceState(...) — same entry,
+         URL + state updated, no second entry (back still returns home)
+       * goHome: history.back() as before.
+     How the two URL events split the work (this Chromium fires popstate for a
+     fragment navigation too — proven by a blank-page control — so popstate
+     alone cannot tell "user typed a hash" from "user pressed Back"):
+       * popstate reads history.state: {phApp} opens that app; {phLoad}
+         (the load entry, stamped at load when the URL carried a valid hash)
+         is home; null state means a fragment-created entry, so popstate
+         SKIPS it and the hashchange handler owns it.
+       * hashchange reads location.hash: opens that app (stamping the entry
+         it was born on with replaceState({phApp}) so a later Back to it
+         resolves by state), or home + hash strip for unknown hashes.
+       * the load entry is stamped {phLoad} ONLY when the load URL carried a
+         valid hash; a bare load keeps state null, so the existing
+         "no history entry before unlock" contract is unchanged.
+     A shared link lands straight in the app: the lock screen is SKIPPED on a
+     valid-hash load (same as jmfgames.com) — unlock() + openApp() run at init.
+     Unknown hash -> plain home, lock screen as normal. Reload mid-game
+     reopens the same game (its hash is in the URL).
+     Sub-tabs are in-app state, not apps: #etfs / #options are NOT slugs. */
+  var pendingDeepLink = null, syncingUrl = false;
+  function appFromHash() {
+    var h = '';
+    try { h = (location.hash || '').replace(/^#/, ''); } catch (e) {}
+    h = h.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    if (!h || h === 'home') return null;
+    return APP_MAP[h] ? h : null;
+  }
+  function bareUrl() { try { return location.pathname + location.search; } catch (e) { return ''; } }
+  function syncAppUrl(id, opts) {
+    if (opts && opts.fromUrl) return; /* the URL drove this open; nothing to write */
+    try {
+      if (!histPushed) { history.pushState({ phApp: id }, '', '#' + id); histPushed = true; }
+      else { history.replaceState({ phApp: id }, '', '#' + id); }
+    } catch (e) {}
+  }
+  function syncAppFromUrl(fromPop) {
+    if (syncingUrl) return;
+    if (!unlocked) { pendingDeepLink = appFromHash(); return; } /* lock screen: remember, open on unlock */
+    syncingUrl = true;
+    try {
+      var target = null, st = null;
+      try { st = history.state; } catch (e) {}
+      if (fromPop) {
+        if (!st) return; /* null state = fragment-created entry; hashchange owns it */
+        target = (st.phApp && APP_MAP[st.phApp]) ? st.phApp : null; /* {phLoad} -> home */
+      } else {
+        target = appFromHash();
+      }
+      if (target) {
+        if (target !== currentApp) {
+          if (APP_MAP[target].external) { window.location.href = APP_MAP[target].external; }
+          else {
+            openApp(target, null, { fromUrl: true }); histPushed = true;
+            /* Stamp the entry the fragment navigation created: it was born
+               with null state, so without this a later Back to it would read
+               "home" instead of this app. */
+            if (!fromPop) { try { history.replaceState({ phApp: target }, '', location.href); } catch (e) {} }
+          }
+        }
+      } else {
+        if (currentApp) closeCurrentApp();
+        histPushed = false;
+        var h = ''; try { h = location.hash || ''; } catch (e) {}
+        if (h) { try { history.replaceState(st, '', bareUrl()); } catch (e) {} } /* strip hash, keep the entry's state */
+      }
+    } finally { syncingUrl = false; }
+  }
+  window.addEventListener('popstate', function () { syncAppFromUrl(true); });
+  window.addEventListener('hashchange', function () { syncAppFromUrl(false); });
 
   /* ---------- app switcher: double-tap the home indicator ----------
      Session-only recency (no live snapshots, no persistence). The first tap
@@ -35651,6 +35725,10 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     lock.classList.add('ph-unlocking');
     setTimeout(function () { lock.style.display = 'none'; }, 500);
     if (prefs.music) startMusic();
+    /* Deep link remembered while locked (hash typed on the lock screen): the
+       fragment navigation already created its entry, so open without pushing
+       and stamp it — Back returns home, Forward re-opens the app. */
+    if (pendingDeepLink) { var id = pendingDeepLink; pendingDeepLink = null; openApp(id, null, { fromUrl: true }); try { history.replaceState({ phApp: id }, '', location.href); } catch (e) {} histPushed = true; }
   }
   function bindLock() {
     var lock = $('ph-lock'), startY = null, dragged = false;
@@ -36230,6 +36308,21 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   bindChrome();
   bindCasinoSfx();
   initAudio();
+  /* Deep link on load (matches jmfgames.com): a valid #hash skips the lock
+     screen and lands straight in the app. The load entry is stamped {phLoad}
+     so a later Back to it resolves to home, not the app. An unknown hash /
+     #home is normalized to the bare URL; a bare load shows the lock as normal. */
+  pendingDeepLink = appFromHash();
+  if (pendingDeepLink) {
+    try { history.replaceState({ phLoad: true }, '', location.href); } catch (e) {}
+    var _dl = pendingDeepLink; pendingDeepLink = null; /* clear first: unlock() would otherwise open it via its own remembered-link path (no push, stamp overwrite) */
+    unlock();
+    var _lk = $('ph-lock'); if (_lk) _lk.style.display = 'none'; /* no unlock-fade flash on a deep link */
+    openApp(_dl); /* normal open: pushes the one app entry, load entry keeps its {phLoad} stamp */
+  } else {
+    var _dlh = ''; try { _dlh = location.hash || ''; } catch (e) {}
+    if (_dlh) { try { history.replaceState(null, '', bareUrl()); } catch (e) {} }
+  }
   applyWallpaper(prefs.wallpaper || 0);
   renderWallpaperPicker();
   applyIconSize();
@@ -36280,6 +36373,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     get pages() { return pages.map(function (pg) { return pg.slice(); }); },
     get iconSize() { return prefs.iconSize || 100; },
     get histPushed() { return histPushed; },
+    get pendingDeepLink() { return pendingDeepLink; },
+    get deepLinks() { return APPS.map(function (a) { return '#' + a.id; }); },
     get audioRunning() { try { var m = musicMod(); return !!(m && m.getState && m.getState().running); } catch (e) { return false; } }
   };
 })();
