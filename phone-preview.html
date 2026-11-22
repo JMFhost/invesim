@@ -642,6 +642,24 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
 #ph-dots button { width: 7px; height: 7px; border-radius: 50%; border: none; padding: 0; background: rgba(255,255,255,.35); cursor: pointer; }
 #ph-dots button.ph-active { background: #fff; }
 
+/* ---- home banner widget (Nov 21, 2026) ----
+   Ad slot on the HOME screen only: it lives inside #ph-home (below the icon
+   grid, above the page dots), so it never appears inside an app or a game
+   and never sits where a game tap could land. In-flow flex child,
+   flex-shrink:0 via the #ph-home > :not(#ph-pages) rule above, so a filled
+   slot takes its height from #ph-pages only — the grid's scroll fallback
+   covers the 4th row at the shortest heights. Its bottom edge sits above
+   the 30px home indicator strip: 14px of #ph-home bottom padding + 16-18px
+   banner bottom margin = 30-32px above the screen bottom, so an ad never
+   covers the bottom buttons and stays tappable. EMPTY for now (BidVertiser
+   snippet outstanding — see the hook comment in ph-shell.html): the
+   ph-banner-empty rule hides the slot completely, so the home renders
+   exactly like the live build until fill lands. Fill (BidVertiser now,
+   AdSense unit on approval day) is documented in
+   banner-activation-2026-11-21.md (work dir, not shipped in the build). */
+#ph-banner { margin: 0 16px 18px; min-height: 44px; }
+#ph-banner.ph-banner-empty { display: none; }
+
 /* Compact tier (Nov 17 fit fix — breakpoint raised 700px -> 800px): the base
    tier's stack (ticker + greeting + widgets + goal text + 50px icons) needs
    ~795px of viewport height with a player name set, but the old 700px tier
@@ -671,6 +689,11 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
      Music pills are irrelevant while arranging, so hide them in edit mode and
      give the space back to the grid. */
   #ph-home.ph-editing #ph-controls { display: none; }
+  /* banner widget: shorter strip on short screens so the grid keeps its room.
+     margin-bottom stays >=16px: with #ph-home's 14px bottom padding that puts
+     the banner's bottom edge exactly at (or above) the top of the 30px home
+     indicator strip, so an ad stays tappable when the dots are hidden. */
+  #ph-banner { margin-bottom: 16px; min-height: 38px; }
 }
 
 /* Very short viewports (Nov 17 fit fix — breakpoint raised 620px -> 675px):
@@ -711,6 +734,10 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
   #ph-pages { margin-top: 2px; }
   .ph-grid { padding-top: 2px; }
   #ph-dots { padding: 4px 0 6px; }
+  /* banner widget: shortest strip on the shortest screens (margin-bottom
+     stays 16px — see the 800px tier note — so the banner never dips into
+     the home indicator strip). */
+  #ph-banner { margin-bottom: 16px; min-height: 34px; }
 }
 
 /* landscape phones: the framed 430/932 phone would shrink to ~156px wide and
@@ -1015,6 +1042,9 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
 .ph-size-picker { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 14px; }
 .ph-size-btn { flex: 1 1 0; min-width: 52px; border: 2px solid #2c3137; background: #1e2227; color: #fff; border-radius: 12px; padding: 10px 4px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
 .ph-size-btn.ph-size-sel { border-color: #00c805; background: #00c805; color: #000; }
+.ph-theme-picker { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 14px; }
+.ph-theme-btn { flex: 1 1 0; min-width: 52px; border: 2px solid #2c3137; background: #1e2227; color: #fff; border-radius: 12px; padding: 10px 4px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.ph-theme-btn.ph-on { border-color: #00c805; background: #00c805; color: #000; }
 .ph-wallpaper { background-size: cover; background-position: center; }
 .ph-wallpaper.ph-wallpaper-art::before { display: none; }
 .ph-wallpaper.ph-wallpaper-art > * { display: none; }
@@ -1191,6 +1221,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
 </style>
 </head>
 <body class="light-theme min-h-screen flex flex-col selection:bg-[#00C805] selection:text-black ph-shell-active ph-locked">
+<!-- Bidvertiser2109153 -->
 <!-- ==================== INVESIM PHONE SHELL (Phase 1) ==================== -->
 <div id="phone-stage">
   <div id="phone-frame">
@@ -1267,6 +1298,19 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           <button type="button" class="ph-edit-btn" id="ph-edit-reset">Reset order</button>
         </div>
         <div id="ph-pages"><div id="ph-track"></div></div>
+        <!-- Home banner widget (Nov 21): ad slot, HOME screen only. It lives
+             inside #ph-home (below the icon grid, above the page dots), so it
+             never appears inside an app or a game. EMPTY for now: the
+             BidVertiser snippet for invesim.com does not exist yet (the
+             BidVertiser account cleanup + site add is still running) — the
+             hook below marks exactly where it goes. While empty the slot
+             hides completely (ph-banner-empty), so the home renders exactly
+             like the live build. When the snippet lands, paste it in place of
+             the hook comment and drop the ph-banner-empty class; on AdSense
+             approval day the BidVertiser snippet comes OUT and the AdSense
+             banner unit goes in instead — see banner-activation-2026-11-21.md
+             (work dir, not shipped). -->
+        <div id="ph-banner" class="ph-banner-empty"><!-- BIDVERTISER HOOK: paste the BidVertiser ad-unit snippet for invesim.com here, then remove the ph-banner-empty class from this div. Request a slim banner unit (320x50 / responsive) so the strip stays slim. --></div>
         <div id="ph-dots" role="tablist" aria-label="Home screen pages"></div>
       </div>
 
@@ -33867,7 +33911,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
 </footer>
 <script>
 /* ================= ph-music.js — InveSim Phone music engine =================
-   Fifteen distinct generative WebAudio compositions. Code-only: NO audio files.
+   Thirty-one distinct generative WebAudio compositions in four themes
+   (Holidays, Originals, Children, Movies). Code-only: NO audio files.
    Pure logic/audio module: makes NO DOM writes. The shell UI wires it later.
 
    API (attached to window.__phMusic):
@@ -33886,22 +33931,33 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
      setTrack(index)           Switch track (integer; out-of-range wraps). If
                                playing, crossfades (~400ms) to the new track;
                                if stopped, just changes the persisted index.
-                               Returns getState().
-     next()                    Advance to the next track (random different track
-                               when shuffle is on). Returns getState().
-     prev()                    Previous track (shuffle history when shuffle is
-                               on, else index-1). Returns getState().
+                               If the target lives in another theme, the
+                               theme follows the track. Returns getState().
+     setTheme(id)              Switch theme ('holidays' | 'originals' |
+                               'children' | 'movies'; invalid id is ignored).
+                               Snaps to the first track of that theme;
+                               crossfades if playing. Returns getState().
+     themeOf(index)            The theme id of the track at that index.
+     next()                    Advance to the next track WITHIN the current
+                               theme (random different in-theme track when
+                               shuffle is on). Returns getState().
+     prev()                    Previous track WITHIN the current theme
+                               (shuffle history when shuffle is on, else
+                               index-1 within the theme). Returns getState().
      toggleShuffle()           Flip shuffle, persist it, return the new value.
      setOn(bool)               Persist on/off (prefs.music) and play()/stop().
                                Returns getState().
-     getState()                { on, trackIndex, trackName, shuffle, running }
+     getState()                { on, trackIndex, trackName, shuffle, running,
+                               theme, themeName, themeShort }
                                running = the scheduler is engaged (play called,
                                stop not called). See _debug().ctxState for the
                                live AudioContext state.
      getAudioContext()         The lazily created AudioContext, or null if not
                                created yet / unavailable. NEVER creates one.
                                Intended for ph-sfx.js context sharing.
-     TRACKS                    [{ name, key, bpm, timbre }, ...] (15 entries).
+     TRACKS                    [{ name, key, bpm, timbre, theme }, ...] (31 entries).
+     THEMES                    [{ id, label, short, icon }, ...] in picker order:
+                               holidays, originals, children, movies.
      _debug()                  { schedulers, liveNodes, fadingChains,
                                audibleChains, ctxState, generation, masterGain }
                                Diagnostic snapshot for harness verification.
@@ -33910,8 +33966,16 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
    INVESIM_PHONE_PREFS in ph-shell.js):
      music        boolean, default false (EXISTING key: on/off, same as the
                   old single-loop toggle — old saves keep working).
-     musicTrack   integer 0-14, default 0 (NEW key).
+     musicTrack   integer 0-30, default 0 (NEW key).
      musicShuffle boolean, default false (NEW key).
+     musicTheme   string, one of the THEMES ids, default 'holidays' (NEW key).
+                  DEFAULT RULE: the default applies only when NO theme choice
+                  is saved. Once a player picks a theme it persists forever
+                  and is never reset. If the stored track belongs to another
+                  theme than the current one (e.g. an old save with
+                  musicTrack 7 in Originals loading under the new default),
+                  init() snaps to the first track of the current theme and
+                  persists the snapped values.
    The module tolerates missing keys (defaults apply) and a missing prefs
    object entirely (internal state only, nothing persisted). NOTE for the
    shell integrator: ph-shell.js must extend its prefs loader/defaults to
@@ -33955,91 +34019,270 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     return i;
   }
 
-  /* ---------- the fifteen compositions ----------
+  /* ---------- the thirty-one compositions ----------
      Each track: own key, tempo, chord progression, timbre AND renderer.
      chords are MIDI note numbers. stepsPerChord is in eighth notes. */
   var TRACKS = [
-    { name: 'Morning Light', key: 'A minor', bpm: 60,
+    { theme: 'originals', name: 'Morning Light', key: 'A minor', bpm: 60,
       timbre: 'Warm detuned triangle pad + sine sub',
       voice: 'pad', stepsPerChord: 16,
       chords: [[57, 60, 64], [53, 57, 60], [55, 60, 64], [55, 59, 62]],
       sparkle: [[76, 79], [77, 76], [79, 81], [79, 74]] },
-    { name: 'Quiet Ledger', key: 'C major', bpm: 72,
+    { theme: 'originals', name: 'Quiet Ledger', key: 'C major', bpm: 72,
       timbre: 'Gentle piano arpeggio + soft bass',
       voice: 'piano', stepsPerChord: 8,
       chords: [[60, 64, 67, 72], [57, 60, 64, 69], [53, 57, 60, 65], [55, 59, 62, 67]],
       bass: [48, 45, 41, 43],
       arp: [0, 1, 2, 3, 2, 1, 2, 3] },
-    { name: 'Amber Hours', key: 'D minor', bpm: 66,
+    { theme: 'originals', name: 'Amber Hours', key: 'D minor', bpm: 66,
       timbre: 'Soft Rhodes-like chords, syncopated',
       voice: 'rhodes', stepsPerChord: 8,
       chords: [[62, 65, 69, 72], [58, 62, 65, 69], [65, 69, 72, 76], [60, 64, 67, 72]],
       bass: [50, 46, 53, 48],
       sparkle: [0, 81, 0, 79] },
-    { name: 'High Windows', key: 'G major', bpm: 54,
+    { theme: 'originals', name: 'High Windows', key: 'G major', bpm: 54,
       timbre: 'Airy bells over a sustained drone',
       voice: 'bells', stepsPerChord: 16,
       chords: [[43, 50, 55], [40, 47, 52], [48, 52, 55], [50, 54, 57]],
       bells: [[79, 83, 81, 86], [76, 79, 83, 79], [81, 79, 76, 72], [78, 81, 86, 81]] },
-    { name: 'Paper Lanterns', key: 'E minor', bpm: 84,
+    { theme: 'originals', name: 'Paper Lanterns', key: 'E minor', bpm: 84,
       timbre: 'Mellow fingerstyle plucks + soft pad',
       voice: 'pluck', stepsPerChord: 8,
       chords: [[52, 55, 59, 64], [55, 60, 64, 67], [55, 59, 62, 67], [54, 57, 62, 66]],
       bass: [[40, 47], [48, 55], [43, 50], [42, 57]] },
-    { name: 'Willow Shade', key: 'F major', bpm: 58,
+    { theme: 'originals', name: 'Willow Shade', key: 'F major', bpm: 58,
       timbre: 'Slow bowed string swells + soft bass',
       voice: 'strings', stepsPerChord: 16,
       chords: [[53, 57, 60], [50, 53, 57], [58, 62, 65], [55, 60, 64]],
       bass: [41, 38, 46, 43] },
-    { name: 'Moonlit Harbor', key: 'B-flat major', bpm: 63,
+    { theme: 'originals', name: 'Moonlit Harbor', key: 'B-flat major', bpm: 63,
       timbre: 'Soft flute melody over a warm pad',
       voice: 'flute', stepsPerChord: 8,
       chords: [[58, 62, 65], [55, 58, 62], [53, 57, 60], [57, 60, 65]],
       melody: [[70, 72, 74, 72], [69, 70, 72, 70], [65, 67, 69, 67], [69, 72, 74, 77]] },
-    { name: 'Rain on Glass', key: 'G minor', bpm: 76,
+    { theme: 'originals', name: 'Rain on Glass', key: 'G minor', bpm: 76,
       timbre: 'Sparse high droplets over a low pad',
       voice: 'drops', stepsPerChord: 8,
       chords: [[55, 58, 62], [53, 58, 62], [51, 55, 58], [54, 58, 62]],
       drops: [[79, 0, 82, 77], [77, 82, 0, 79], [76, 0, 79, 82], [78, 81, 0, 79]] },
-    { name: 'Golden Meadow', key: 'D major', bpm: 68,
+    { theme: 'originals', name: 'Golden Meadow', key: 'D major', bpm: 68,
       timbre: 'Rolling harp arpeggios + soft bass',
       voice: 'harp', stepsPerChord: 8,
       chords: [[62, 66, 69, 74], [57, 61, 66, 69], [59, 62, 66, 71], [61, 66, 69, 73]],
       arp: [0, 2, 1, 3, 2, 3, 1, 2] },
-    { name: 'Night Garden', key: 'F-sharp minor', bpm: 56,
+    { theme: 'originals', name: 'Night Garden', key: 'F-sharp minor', bpm: 56,
       timbre: 'Detuned choir voices, very slow',
       voice: 'choir', stepsPerChord: 16,
       chords: [[54, 57, 61], [52, 54, 57], [57, 61, 64], [55, 59, 62]] },
-    { name: 'Silver Creek', key: 'E major', bpm: 78,
+    { theme: 'originals', name: 'Silver Creek', key: 'E major', bpm: 78,
       timbre: 'Soft mallet tones + gentle bass',
       voice: 'marimba', stepsPerChord: 8,
       chords: [[52, 56, 59, 64], [49, 52, 56, 61], [54, 57, 59, 64], [51, 56, 59, 63]],
       bass: [40, 37, 42, 39],
       pat: [0, -1, 1, 2, -1, 3, 2, 1] },
-    { name: 'Drifting Clouds', key: 'A major', bpm: 50,
+    { theme: 'originals', name: 'Drifting Clouds', key: 'A major', bpm: 50,
       timbre: 'Chorused vibraphone + low pedal',
       voice: 'vibes', stepsPerChord: 16,
       chords: [[57, 61, 64], [54, 57, 61], [52, 57, 61], [56, 59, 61]],
       vibes: [[76, 79, 81, 79], [74, 76, 79, 76], [73, 76, 78, 76], [76, 78, 81, 78]] },
-    { name: 'Cedar & Sage', key: 'C minor', bpm: 62,
+    { theme: 'originals', name: 'Cedar & Sage', key: 'C minor', bpm: 62,
       timbre: 'Mellow nylon-guitar figures + bass',
       voice: 'guitar', stepsPerChord: 8,
       chords: [[48, 51, 55], [53, 55, 60], [46, 51, 55], [50, 53, 55]],
       bass: [36, 41, 34, 38] },
-    { name: 'Starlit Porch', key: 'E-flat major', bpm: 70,
+    { theme: 'originals', name: 'Starlit Porch', key: 'E-flat major', bpm: 70,
       timbre: 'High celesta sparkles over a soft pad',
       voice: 'celesta', stepsPerChord: 8,
       chords: [[51, 55, 58], [48, 53, 56], [53, 58, 62], [55, 58, 62]],
       sparkle: [[82, 79, 84, 82], [79, 82, 79, 77], [80, 84, 82, 79], [82, 84, 86, 84]] },
-    { name: 'Still Waters', key: 'B minor', bpm: 48,
+    { theme: 'originals', name: 'Still Waters', key: 'B minor', bpm: 48,
       timbre: 'Soft flute-organ chords + pedal tone',
       voice: 'organ', stepsPerChord: 16,
-      chords: [[47, 50, 54], [45, 50, 54], [52, 55, 59], [50, 54, 57]] }
+      chords: [[47, 50, 54], [45, 50, 54], [52, 55, 59], [50, 54, 57]] },
+    /* ---- Holidays: Christmas (5) + New Year (3) ----
+       The six public-domain tunes below encode the REAL melody as a
+       per-chord melody array on the flute voice: one note per quarter
+       beat, four notes per chord. Where the original holds a note or
+       runs in eighth notes, the beat repeats the note sounding on that
+       beat, so the pitch sequence stays exact. (The bells voice only
+       plays 2 notes per chord at stepsPerChord 8, so all six carols
+       use flute — the only renderer with a 4-note melody grid.) */
+    /* Jingle Bells — chorus, quarter-note reduction of the 51-note chorus:
+       B B B B | B D G A | C C C B | B A B D | B B B B | B D G A | C C C B |
+       D D A G. G mixolydian: the tune uses scale degrees 1-5 only, so
+       the F-natural of mixolydian never sounds. */
+    { name: 'Jingle Bells', key: 'G mixolydian', bpm: 96, theme: 'holidays',
+      timbre: 'Bright flute melody over a festive pad',
+      voice: 'flute', stepsPerChord: 8,
+      chords: [[55, 59, 62], [55, 59, 62], [48, 52, 55], [55, 59, 62],
+               [55, 59, 62], [55, 59, 62], [48, 52, 55], [55, 59, 62]],
+      melody: [[71, 71, 71, 71], [71, 67, 69, 71], [72, 72, 72, 71], [71, 69, 71, 74],
+               [71, 71, 71, 71], [71, 67, 69, 71], [72, 72, 72, 71], [74, 74, 69, 67]] },
+    /* Silent Night — full verse (46 notes), quarter-note reduction, in
+       A-flat major: Eb F Eb C | Eb F Eb C | Bb Bb G Ab | Ab Eb F F |
+       Ab G F Eb | F Eb C F | F Ab G F | Eb F Eb C | Bb Bb Db Bb |
+       G Ab C Ab | Eb C Eb Db | Bb Ab (held). Uses degrees 1-7, so it
+       needs a true major key (mixolydian/lydian would flatten the 7th/4th). */
+    { name: 'Silent Night', key: 'A-flat major', bpm: 52, theme: 'holidays',
+      timbre: 'Soft flute melody over a warm pad',
+      voice: 'flute', stepsPerChord: 8,
+      chords: [[56, 60, 63], [56, 60, 63], [58, 63, 67], [56, 60, 63],
+               [53, 56, 60], [56, 60, 63], [53, 56, 60], [56, 60, 63],
+               [58, 63, 67], [56, 60, 63], [56, 60, 63], [56, 60, 63]],
+      melody: [[63, 65, 63, 60], [63, 65, 63, 60], [70, 70, 67, 68], [68, 63, 65, 65],
+               [68, 67, 65, 63], [65, 63, 60, 65], [65, 68, 67, 65], [63, 65, 63, 60],
+               [70, 70, 73, 70], [67, 68, 72, 68], [63, 60, 63, 73], [70, 68, 68, 68]] },
+    /* Deck the Halls — lines 1 + 3 (A and B sections), quarter-note
+       reduction, in D-flat major: Ab Gb F Eb | Db Eb F Db | Eb F Gb Eb |
+       F Eb Db C | Db Eb F Gb | Eb F Gb Ab | Eb F Gb Ab | Bb C Db C |
+       Bb Ab (held). Uses degrees 1-7, so it needs a true major key. */
+    { name: 'Deck the Halls', key: 'D-flat major', bpm: 104, theme: 'holidays',
+      timbre: 'Bright flute melody over a soft pad',
+      voice: 'flute', stepsPerChord: 8,
+      chords: [[61, 65, 68], [61, 65, 68], [61, 65, 68], [61, 65, 68],
+               [66, 70, 73], [61, 65, 68], [66, 70, 73], [61, 65, 68],
+               [61, 65, 68]],
+      melody: [[68, 66, 65, 63], [61, 63, 65, 61], [63, 65, 66, 63], [65, 63, 61, 60],
+               [61, 63, 65, 66], [63, 65, 66, 68], [63, 65, 66, 68], [70, 72, 73, 72],
+               [70, 68, 68, 68]] },
+    /* We Wish You a Merry Christmas — full verse (52 notes), quarter-note
+       reduction, in F-sharp major: C# F# F# G# | F# E# D# D# | D# G# G# A# |
+       G# F# E# C# | C# A# A# B | A# G# F# D# | C# C# D# G# | E# F# C# F# |
+       F# F# E# E# | F# E# D# C# | G# A# G# F# | C# C# C# C# | D# G# E# F#.
+       Note 77 is E-sharp, the leading tone of F-sharp major. */
+    { name: 'We Wish You a Merry Christmas', key: 'F-sharp major', bpm: 92, theme: 'holidays',
+      timbre: 'Warm flute melody over a soft pad',
+      voice: 'flute', stepsPerChord: 8,
+      chords: [[54, 58, 61], [54, 58, 61], [59, 63, 66], [54, 58, 61],
+               [59, 63, 66], [54, 58, 61], [54, 58, 61], [54, 58, 61],
+               [54, 58, 61], [54, 58, 61], [59, 63, 66], [54, 58, 61],
+               [54, 58, 61]],
+      melody: [[73, 78, 78, 80], [78, 77, 75, 75], [75, 80, 80, 82], [80, 78, 77, 73],
+               [73, 82, 82, 83], [82, 80, 78, 75], [73, 73, 75, 80], [77, 78, 73, 78],
+               [78, 78, 77, 77], [78, 77, 75, 73], [80, 82, 80, 78], [73, 73, 73, 73],
+               [75, 80, 77, 78]] },
+    /* O Christmas Tree — opening + middle (31 notes), quarter-note
+       reduction, in B major: F# B B B | C# D# D# D# | D# C# D# E |
+       A# C# B F# | F# F# D# G# | F# E E E | E C# F# E | E D# D# D#.
+       The low F-sharp pickup leaps up to B. Uses degrees 1-7, so it
+       needs a true major key. */
+    { name: 'O Christmas Tree', key: 'B major', bpm: 64, theme: 'holidays',
+      timbre: 'Soft flute melody over a warm pad',
+      voice: 'flute', stepsPerChord: 8,
+      chords: [[47, 51, 54], [47, 51, 54], [54, 58, 61], [54, 58, 61],
+               [47, 51, 54], [52, 56, 59], [54, 58, 61], [47, 51, 54]],
+      melody: [[54, 59, 59, 59], [61, 63, 63, 63], [63, 61, 63, 64], [58, 61, 59, 66],
+               [66, 63, 68, 66], [66, 64, 64, 64], [64, 61, 66, 64], [64, 63, 63, 63]] },
+    /* Auld Lang Syne — full song (56 notes), quarter-note reduction, in
+       E mixolydian (pentatonic: no 4th, no 7th): B E E E | G# F# E F# |
+       G# E E G# | B C# C# B | G# G# E F# | E F# G# E | A A B E |
+       C# B G# G# | E F# E F# | C# B G# G# | B C# C# B | G# G# E F# |
+       E F# G# E | A A B E. */
+    { name: 'Auld Lang Syne', key: 'E mixolydian', bpm: 74, theme: 'holidays',
+      timbre: 'Soft flute melody over a warm pad',
+      voice: 'flute', stepsPerChord: 8,
+      chords: [[52, 56, 59], [52, 56, 59], [52, 56, 59], [52, 56, 59],
+               [57, 61, 64], [52, 56, 59], [57, 61, 64], [57, 61, 64],
+               [52, 56, 59], [57, 61, 64], [52, 56, 59], [57, 61, 64],
+               [52, 56, 59], [52, 56, 59]],
+      melody: [[59, 64, 64, 64], [68, 66, 64, 66], [68, 64, 64, 68], [71, 73, 73, 71],
+               [68, 68, 64, 66], [64, 66, 68, 64], [57, 57, 59, 64], [73, 71, 68, 68],
+               [64, 66, 64, 66], [73, 71, 68, 68], [71, 73, 73, 71], [68, 68, 64, 66],
+               [64, 66, 68, 64], [57, 57, 59, 64]] },
+    /* Midnight Countdown — original New Year party piece: driving Rhodes
+       stabs over a deep bass, counting down to midnight. */
+    { name: 'Midnight Countdown', key: 'F minor', bpm: 120, theme: 'holidays',
+      timbre: 'Driving Rhodes stabs + deep bass',
+      voice: 'rhodes', stepsPerChord: 8,
+      chords: [[53, 56, 60], [56, 60, 63], [49, 53, 56], [48, 52, 55]],
+      bass: [41, 44, 37, 36],
+      sparkle: [77, 81, 79, 84] },
+    /* First Light of January — original New Year dawn piece: a slow pad
+       brightening into the new year. */
+    { name: 'First Light of January', key: 'C mixolydian', bpm: 59, theme: 'holidays',
+      timbre: 'Slow dawn pad + rising sparkle',
+      voice: 'pad', stepsPerChord: 16,
+      chords: [[60, 64, 67], [57, 60, 65], [55, 59, 62], [58, 62, 65]],
+      sparkle: [[72, 76], [74, 77], [76, 79], [74, 79]] },
+    /* ---- Children: simple cheerful originals / lullabies ---- */
+    { name: 'Little Duck Parade', key: 'D mixolydian', bpm: 100, theme: 'children',
+      timbre: 'Playful marimba march + bass',
+      voice: 'marimba', stepsPerChord: 8,
+      chords: [[62, 66, 69], [55, 59, 62], [57, 61, 64], [62, 66, 69]],
+      bass: [50, 43, 45, 50],
+      pat: [0, -1, 1, 2, -1, 3, 2, 1] },
+    { name: 'Moonlight Lullaby', key: 'E dorian', bpm: 46, theme: 'children',
+      timbre: 'Gentle celesta sparkles over a soft pad',
+      voice: 'celesta', stepsPerChord: 8,
+      chords: [[52, 55, 59], [48, 52, 55], [55, 59, 62], [50, 54, 57]],
+      sparkle: [[76, 79, 81, 79], [74, 76, 79, 76], [76, 79, 81, 79], [74, 77, 79, 76]] },
+    { name: 'Bouncing Balloon', key: 'A mixolydian', bpm: 112, theme: 'children',
+      timbre: 'Bouncy fingerstyle plucks + soft pad',
+      voice: 'pluck', stepsPerChord: 8,
+      chords: [[57, 61, 64], [50, 54, 57], [52, 56, 59], [57, 61, 64]],
+      bass: [[45, 52], [50, 57], [47, 54], [45, 52]] },
+    { name: 'Rainbow Train', key: 'B-flat minor', bpm: 108, theme: 'children',
+      timbre: 'Rolling harp arpeggios + soft bass',
+      voice: 'harp', stepsPerChord: 8,
+      chords: [[58, 61, 65], [54, 58, 61], [49, 53, 56], [53, 57, 60]],
+      arp: [0, 2, 1, 3, 2, 3, 1, 2] },
+    /* ---- Movies: original cinematic-style pieces "in the style of" film
+       music. No copyrighted movie themes are quoted or encoded here. ---- */
+    { name: 'Epic Quest Overture', key: 'D dorian', bpm: 80, theme: 'movies',
+      timbre: 'Sweeping string swells + deep bass',
+      voice: 'strings', stepsPerChord: 16,
+      chords: [[62, 65, 69], [60, 64, 67], [65, 69, 72], [55, 59, 62]],
+      bass: [50, 48, 53, 43] },
+    { name: 'Midnight Detective', key: 'A dorian', bpm: 82, theme: 'movies',
+      timbre: 'Noir piano figures + low bass',
+      voice: 'piano', stepsPerChord: 8,
+      chords: [[57, 60, 64], [55, 59, 62], [62, 66, 69], [64, 67, 71]],
+      bass: [45, 43, 50, 40],
+      arp: [0, 1, 2, 3, 2, 1, 2, 3] },
+    { name: 'Starlight Voyage', key: 'G lydian', bpm: 86, theme: 'movies',
+      timbre: 'Dreamy chorused vibraphone + low pedal',
+      voice: 'vibes', stepsPerChord: 16,
+      chords: [[55, 59, 62], [57, 61, 64], [59, 62, 66], [62, 66, 69]],
+      vibes: [[76, 79, 81, 79], [74, 76, 79, 76], [76, 78, 81, 78], [74, 79, 81, 79]] },
+    { name: 'The Last Sunset', key: 'E-flat minor', bpm: 88, theme: 'movies',
+      timbre: 'Solemn organ chords + deep pedal',
+      voice: 'organ', stepsPerChord: 16,
+      chords: [[51, 54, 58], [54, 58, 61], [47, 51, 54], [58, 62, 65]] }
   ];
+
+  /* ---------- themes ----------
+     Four themes, picker order: Holidays (Christmas & New Year — the
+     default), Originals (the v1.1 fifteen), Children, Movies. A track's
+     `theme` field is the single source of truth; themeIndices() derives
+     the per-theme track lists so next/prev/shuffle never leave the
+     current theme. */
+  var THEMES = [
+    { id: 'holidays', label: '🎄 Christmas & New Year', short: 'Holidays', icon: '🎄' },
+    { id: 'originals', label: 'Originals', short: 'Originals', icon: '🎵' },
+    { id: 'children', label: 'Children', short: 'Children', icon: '🧒' },
+    { id: 'movies', label: 'Movies', short: 'Movies', icon: '🎬' }
+  ];
+  var DEFAULT_THEME = 'holidays';
+  function themeMeta(id) {
+    for (var i = 0; i < THEMES.length; i++) { if (THEMES[i].id === id) { return THEMES[i]; } }
+    return THEMES[0];
+  }
+  function themeIndices(id) {
+    var out = [];
+    for (var i = 0; i < TRACKS.length; i++) { if (TRACKS[i].theme === id) { out.push(i); } }
+    return out;
+  }
+  function themeFirst(id) {
+    var list = themeIndices(id);
+    return list.length ? list[0] : 0;
+  }
+  function themeOf(i) {
+    return TRACKS[clampTrack(i, 0)].theme;
+  }
 
   /* ---------- state ---------- */
   var prefsRef = null, saveFn = null;
-  var on = false, trackIndex = 0, shuffle = false;
+  var on = false, trackIndex = 0, shuffle = false, theme = DEFAULT_THEME;
   var history = [];
   var ctx = null, master = null, audioOK = true, audioTried = false;
   var schedTimer = null, generation = 0, nextTime = 0, nextStep = 0;
@@ -34052,6 +34295,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       prefsRef.music = on;
       prefsRef.musicTrack = trackIndex;
       prefsRef.musicShuffle = shuffle;
+      prefsRef.musicTheme = theme;
     } catch (e) {}
     if (typeof saveFn === 'function') {
       try { saveFn(); } catch (e) {}
@@ -34434,8 +34678,20 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     if (typeof save === 'function') { saveFn = save; }
     if (prefsRef) {
       if (typeof prefsRef.music === 'boolean') { on = prefsRef.music; }
+      if (typeof prefsRef.musicTheme === 'string' && themeIndices(prefsRef.musicTheme).length) { theme = prefsRef.musicTheme; }
       if (typeof prefsRef.musicTrack === 'number') { trackIndex = clampTrack(prefsRef.musicTrack, trackIndex); }
       if (typeof prefsRef.musicShuffle === 'boolean') { shuffle = prefsRef.musicShuffle; }
+      /* A stored track from another theme (e.g. an old save with musicTrack 7
+         loading under the new holidays default) snaps to the first track of
+         the current theme; the snapped values persist. When no theme choice
+         is saved at all, the holidays default is recorded now, so the choice
+         is explicit from here on and never reset. */
+      if (TRACKS[trackIndex].theme !== theme) {
+        trackIndex = themeFirst(theme);
+        persist();
+      } else if (typeof prefsRef.musicTheme !== 'string' || !themeIndices(prefsRef.musicTheme).length) {
+        persist();
+      }
     }
     return getState();
   }
@@ -34473,7 +34729,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     } catch (e) {}
   }
   function getState() {
-    return { on: on, trackIndex: trackIndex, trackName: TRACKS[trackIndex].name, shuffle: shuffle, running: !!schedTimer };
+    var th = themeMeta(theme);
+    return { on: on, trackIndex: trackIndex, trackName: TRACKS[trackIndex].name, shuffle: shuffle, running: !!schedTimer, theme: theme, themeName: th.label, themeShort: th.short };
   }
   function setTrack(i) {
     if (typeof i !== 'number' || isNaN(i) || !isFinite(i)) { return getState(); }
@@ -34481,6 +34738,22 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     var idx = ((Math.floor(i) % n) + n) % n;
     var changed = idx !== trackIndex;
     trackIndex = idx;
+    /* Absolute-index switch: if the target lives in another theme, the
+       theme follows the track so engine state stays consistent. */
+    if (TRACKS[idx].theme !== theme) { theme = TRACKS[idx].theme; history = []; }
+    persist();
+    if (changed && schedTimer && ctx) { beginTrack(); }
+    return getState();
+  }
+  /* Switch theme: validates the id, snaps to the first track of that theme,
+     persists, and crossfades if playing. Returns getState(). */
+  function setTheme(id) {
+    if (typeof id !== 'string' || !themeIndices(id).length) { return getState(); }
+    var first = themeFirst(id);
+    var changed = id !== theme || first !== trackIndex;
+    theme = id;
+    trackIndex = first;
+    history = [];
     persist();
     if (changed && schedTimer && ctx) { beginTrack(); }
     return getState();
@@ -34488,28 +34761,34 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   function next() {
     history.push(trackIndex);
     if (history.length > 20) { history.shift(); }
-    var idx;
+    var list = themeIndices(theme), pos = list.indexOf(trackIndex), idx;
     if (shuffle) {
       idx = trackIndex;
       var tries = 0;
-      while (idx === trackIndex && tries < 10) {
-        idx = Math.floor(Math.random() * TRACKS.length);
+      while (idx === trackIndex && tries < 10 && list.length > 1) {
+        idx = list[Math.floor(Math.random() * list.length)];
         tries++;
       }
-      if (idx === trackIndex) { idx = (trackIndex + 1) % TRACKS.length; }
+      if (idx === trackIndex) { idx = list[(pos + 1) % list.length]; }
     } else {
-      idx = (trackIndex + 1) % TRACKS.length;
+      idx = list[(pos + 1) % list.length];
     }
     return setTrack(idx);
   }
   function prev() {
-    var idx;
+    var list = themeIndices(theme), pos = list.indexOf(trackIndex), idx;
     if (shuffle && history.length) {
-      idx = history.pop();
+      /* Shuffle history may predate a theme switch; only step back inside
+         the current theme (cross-theme entries are dropped). */
+      while (history.length) {
+        var h = history.pop();
+        if (list.indexOf(h) !== -1) { idx = h; break; }
+      }
+      if (idx === undefined) { idx = list[(pos - 1 + list.length) % list.length]; }
     } else {
       history.push(trackIndex);
       if (history.length > 20) { history.shift(); }
-      idx = (trackIndex - 1 + TRACKS.length) % TRACKS.length;
+      idx = list[(pos - 1 + list.length) % list.length];
     }
     return setTrack(idx);
   }
@@ -34539,7 +34818,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
 
   var META = [];
   for (var m = 0; m < TRACKS.length; m++) {
-    META.push({ name: TRACKS[m].name, key: TRACKS[m].key, bpm: TRACKS[m].bpm, timbre: TRACKS[m].timbre });
+    META.push({ name: TRACKS[m].name, key: TRACKS[m].key, bpm: TRACKS[m].bpm, timbre: TRACKS[m].timbre, theme: TRACKS[m].theme });
   }
 
   root.__phMusic = {
@@ -34547,6 +34826,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     play: play,
     stop: stop,
     setTrack: setTrack,
+    setTheme: setTheme,
+    themeOf: themeOf,
     next: next,
     prev: prev,
     toggleShuffle: toggleShuffle,
@@ -34554,8 +34835,9 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     getState: getState,
     getAudioContext: getAudioContext,
     TRACKS: META,
+    THEMES: THEMES,
     _debug: debug,
-    version: '1.1'
+    version: '1.2'
   };
 })();
 
@@ -34946,8 +35228,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     return chars.length > 20 ? chars.slice(0, 20).join('') : s;
   }
   var PREFS_KEY = 'INVESIM_PHONE_PREFS';
-  var prefs = { music: false, order: null, stocksTab: 'stocks', playerName: '', musicTrack: 0, musicShuffle: false, sfxOn: true, wallpaper: 0, iconSize: 100, pages: null };
-  try { var raw = localStorage.getItem(PREFS_KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p.music === 'boolean') prefs.music = p.music; if (p && Array.isArray(p.order)) prefs.order = p.order; if (p && (p.stocksTab === 'stocks' || p.stocksTab === 'etfs' || p.stocksTab === 'options')) prefs.stocksTab = p.stocksTab; if (p && typeof p.playerName === 'string') prefs.playerName = normalizeName(p.playerName); if (p && typeof p.musicTrack === 'number' && isFinite(p.musicTrack)) prefs.musicTrack = Math.max(0, Math.min(14, Math.floor(p.musicTrack))); if (p && typeof p.musicShuffle === 'boolean') prefs.musicShuffle = p.musicShuffle; if (p && typeof p.sfxOn === 'boolean') prefs.sfxOn = p.sfxOn; if (p && typeof p.wallpaper === 'number' && isFinite(p.wallpaper)) prefs.wallpaper = Math.max(0, Math.min(14, Math.floor(p.wallpaper))); if (p && ICON_SIZES.indexOf(p.iconSize) !== -1) prefs.iconSize = p.iconSize; if (p && Array.isArray(p.pages)) prefs.pages = p.pages; } } catch (e) {}
+  var prefs = { music: false, order: null, stocksTab: 'stocks', playerName: '', musicTrack: 0, musicTheme: 'holidays', musicShuffle: false, sfxOn: true, wallpaper: 0, iconSize: 100, pages: null };
+  try { var raw = localStorage.getItem(PREFS_KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p.music === 'boolean') prefs.music = p.music; if (p && Array.isArray(p.order)) prefs.order = p.order; if (p && (p.stocksTab === 'stocks' || p.stocksTab === 'etfs' || p.stocksTab === 'options')) prefs.stocksTab = p.stocksTab; if (p && typeof p.playerName === 'string') prefs.playerName = normalizeName(p.playerName); if (p && typeof p.musicTrack === 'number' && isFinite(p.musicTrack)) prefs.musicTrack = Math.max(0, Math.min(30, Math.floor(p.musicTrack))); if (p && typeof p.musicTheme === 'string' && (p.musicTheme === 'holidays' || p.musicTheme === 'originals' || p.musicTheme === 'children' || p.musicTheme === 'movies')) prefs.musicTheme = p.musicTheme; if (p && typeof p.musicShuffle === 'boolean') prefs.musicShuffle = p.musicShuffle; if (p && typeof p.sfxOn === 'boolean') prefs.sfxOn = p.sfxOn; if (p && typeof p.wallpaper === 'number' && isFinite(p.wallpaper)) prefs.wallpaper = Math.max(0, Math.min(14, Math.floor(p.wallpaper))); if (p && ICON_SIZES.indexOf(p.iconSize) !== -1) prefs.iconSize = p.iconSize; if (p && Array.isArray(p.pages)) prefs.pages = p.pages; } } catch (e) {}
   function savePrefs() { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {} }
   function validOrder(o) {
     if (!Array.isArray(o) || o.length !== APPS.length) return false;
@@ -35126,6 +35408,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           '<div class="ph-set-group">' +
             '<div class="ph-set-row"><span class="ph-set-ic">🎵</span><span class="ph-set-tx"><b>Soft music</b><i id="ph-music-now">Off</i></span><button type="button" class="ph-toggle" id="ph-settings-music-toggle" aria-label="Toggle music"></button></div>' +
             '<div class="ph-set-row ph-music-controls"><button type="button" class="ph-music-nav" id="ph-music-prev" aria-label="Previous track">⏮</button><span class="ph-music-track" id="ph-music-track-name" role="button" tabindex="0" title="Tap for next track">—</span><button type="button" class="ph-music-nav" id="ph-music-next" aria-label="Next track">⏭</button><button type="button" class="ph-set-pill" id="ph-music-shuffle">Shuffle: Off</button></div>' +
+            '<div class="ph-theme-picker" id="ph-music-theme-picker"><button type="button" class="ph-theme-btn" data-theme="holidays">🎄 Holidays</button><button type="button" class="ph-theme-btn" data-theme="originals">Originals</button><button type="button" class="ph-theme-btn" data-theme="children">Children</button><button type="button" class="ph-theme-btn" data-theme="movies">Movies</button></div>' +
             '<div class="ph-set-row"><span class="ph-set-ic">🔊</span><span class="ph-set-tx"><b>Sound effects</b><i>Taps, casino sounds, stingers</i></span><button type="button" class="ph-toggle" id="ph-settings-sfx-toggle" aria-label="Toggle sound effects"></button></div>' +
           '</div>' +
           '<div class="ph-set-group">' +
@@ -35159,6 +35442,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     var mn = $('ph-music-next'); if (mn) mn.addEventListener('click', function () { musicNext(); playSfx('tap'); });
     var mt = $('ph-music-track-name'); if (mt) { mt.addEventListener('click', function () { musicNext(); playSfx('tap'); }); mt.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); musicNext(); playSfx('tap'); } }); }
     var ms = $('ph-music-shuffle'); if (ms) ms.addEventListener('click', function () { musicToggleShuffle(); playSfx('toggle'); });
+    var tp = $('ph-music-theme-picker'); if (tp) tp.addEventListener('click', function (e) { var b = e.target.closest ? e.target.closest('[data-theme]') : null; if (b) { setMusicTheme(b.getAttribute('data-theme')); playSfx('tap'); } });
     var sx = $('ph-settings-sfx-toggle'); if (sx) sx.addEventListener('click', function () { var on = prefs.sfxOn === false; setSfx(on); if (on) playSfx('toggle'); });
     var wp = $('ph-wallpaper-picker'); if (wp) wp.addEventListener('click', function (e) { var b = e.target.closest ? e.target.closest('[data-wp]') : null; if (b) { setWallpaper(parseInt(b.getAttribute('data-wp'), 10) || 0); playSfx('tap'); } });
     var sp = $('ph-size-picker'); if (sp) sp.addEventListener('click', function (e) { var b = e.target.closest ? e.target.closest('[data-size]') : null; if (b) { setIconSize(parseInt(b.getAttribute('data-size'), 10) || 100); playSfx('tap'); } });
@@ -35421,14 +35705,32 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   }
 
   /* ---------- navigation ---------- */
+  /* HOME BANNER WIDGET (Nov 21): the ad slot is home-only. #ph-home stays
+     laid out underneath open app windows, so merely living inside #ph-home
+     is not enough — hide the slot whenever an app is open, show it on home.
+     openApp/closeCurrentApp are the single choke points (back/forward and
+     deep links funnel through them), so syncing here covers every path.
+     While the slot is empty (ph-banner-empty) it is display:none by CSS, so
+     this only matters once fill lands. */
+  function syncBanner() {
+    var b = document.getElementById('ph-banner');
+    if (b) b.style.display = currentApp ? 'none' : '';
+  }
   function openApp(id, originEl, opts) {
     if (!unlocked) return;
     closeNotifCenter();
     closeSwitcher();
     var app = APP_MAP[id]; if (!app) return;
     if (app.external) { window.location.href = app.external; return; } /* redirect, same tab: leaving the page stops the music */
+    /* HOME BANNER WIDGET (Nov 21): the #ph-banner slot in ph-shell.html holds
+       the BidVertiser ad-unit snippet for invesim.com (hook marked in the
+       HTML; snippet outstanding as of Nov 21 — see
+       banner-activation-2026-11-21.md, work dir, not shipped). On AdSense
+       approval day the BidVertiser snippet comes OUT and the AdSense banner
+       unit goes in instead. No ad code lives in this file. */
     if (currentApp && currentApp !== id) { var prev = windows[currentApp]; prev.classList.remove('ph-open', 'ph-closing'); }
     currentApp = id;
+    syncBanner();
     noteRecentApp(id);
     playSfx('appOpen');
     syncAppUrl(id, opts);
@@ -35456,6 +35758,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   function closeCurrentApp() {
     var win = windows[currentApp];
     currentApp = null;
+    syncBanner();
     if (win) { win.classList.remove('ph-open'); win.classList.add('ph-closing'); setTimeout(function () { win.classList.remove('ph-closing'); }, 200); playSfx('appClose'); }
     try { if (typeof window.switchMainTab === 'function') window.switchMainTab('home'); } catch (e) {}
   }
@@ -35924,6 +36227,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     if (ap) { var ic = $('autoPlayIcon'); var playing = !!(ic && ic.textContent.indexOf('⏸') !== -1); ap.className = 'ph-toggle' + (playing ? ' ph-on' : ''); }
     var day = $('ph-set-day');
     if (day && window.G) day.textContent = 'Day ' + (Number(window.G.day) || 1);
+    syncMusicUI();
   }
   function syncStocksSubtabs() {
     var st = $('ph-stocks-subtabs'); if (!st) return;
@@ -36110,15 +36414,21 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   function stopMusic() { try { var m = musicMod(); if (m && m.stop) m.stop(); } catch (e) {} }
   function musicState() { try { var m = musicMod(); if (m && m.getState) return m.getState(); } catch (e) {} return { on: !!prefs.music, trackIndex: prefs.musicTrack || 0, trackName: '', shuffle: !!prefs.musicShuffle, running: false }; }
   function musicTrackName() { try { var m = musicMod(); if (m && m.TRACKS && m.TRACKS[prefs.musicTrack || 0]) return m.TRACKS[prefs.musicTrack || 0].name; } catch (e) {} return ''; }
+  function musicThemeShort() {
+    try { var m = musicMod(); if (m && m.THEMES) { for (var i = 0; i < m.THEMES.length; i++) { if (m.THEMES[i].id === (prefs.musicTheme || 'holidays')) return m.THEMES[i].short; } } } catch (e) {}
+    return 'Holidays';
+  }
   function syncMusicUI() {
     var st = musicState();
     var pill = $('ph-btn-music');
     if (pill) { pill.innerHTML = st.on ? '&#9834; Music: On' : '&#9834; Music: Off'; pill.className = 'ph-pill-btn' + (st.on ? ' ph-on' : ''); }
     var tog = $('ph-settings-music-toggle');
     if (tog) { tog.className = 'ph-toggle' + (st.on ? ' ph-on' : ''); tog.setAttribute('aria-checked', st.on ? 'true' : 'false'); }
-    var now = $('ph-music-now'); if (now) now.textContent = st.on ? ('Now playing: ' + (st.trackName || musicTrackName())) : 'Off';
+    var now = $('ph-music-now'); if (now) now.textContent = st.on ? ('Now playing: ' + (st.themeShort || musicThemeShort()) + ' • ' + (st.trackName || musicTrackName())) : 'Off';
     var tn = $('ph-music-track-name'); if (tn) tn.textContent = st.trackName || musicTrackName() || '—';
     var sh = $('ph-music-shuffle'); if (sh) { sh.textContent = 'Shuffle: ' + (st.shuffle ? 'On' : 'Off'); sh.className = 'ph-set-pill' + (st.shuffle ? ' ph-on' : ''); }
+    var tp = $('ph-music-theme-picker');
+    if (tp) { var cur = st.theme || prefs.musicTheme || 'holidays'; var btns = tp.querySelectorAll('[data-theme]'); for (var bi = 0; bi < btns.length; bi++) { btns[bi].className = 'ph-theme-btn' + (btns[bi].getAttribute('data-theme') === cur ? ' ph-on' : ''); } }
     var sfxT = $('ph-settings-sfx-toggle'); if (sfxT) { var en = prefs.sfxOn !== false; sfxT.className = 'ph-toggle' + (en ? ' ph-on' : ''); sfxT.setAttribute('aria-checked', en ? 'true' : 'false'); }
   }
   function setMusic(on) {
@@ -36128,6 +36438,11 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   function musicPrev() { try { var m = musicMod(); if (m && m.prev) m.prev(); } catch (e) {} syncMusicUI(); }
   function musicNext() { try { var m = musicMod(); if (m && m.next) m.next(); } catch (e) {} syncMusicUI(); }
   function musicToggleShuffle() { try { var m = musicMod(); if (m && m.toggleShuffle) { m.toggleShuffle(); } else { prefs.musicShuffle = !prefs.musicShuffle; savePrefs(); } } catch (e) {} syncMusicUI(); }
+  function setMusicTheme(id) {
+    if (id !== 'holidays' && id !== 'originals' && id !== 'children' && id !== 'movies') { return; }
+    try { var m = musicMod(); if (m && m.setTheme) { m.setTheme(id); } else { prefs.musicTheme = id; savePrefs(); } } catch (e) { prefs.musicTheme = id; savePrefs(); }
+    syncMusicUI();
+  }
   function setSfx(on) {
     try { var s = sfxMod(); if (s && s.setEnabled) { s.setEnabled(!!on); } else { prefs.sfxOn = !!on; savePrefs(); } } catch (e) { prefs.sfxOn = !!on; savePrefs(); }
     syncMusicUI();
@@ -36360,6 +36675,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     get musicOn() { return prefs.music; },
     get musicTrack() { return prefs.musicTrack || 0; },
     get musicTrackName() { return musicTrackName(); },
+    get musicTheme() { return prefs.musicTheme || 'holidays'; },
     get musicShuffle() { return !!prefs.musicShuffle; },
     get sfxOn() { return prefs.sfxOn !== false; },
     get wallpaper() { return prefs.wallpaper || 0; },
