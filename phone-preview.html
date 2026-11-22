@@ -517,6 +517,21 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
 #ph-lock-hint .ph-chev { display: block; margin: 0 auto 4px; animation: ph-bob 1.8s ease-in-out infinite; }
 @keyframes ph-bob { 0%,100% { transform: translateY(0); opacity:.7;} 50% { transform: translateY(-7px); opacity:1;} }
 
+/* ---- lock-screen banner widget (Nov 22) ---- */
+/* #ph-banner-lock lives INSIDE #ph-lock, directly under the clock/date block
+   (ph-lock-top), above the spacer that pushes the swipe hint to the bottom —
+   so it can never sit on the swipe zone or cover the unlock hint. Same slim
+   strip as the home slot (44px min-height), full lock width minus 16px side
+   margins. It inherits the lock's hide-on-unlock for free (#ph-lock gets
+   display:none), so no JS sync is needed. EMPTY for now (BidVertiser snippet
+   outstanding — see the hook comment in ph-shell.html): the ph-banner-empty
+   rule hides the slot completely, so the lock renders exactly like the live
+   build until fill lands. Fill (BidVertiser now, AdSense unit on approval
+   day) is documented in banner-activation-2026-11-21.md (work dir, not
+   shipped in the build). */
+#ph-banner-lock { align-self: stretch; margin: 18px 16px 0; min-height: 44px; }
+#ph-banner-lock.ph-banner-empty { display: none; }
+
 /* ---- home screen ---- */
 #ph-home {
   position: absolute; inset: 0; z-index: 10;
@@ -694,6 +709,8 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
      the banner's bottom edge exactly at (or above) the top of the 30px home
      indicator strip, so an ad stays tappable when the dots are hidden. */
   #ph-banner { margin-bottom: 16px; min-height: 38px; }
+  /* lock banner widget: same shorter strip on short screens. */
+  #ph-banner-lock { min-height: 38px; }
 }
 
 /* Very short viewports (Nov 17 fit fix — breakpoint raised 620px -> 675px):
@@ -738,6 +755,8 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
      stays 16px — see the 800px tier note — so the banner never dips into
      the home indicator strip). */
   #ph-banner { margin-bottom: 16px; min-height: 34px; }
+  /* lock banner widget: same shortest strip on the shortest screens. */
+  #ph-banner-lock { min-height: 34px; }
 }
 
 /* landscape phones: the framed 430/932 phone would shrink to ~156px wide and
@@ -1251,6 +1270,21 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           <div id="ph-lock-brand">JMF Games Phone</div>
           <div id="ph-lock-gameday">Day 1 &bull; 08:30 AM in-game</div>
         </div>
+        <!-- Lock-screen banner widget (Nov 22): ad slot, LOCK screen only, at
+             the TOP directly under the clock/date — NEVER at the bottom: the
+             bottom is where the thumb swipes up, and a banner there means
+             accidental taps. It lives INSIDE #ph-lock, so hiding the lock on
+             unlock hides this slot for free (swipe path, tap path, and
+             deep-link loads, which skip the lock entirely). EMPTY for now:
+             the BidVertiser snippet for invesim.com does not exist yet — the
+             hook below marks exactly where it goes. While empty the slot
+             hides completely (ph-banner-empty), so the lock renders exactly
+             like the live build. When the snippet lands, paste it in place
+             of the hook comment and drop the ph-banner-empty class; on
+             AdSense approval day the BidVertiser snippet comes OUT and the
+             AdSense banner unit goes in instead — see
+             banner-activation-2026-11-21.md (work dir, not shipped). -->
+        <div id="ph-banner-lock" class="ph-banner-empty"><!-- BIDVERTISER HOOK (LOCK): paste the BidVertiser ad-unit snippet for invesim.com here, then remove the ph-banner-empty class from this div. Request a slim banner unit (320x50 / responsive) so the strip stays slim. --></div>
         <div class="ph-lock-spacer"></div>
         <div id="ph-lock-hint">
           <svg class="ph-chev" width="26" height="14" viewBox="0 0 26 14" fill="none"><path d="M2 12L13 2l11 10" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -36049,6 +36083,13 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       startY = null;
     });
     lock.addEventListener('click', function () { if (!dragged) unlock(); });
+    /* LOCK BANNER WIDGET (Nov 22): a tap on a filled lock-screen ad must not
+       also unlock the phone — stop the click here so it never reaches the
+       lock's unlock handler above. No-op while the slot is empty
+       (display:none). The swipe path needs no guard: a drag starting on the
+       banner is an intentional unlock gesture, same as anywhere on the lock. */
+    var lb = $('ph-banner-lock');
+    if (lb) lb.addEventListener('click', function (e) { e.stopPropagation(); });
   }
 
   /* ---------- HUD: status clock, ticker, widgets, hero ---------- */
