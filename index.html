@@ -3674,6 +3674,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
 
       <!-- 6. AUTOMATION: DRIP, SCHEDULED AUTO-BUYS, GOALS, CONDITIONAL ORDERS, WATCHLIST -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div id="myPortfolioAnalyticsBox" class="lg:col-span-2"></div>
         <div id="myPortfolioDripBox"></div>
         <div id="myPortfolioDcaBox"></div>
         <div id="myPortfolioGoalsBox"></div>
@@ -32539,6 +32540,286 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       // =========================================================================
       window.renderAll = renderAll;
       window.renderPortfolioTab = renderPortfolioTab;
+      // =========================================================================
+      // PORTFOLIO ANALYTICS (Nov 23, 2026) — VIEW-ONLY. No trading, no money
+      // movement, no new save state: one read-only walk of G.human per render.
+      // Valuations mirror recalculateAllNetWorths() exactly; the denominator is
+      // h.netWorth (already computed there) — net worth is never recomputed here.
+      // =========================================================================
+      function computePortfolioAnalytics() {
+        if (typeof G === 'undefined' || !G || !G.human) return null;
+        const h = G.human;
+        const stockMap = new Map((G.stocks || []).map(s => [s.ticker, s]));
+        const commMap  = new Map((G.commodities || []).map(c => [c.sym, c]));
+        const fxMap    = new Map((G.forexPairs || []).map(f => [f.pair, f]));
+        const etfMap   = new Map((G.etfs || []).map(e => [e.sym, e]));
+        const prMap    = new Map((G.privateReFunds || []).map(f => [f.sym, f]));
+        const r2 = (x) => Number((Number(x) || 0).toFixed(2));
+
+        const top = { label: '—', value: 0 };
+        const noteTop = (label, value) => { if (value > top.value) { top.label = label; top.value = value; } };
+
+        // --- Stocks (long: shares*price; short: entry value + P&L, floored at 0)
+        let stocksVal = 0;
+        for (const [ticker, pos] of Object.entries(h.stocks || {})) {
+          const st = stockMap.get(ticker);
+          if (!st) continue;
+          let v = 0;
+          if (pos.shares >= 0) v = pos.shares * st.price;
+          else {
+            const absSh = Math.abs(pos.shares);
+            v = Math.max(0, absSh * pos.avgPrice + (pos.avgPrice - st.price) * absSh);
+          }
+          stocksVal += v;
+          noteTop(ticker, v);
+        }
+
+        // --- Options (signed leg values; gross = sum of absolute leg values)
+        let optionsVal = 0, optionsGross = 0;
+        for (const opt of (h.options || [])) {
+          const lot = opt.lotSize || 10;
+          const mult = opt.side === 'LONG' ? 1 : -1;
+          const leg = mult * opt.contracts * lot * opt.markPrice;
+          optionsVal += leg;
+          optionsGross += Math.abs(leg);
+        }
+        noteTop('Options', optionsVal);
+
+        // --- Commodities (margin + P&L, floored at 0)
+        let commVal = 0;
+        for (const [sym, cPos] of Object.entries(h.commodities || {})) {
+          const c = commMap.get(sym);
+          if (!c) continue;
+          const v = Math.max(0, cPos.marginUsed + (c.price - cPos.entryPrice) * cPos.units);
+          commVal += v;
+          noteTop(sym, v);
+        }
+
+        // --- Forex (margin + P&L + swap, floored at 0; skip marginUsed<=0 / no pair)
+        let fxVal = 0;
+        if (G.forexPairs && h.forex) {
+          for (const [pair, fPos] of Object.entries(h.forex)) {
+            const fx = fxMap.get(pair);
+            if (!fx || !fPos || fPos.marginUsed <= 0) continue;
+            const dirSign = fPos.side === 'SHORT' ? -1 : 1;
+            const movePct = ((fx.rate - fPos.entryRate) / fPos.entryRate) * dirSign;
+            const pnl = (fPos.notionalUsd * movePct) + (fPos.accumSwap || 0);
+            const v = Math.max(0, fPos.marginUsed + pnl);
+            fxVal += v;
+            noteTop(pair, v);
+          }
+        }
+
+        // --- Real estate (protectedVal - debt; protected = max(stored, book, market))
+        // Read-only: unlike recalculateAllNetWorths, this never WRITES protectedVal.
+        let reVal = 0;
+        for (const rePos of (h.realEstate || [])) {
+          const prop = (G.properties || [])[rePos.propId - 1];
+          if (!prop) continue;
+          const curPrice = getCurrentPropertyPrice(G, prop);
+          const bookBasis = (rePos.purchasePrice || prop.price || curPrice) * Math.pow(1.07, rePos.upgradeLevel || 0);
+          const protectedVal = Math.max(rePos.protectedVal || 0, bookBasis, curPrice);
+          const v = protectedVal - (rePos.debt || 0);
+          reVal += v;
+          noteTop(prop.name || ('Property #' + rePos.propId), v);
+        }
+
+        // --- ETFs
+        let etfVal = 0;
+        for (const [sym, ePos] of Object.entries(h.etfs || {})) {
+          const etf = etfMap.get(sym);
+          if (etf && ePos.shares > 0) {
+            const v = ePos.shares * etf.price;
+            etfVal += v;
+            noteTop(sym, v);
+          }
+        }
+
+        // --- eREITs (private real estate funds) incl. pending redemptions
+        let privReVal = 0;
+        for (const [sym, pPos] of Object.entries(h.privateRe || {})) {
+          const pr = prMap.get(sym);
+          if (pr && pPos.shares > 0) {
+            const v = pPos.shares * pr.navPrice;
+            privReVal += v;
+            noteTop(sym, v);
+          }
+        }
+        if (h.privateReRedemptions) {
+          for (const req of h.privateReRedemptions) {
+            const pr = prMap.get(req.sym);
+            privReVal += req.shares * (pr ? pr.navPrice : req.reqNav);
+          }
+        }
+
+        // --- Venture capital
+        let vcVal = 0;
+        for (const vPos of (h.vcHoldings || [])) {
+          const v = (vPos.currentVal || vPos.investedAmount || 0);
+          vcVal += v;
+          noteTop(vPos.name || 'Venture', v);
+        }
+
+        // --- Managed accounts (reconciliation only, not an allocation class)
+        let managedVal = 0;
+        for (const acct of Object.values(h.managedAccounts || {})) {
+          if (acct && acct.currentEquity > 0) managedVal += acct.currentEquity;
+        }
+
+        // --- Small businesses
+        let sbVal = 0;
+        for (const sbPos of (h.smallBusinesses || [])) {
+          const biz = (G.smallBusinesses || [])[sbPos.bizId - 1];
+          if (biz) {
+            const v = (biz.baseVal || sbPos.purchasePrice || 0);
+            sbVal += v;
+            noteTop(biz.name || ('Business #' + sbPos.bizId), v);
+          }
+        }
+
+        const cash = r2(h.cash || 0);
+        const marginDebt = r2(h.marginDebt || 0);
+        const taxDue = r2(h.taxLedger ? (h.taxLedger.accruedTax || 0) : 0);
+        const netWorth = r2(h.netWorth || 0);
+        const managed = r2(managedVal);
+        const nw = netWorth > 0 ? netWorth : 0;
+
+        const classes = [
+          { key: 'stocks',      label: 'Stocks',           value: r2(stocksVal),  tab: 'stocks' },
+          { key: 'etfs',        label: 'ETFs',             value: r2(etfVal),     tab: 'etfs' },
+          { key: 'options',     label: 'Options',          value: r2(optionsVal), tab: 'options' },
+          { key: 'realestate',  label: 'Real Estate',      value: r2(reVal),      tab: 'realestate' },
+          { key: 'privatere',   label: 'eREITs',           value: r2(privReVal),  tab: 'privatere' },
+          { key: 'smallbiz',    label: 'Small Businesses', value: r2(sbVal),      tab: 'smallbiz' },
+          { key: 'vc',          label: 'Venture Capital',  value: r2(vcVal),      tab: 'vc' },
+          { key: 'commodities', label: 'Commodities',      value: r2(commVal),    tab: 'commodities' },
+          { key: 'forex',       label: 'Forex',            value: r2(fxVal),      tab: 'forex' },
+          { key: 'cash',        label: 'Cash',             value: cash,           tab: 'finance' },
+        ];
+        for (const c of classes) c.pct = nw > 0 ? c.value / nw : 0;
+        classes.sort((a, b) => b.value - a.value);
+
+        const topHolding = { label: top.label, value: r2(top.value), pct: nw > 0 ? top.value / nw : 0 };
+
+        // --- Dividends: daily = position * yield / 252 trading days, mirroring
+        // the day-step loops (stocks long only, ETFs, private RE).
+        const divRows = [];
+        let divDaily = 0;
+        const pushDiv = (kind, sym, label, daily) => {
+          if (!(daily > 0)) return;
+          divDaily += daily;
+          divRows.push({ kind, sym, label, daily, drip: isDripEffective(kind, sym) });
+        };
+        for (const [ticker, pos] of Object.entries(h.stocks || {})) {
+          const st = stockMap.get(ticker);
+          if (st && pos.shares > 0 && st.divYield > 0) pushDiv('STOCK', ticker, st.name || ticker, (pos.shares * st.price * (st.divYield / 100)) / 252);
+        }
+        for (const [sym, ePos] of Object.entries(h.etfs || {})) {
+          const etf = etfMap.get(sym);
+          if (etf && ePos.shares > 0 && etf.divYield > 0) pushDiv('ETF', sym, etf.name || sym, (ePos.shares * etf.price * (etf.divYield / 100)) / 252);
+        }
+        for (const [sym, pPos] of Object.entries(h.privateRe || {})) {
+          const pr = prMap.get(sym);
+          if (pr && pPos.shares > 0 && pr.divYield > 0) pushDiv('PRIVRE', sym, pr.name || sym, (pPos.shares * pr.navPrice * (pr.divYield / 100)) / 252);
+        }
+        divRows.sort((a, b) => b.daily - a.daily);
+        const dividends = {
+          daily: divDaily,
+          rows: divRows,
+          forecast30: divDaily * 30,
+          monthly: divDaily * 21,
+          yearly: divDaily * 252,
+        };
+
+        // --- Risk score (deterministic formula):
+        // top holding share of NW: >25% +25, >15% +15, >10% +8
+        // largest single class share: >60% +20, >45% +12, >30% +6
+        // margin: marginDebt>0 -> +min(25, round(marginDebt/NW*100))
+        // options gross exposure: >15% of NW +15, >8% +8, >0 +3
+        // cash buffer: cash/NW <5% +10, <15% +5. Total capped 0-100.
+        const drivers = [];
+        let score = 0;
+        const addDriver = (label, pts) => { if (pts > 0) { score += pts; drivers.push({ label, points: pts }); } };
+        const topShare = topHolding.pct;
+        addDriver('Top holding ' + topHolding.label + ' is ' + fmtPct(topShare * 100, 1, false) + ' of net worth', topShare > 0.25 ? 25 : topShare > 0.15 ? 15 : topShare > 0.10 ? 8 : 0);
+        const largestClass = classes.reduce((m, c) => (c.pct > m.pct ? c : m), classes[0]);
+        addDriver('Largest class (' + largestClass.label + ') is ' + fmtPct(largestClass.pct * 100, 1, false) + ' of net worth', largestClass.pct > 0.60 ? 20 : largestClass.pct > 0.45 ? 12 : largestClass.pct > 0.30 ? 6 : 0);
+        addDriver('Margin debt ' + fmtMoney(marginDebt), marginDebt > 0 && nw > 0 ? Math.min(25, Math.round(marginDebt / nw * 100)) : 0);
+        const optShare = nw > 0 ? optionsGross / nw : 0;
+        addDriver('Options gross exposure ' + fmtPct(optShare * 100, 1, false) + ' of net worth', optShare > 0.15 ? 15 : optShare > 0.08 ? 8 : optShare > 0 ? 3 : 0);
+        const cashShare = nw > 0 ? cash / nw : 0;
+        addDriver('Cash buffer only ' + fmtPct(cashShare * 100, 1, false) + ' of net worth', cashShare < 0.05 ? 10 : cashShare < 0.15 ? 5 : 0);
+        score = Math.max(0, Math.min(100, score));
+        drivers.sort((a, b) => b.points - a.points);
+        const riskLabel = score <= 34 ? 'Conservative' : score <= 64 ? 'Balanced' : 'Aggressive';
+        const risk = { score, label: riskLabel, drivers: drivers.slice(0, 4) };
+
+        return {
+          classes, netWorth, cash, marginDebt, taxDue, managedVal: managed,
+          topHolding, risk, dividends,
+        };
+      }
+
+      function renderAnalyticsCard() {
+        const a = computePortfolioAnalytics();
+        if (!a) return '';
+        const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        const allocRows = a.classes.map(c => {
+          const w = Math.max(0, Math.min(100, c.pct * 100));
+          return '<button type="button" data-analytics-row="' + c.key + '" onclick="switchMainTab(\'' + c.tab + '\')" class="block w-full text-left py-1.5 px-1 border-b border-[#1E2227] last:border-0 hover:bg-[#16191D] rounded transition">'
+            + '<span class="flex flex-wrap items-center justify-between gap-2">'
+            + '<span class="font-extrabold text-white text-xs">' + esc(c.label) + ' <span class="text-[#00C805] font-bold">\u2192</span></span>'
+            + '<span class="font-mono text-[11px] text-white">' + fmtMoney(c.value) + ' <span class="text-[#8A919E]">(' + fmtPct(c.pct * 100, 1, false) + ')</span></span>'
+            + '</span>'
+            + '<span class="block h-2 mt-1 rounded-full bg-[#1C2024] overflow-hidden"><span class="block h-2 rounded-full ' + (c.value < 0 ? 'bg-[#FF5000]' : 'bg-[#00C805]') + '" style="width:' + w.toFixed(1) + '%"></span></span>'
+            + '</button>';
+        }).join('');
+        const riskColor = a.risk.score <= 34 ? 'bg-[#00C805]' : a.risk.score <= 64 ? 'bg-amber-400' : 'bg-[#FF5000]';
+        const driverRows = a.risk.drivers.length
+          ? a.risk.drivers.map(d => '<div class="flex items-center justify-between gap-2 py-0.5"><span class="text-[#8A919E]">' + esc(d.label) + '</span><span class="font-mono font-bold text-white whitespace-nowrap">+' + d.points + ' pts</span></div>').join('')
+          : '<div class="text-[#8A919E]">No concentration, leverage, or cash-buffer risks detected.</div>';
+        const divRows = a.dividends.rows.length
+          ? a.dividends.rows.map(r => '<div class="flex flex-wrap items-center justify-between gap-2 py-1 border-b border-[#1E2227] last:border-0">'
+            + '<div><span class="font-extrabold text-white text-xs">' + esc(r.sym) + '</span> <span class="text-[11px] text-[#8A919E]">' + esc(r.label) + '</span></div>'
+            + '<div class="flex items-center gap-1.5"><span class="font-mono text-[11px] text-white">' + fmtMoney(r.daily) + '/day</span><span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ' + (r.drip ? 'bg-[#00C805]/15 text-[#00C805]' : 'bg-[#1C2024] text-[#8A919E]') + '">' + (r.drip ? 'DRIP ON' : 'CASH') + '</span></div>'
+            + '</div>').join('')
+          : '<div class="text-xs text-[#8A919E] py-1">No dividend-paying holdings yet.</div>';
+        const allocSum = a.classes.reduce((s, c) => s + c.value, 0);
+        const reconSum = allocSum + a.managedVal - a.marginDebt - a.taxDue;
+        return '<div class="rh-card p-5 flex flex-col gap-4">'
+          + '<div class="flex flex-wrap items-center justify-between gap-2">'
+          + '<h2 class="text-base font-extrabold text-white">\uD83D\uDCCA Portfolio Analytics</h2>'
+          + '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-[#00C805]/15 text-[#00C805] border border-[#00C805]/30">Net Worth ' + fmtMoney(a.netWorth) + '</span>'
+          + '</div>'
+          + '<div>'
+          + '<div class="text-xs font-extrabold text-white mb-1">Allocation \u2014 share of net worth</div>'
+          + '<p class="text-[11px] text-[#8A919E] mb-1">Tap any row to open that market.</p>'
+          + allocRows
+          + '</div>'
+          + '<div>'
+          + '<div class="flex flex-wrap items-center justify-between gap-2 mb-1">'
+          + '<span class="text-xs font-extrabold text-white">Risk Score</span>'
+          + '<span class="font-mono text-xs font-extrabold text-white" data-analytics="risk-score">' + a.risk.score + '/100 \u2022 ' + a.risk.label + '</span>'
+          + '</div>'
+          + '<div class="h-2 rounded-full bg-[#1C2024] overflow-hidden"><div class="h-2 rounded-full ' + riskColor + '" style="width:' + a.risk.score + '%"></div></div>'
+          + '<div class="text-[11px] text-[#8A919E] mt-1.5">Top holding: <strong class="text-white">' + esc(a.topHolding.label) + '</strong> ' + fmtMoney(a.topHolding.value) + ' (' + fmtPct(a.topHolding.pct * 100, 1, false) + ' of net worth)</div>'
+          + '<div class="text-[11px] mt-1">' + driverRows + '</div>'
+          + '</div>'
+          + '<div>'
+          + '<div class="text-xs font-extrabold text-white mb-1">Dividend Forecast</div>'
+          + '<div class="grid grid-cols-3 gap-2 text-center">'
+          + '<div class="p-2 rounded-xl bg-[#090D0B] border border-[#24282D]"><div class="text-[10px] text-[#8A919E] font-bold">NEXT 30 TRADING DAYS</div><div class="font-mono font-extrabold text-white text-xs sm:text-sm">' + fmtMoney(a.dividends.forecast30) + '</div></div>'
+          + '<div class="p-2 rounded-xl bg-[#090D0B] border border-[#24282D]"><div class="text-[10px] text-[#8A919E] font-bold">MONTHLY AVG</div><div class="font-mono font-extrabold text-white text-xs sm:text-sm">' + fmtMoney(a.dividends.monthly) + '</div></div>'
+          + '<div class="p-2 rounded-xl bg-[#090D0B] border border-[#24282D]"><div class="text-[10px] text-[#8A919E] font-bold">YEARLY RUN-RATE</div><div class="font-mono font-extrabold text-white text-xs sm:text-sm">' + fmtMoney(a.dividends.yearly) + '</div></div>'
+          + '</div>'
+          + '<p class="text-[11px] text-[#8A919E] mt-1.5">About ' + fmtMoney(a.dividends.daily) + ' per trading day. Dividends pay on trading days (252/yr) \u2014 monthly average is 21 trading days. ETF figures are gross of the expense-ratio drag.</p>'
+          + divRows
+          + '</div>'
+          + '<div class="text-[11px] text-[#8A919E] pt-2 border-t border-[#1E2227]" data-analytics="recon">Reconciles: allocations ' + fmtMoney(allocSum) + ' + managed ' + fmtMoney(a.managedVal) + ' \u2212 margin ' + fmtMoney(a.marginDebt) + ' \u2212 taxes ' + fmtMoney(a.taxDue) + ' = ' + fmtMoney(reconSum) + ' (net worth ' + fmtMoney(a.netWorth) + ')</div>'
+          + '</div>';
+      }
+      window.__analytics = computePortfolioAnalytics;
+
       function renderPortfolioTab() {
         if (!G || !G.human) return;
         const h = G.human;
@@ -32584,6 +32865,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         if (ordersBox && !stableFormBusy(ordersBox)) ordersBox.innerHTML = renderOrdersCard();
         const watchBox = document.getElementById('myPortfolioWatchlistBox');
         if (watchBox && !stableFormBusy(watchBox)) watchBox.innerHTML = renderWatchlistCard();
+        const anBox = document.getElementById('myPortfolioAnalyticsBox');
+        if (anBox) anBox.innerHTML = renderAnalyticsCard();
 
         const kpiBox = document.getElementById('myPortfolioSummaryKpis');
         if (kpiBox) {
