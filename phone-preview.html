@@ -1647,6 +1647,9 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         <button type="button" data-tab="coaching" class="nav-tab text-[#8A919E] hover:text-white py-1.5 px-2 transition whitespace-nowrap">
           🎓 Coaching <span id="navCoachingBadge" class="inline text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-[#1C2024] text-[#00C805]">ON</span>
         </button>
+        <button type="button" data-tab="bonds" class="nav-tab text-[#8A919E] hover:text-white py-1.5 px-2 transition whitespace-nowrap">
+          🏛️ Bonds <span class="inline text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-[#00C805]/15 text-[#00C805]">T-Bills</span>
+        </button>
       </nav>
     </div>
   </header>
@@ -4047,6 +4050,57 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         <div id="coachingPlaybookCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
       </div>
     </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB: BONDS & T-BILLS (TREASURIES ONLY) — added Nov 24, 2026.        -->
+    <!-- Buy form is STATIC markup: renderBondsTab() only writes the three  -->
+    <!-- mount divs below, never the form, so an open <select> is never     -->
+    <!-- destroyed by a re-render (select-kill lesson, Nov 17).              -->
+    <!-- =================================================================== -->
+    <section id="tab-bonds" class="tab-section hidden flex flex-col gap-5">
+      <div class="rh-card p-5 flex flex-col gap-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-lg font-extrabold text-white">🏛️ Treasury Bonds &amp; T-Bills</h2>
+            <p class="text-xs text-[#8A919E]">Lend to the U.S. Treasury — the safest parking spot in the game. T-Bills sell at a discount and pay full face value at maturity; notes &amp; bonds pay a coupon every 6 months. Yields follow the Fed Rate, so when the Fed moves, new issues pay more — and your old bonds change price.</p>
+          </div>
+          <span id="bondFedRatePill" class="px-2.5 py-1 rounded-full bg-[#1C2024] text-white text-[11px] font-bold">Fed Rate —</span>
+        </div>
+        <div id="bondYieldTable" class="flex flex-col gap-1"></div>
+      </div>
+      <div class="rh-card p-5 flex flex-col gap-3">
+        <h3 class="text-base font-extrabold text-white">Buy Treasuries</h3>
+        <div class="flex flex-wrap items-end gap-2">
+          <label class="flex flex-col gap-1 text-[11px] text-[#8A919E] font-bold">TERM
+            <select id="bondBuyTerm" onchange="updateBondBuyPreview()" class="px-3 py-2 rounded-lg bg-[#1C2024] text-white font-bold text-xs border border-[#24282D]">
+              <option value="TBILL:4">T-Bill — 4 weeks</option>
+              <option value="TBILL:8">T-Bill — 8 weeks</option>
+              <option value="TBILL:13">T-Bill — 13 weeks</option>
+              <option value="TBILL:26" selected>T-Bill — 26 weeks</option>
+              <option value="TBILL:52">T-Bill — 52 weeks</option>
+              <option value="NOTE:2">Treasury Note — 2 years</option>
+              <option value="NOTE:5">Treasury Note — 5 years</option>
+              <option value="NOTE:10">Treasury Note — 10 years</option>
+              <option value="NOTE:30">Treasury Note — 30 years</option>
+            </select>
+          </label>
+          <label class="flex flex-col gap-1 text-[11px] text-[#8A919E] font-bold">FACE AMOUNT ($)
+            <input id="bondBuyFace" type="number" min="100" step="100" value="10000" oninput="updateBondBuyPreview()" class="px-3 py-2 rounded-lg bg-[#1C2024] text-white font-bold text-xs border border-[#24282D] w-32" />
+          </label>
+          <button type="button" onclick="buyBondFromForm()" class="px-4 py-2 rounded-lg bg-[#00C805] hover:bg-[#00E006] text-black font-extrabold text-xs">Buy</button>
+        </div>
+        <div id="bondBuyPreview" class="text-xs text-[#8A919E]"></div>
+        <p class="text-[11px] text-[#8A919E]">Cash only — never margin. Buying is blocked while you are on the casino night shift. Maturities and coupons pay automatically, even while you work.</p>
+      </div>
+      <div class="rh-card p-5 flex flex-col gap-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h3 class="text-base font-extrabold text-white">Your Bonds</h3>
+          <span id="bondTotalsBar" class="text-[11px] font-mono text-[#8A919E]"></span>
+        </div>
+        <div id="bondHoldingsList" class="flex flex-col gap-2"></div>
+      </div>
+    </section>
+
 
   </main>
 
@@ -11812,6 +11866,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
 
       // ---------- DAILY AUTOMATION HOOKS ----------
       function processDailyAutomation() {
+        processBondsDaily();
         processAutoBuys();
         processPendingOrders();
         processWatchlistAlerts();
@@ -16689,6 +16744,296 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       window.recalculateAllNetWorths = recalculateAllNetWorths;
+      // =========================================================================
+      // BONDS & T-BILLS (Nov 24, 2026) — TREASURIES ONLY. No corporate bonds.
+      // A safe place to park money, especially after the $300K retirement.
+      // State: G.human.bonds = { tbills: [], notes: [], totalInterestEarned,
+      //   totalInvested, nextId }. T-Bill: { id, kind:'tbill', termKey, termWeeks,
+      //   face, cost, yieldAtBuy, buyDay, maturityDay }. Note: { id, kind:'note',
+      //   termKey, termYears, face, cost (= face, issued at par), couponRate,
+      //   yieldAtBuy, buyDay, maturityDay, nextCouponDay }.
+      // Yield curve: yield(term) = G.macro.fedRate + term premium (below).
+      // T-Bill price = face / (1 + yield * days/360) — same formula for a new
+      // issue and for valuing a holding, so buying never moves net worth.
+      // Note value = PV of remaining semi-annual coupons + principal at the
+      // CURRENT yield (n = round(remainingDays/182) half-year periods).
+      // Taxes: T-Bill discount + coupons -> ordinaryIncome (like dividends);
+      // early-sale P&L -> shortTermGains (like ETF sales). Cash-only, never
+      // margin. Buys/sells gated by checkNotWorkingAtCasinoForInvesting.
+      // Maturities/coupons pay automatically on the day step (processBondsDaily,
+      // called from processDailyAutomation) even while working or jailed:
+      // that is return OF the player's money, not a new investment.
+      // =========================================================================
+      const BOND_TBILL_TERMS = [
+        { w: 4, days: 28 }, { w: 8, days: 56 }, { w: 13, days: 91 },
+        { w: 26, days: 182 }, { w: 52, days: 364 },
+      ];
+      const BOND_NOTE_TERMS = [
+        { y: 2, days: 730 }, { y: 5, days: 1825 },
+        { y: 10, days: 3650 }, { y: 30, days: 10950 },
+      ];
+      function bondTermPremiumPct(termKey) {
+        switch (termKey) {
+          case 'TBILL:4': return -0.30;
+          case 'TBILL:8': return -0.25;
+          case 'TBILL:13': return -0.20;
+          case 'TBILL:26': return -0.10;
+          case 'TBILL:52': return 0.00;
+          case 'NOTE:2': return 0.25;
+          case 'NOTE:5': return 0.50;
+          case 'NOTE:10': return 0.75;
+          case 'NOTE:30': return 1.00;
+          default: return 0.00;
+        }
+      }
+      function bondCurrentFedRate() {
+        if (typeof G !== 'undefined' && G && G.macro && typeof G.macro.fedRate === 'number' && isFinite(G.macro.fedRate)) return G.macro.fedRate;
+        return 4.50;
+      }
+      function bondYieldForTerm(termKey) {
+        return Math.max(0.25, Math.min(15, bondCurrentFedRate() + bondTermPremiumPct(termKey)));
+      }
+      function bondTbillCost(face, days, yieldPct) {
+        return Math.max(0.01, Number((face / (1 + (yieldPct / 100) * (days / 360))).toFixed(2)));
+      }
+      function bondNotePrice(face, couponRatePct, remainingDays, yieldPct) {
+        const n = Math.max(1, Math.round(remainingDays / 182));
+        const r = (yieldPct / 100) / 2;
+        const cpn = face * (couponRatePct / 100) / 2;
+        let pv = 0;
+        for (let k = 1; k <= n; k++) pv += cpn / Math.pow(1 + r, k);
+        pv += face / Math.pow(1 + r, n);
+        return Math.max(0.01, Number(pv.toFixed(2)));
+      }
+      function bondCurrentValue(b) {
+        if (!b || !(b.face > 0)) return 0;
+        const y = bondYieldForTerm(b.termKey);
+        const rem = Math.max(0, (b.maturityDay || 0) - ((typeof G !== 'undefined' && G) ? G.day : 0));
+        if (rem <= 0) return Number((b.face || 0).toFixed(2));
+        if (b.kind === 'tbill') return bondTbillCost(b.face, rem, y);
+        return bondNotePrice(b.face, b.couponRate || 0, rem, y);
+      }
+      function bondValueAll() {
+        const st = (typeof G !== 'undefined' && G && G.human) ? ensureBondsState(G.human) : null;
+        if (!st) return { value: 0, count: 0 };
+        let value = 0;
+        for (const b of st.tbills) value += bondCurrentValue(b);
+        for (const b of st.notes) value += bondCurrentValue(b);
+        return { value: Number(value.toFixed(2)), count: st.tbills.length + st.notes.length };
+      }
+      function ensureBondsState(human) {
+        if (!human || typeof human !== 'object') return null;
+        if (!human.bonds || typeof human.bonds !== 'object' || Array.isArray(human.bonds)) {
+          human.bonds = { tbills: [], notes: [], totalInterestEarned: 0, totalInvested: 0, nextId: 1 };
+        }
+        const b = human.bonds;
+        if (!Array.isArray(b.tbills)) b.tbills = [];
+        if (!Array.isArray(b.notes)) b.notes = [];
+        if (typeof b.totalInterestEarned !== 'number' || !isFinite(b.totalInterestEarned)) b.totalInterestEarned = 0;
+        if (typeof b.totalInvested !== 'number' || !isFinite(b.totalInvested)) b.totalInvested = 0;
+        if (typeof b.nextId !== 'number' || !isFinite(b.nextId) || b.nextId < 1) b.nextId = 1 + b.tbills.length + b.notes.length;
+        return b;
+      }
+      window.ensureBondsState = ensureBondsState;
+
+      window.buyTBill = function(termWeeks, faceOpt) {
+        if (!checkNotWorkingAtCasinoForInvesting()) return false;
+        const term = BOND_TBILL_TERMS.find(t => t.w === Number(termWeeks));
+        if (!term) { showToast('Unknown T-Bill Term', 'Pick a T-Bill term (4, 8, 13, 26, or 52 weeks).', false); return false; }
+        const face = Math.floor(Number(faceOpt) || 0);
+        if (face < 100) { showToast('Minimum $100 Face Value', 'T-Bills start at $100 face value.', false); return false; }
+        const key = 'TBILL:' + term.w;
+        const y = bondYieldForTerm(key);
+        const cost = bondTbillCost(face, term.days, y);
+        const st = ensureBondsState(G.human);
+        if (G.human.cash < cost) {
+          showToast('Insufficient Cash for T-Bill', 'Requires ' + fmtMoney(cost) + ' cash — bonds are cash-only, never margin.', false);
+          return false;
+        }
+        G.human.cash = Number((G.human.cash - cost).toFixed(2));
+        const b = { id: st.nextId++, kind: 'tbill', termKey: key, termWeeks: term.w, face: face, cost: cost, yieldAtBuy: y, buyDay: G.day, maturityDay: G.day + term.days };
+        st.tbills.push(b);
+        st.totalInvested = Number((st.totalInvested + cost).toFixed(2));
+        G.human.logs.unshift('Day ' + G.day + ': Bought ' + term.w + '-week T-Bill, ' + fmtMoney(face) + ' face for ' + fmtMoney(cost) + ' (' + y.toFixed(2) + '% yield).');
+        showToast('T-Bill Purchased', 'Bought ' + fmtMoney(face) + ' face, ' + term.w + '-week T-Bill for ' + fmtMoney(cost) + ' at ' + y.toFixed(2) + '% — matures Day ' + b.maturityDay + ' at full face value.', true);
+        recalculateAllNetWorths(G);
+        renderAll();
+        return true;
+      };
+
+      window.buyTreasuryNote = function(termYears, faceOpt) {
+        if (!checkNotWorkingAtCasinoForInvesting()) return false;
+        const term = BOND_NOTE_TERMS.find(t => t.y === Number(termYears));
+        if (!term) { showToast('Unknown Treasury Term', 'Pick a Treasury note term (2, 5, 10, or 30 years).', false); return false; }
+        const face = Math.floor(Number(faceOpt) || 0);
+        if (face < 100) { showToast('Minimum $100 Face Value', 'Treasury notes start at $100 face value.', false); return false; }
+        const key = 'NOTE:' + term.y;
+        const y = bondYieldForTerm(key);
+        const cost = face; // new notes issue at par; coupon = yield at buy
+        const st = ensureBondsState(G.human);
+        if (G.human.cash < cost) {
+          showToast('Insufficient Cash for Treasury Note', 'Requires ' + fmtMoney(cost) + ' cash — bonds are cash-only, never margin.', false);
+          return false;
+        }
+        G.human.cash = Number((G.human.cash - cost).toFixed(2));
+        const b = { id: st.nextId++, kind: 'note', termKey: key, termYears: term.y, face: face, cost: cost, couponRate: y, yieldAtBuy: y, buyDay: G.day, maturityDay: G.day + term.days, nextCouponDay: G.day + 182 };
+        st.notes.push(b);
+        st.totalInvested = Number((st.totalInvested + cost).toFixed(2));
+        G.human.logs.unshift('Day ' + G.day + ': Bought ' + term.y + '-Yr Treasury Note, ' + fmtMoney(face) + ' face at par (' + y.toFixed(2) + '% coupon, ' + fmtMoney(face * y / 200) + ' every 6 months).');
+        showToast('Treasury Note Purchased', 'Bought ' + fmtMoney(face) + ' face, ' + term.y + '-Yr Treasury Note at par — ' + y.toFixed(2) + '% coupon pays ' + fmtMoney(face * y / 200) + ' every 6 months, principal back Day ' + b.maturityDay + '.', true);
+        recalculateAllNetWorths(G);
+        renderAll();
+        return true;
+      };
+
+      window.sellBond = function(kind, id) {
+        if (!checkNotWorkingAtCasinoForInvesting()) return false;
+        const st = ensureBondsState(G.human);
+        const list = kind === 'note' ? st.notes : st.tbills;
+        const idx = list.findIndex(b => b.id === Number(id));
+        if (idx < 0) { showToast('Bond Not Found', 'That bond is no longer held.', false); return false; }
+        const b = list[idx];
+        const proceeds = bondCurrentValue(b);
+        const pnl = Number((proceeds - b.cost).toFixed(2));
+        G.human.cash = Number((G.human.cash + proceeds).toFixed(2));
+        G.human.taxLedger.shortTermGains = Number(((G.human.taxLedger.shortTermGains || 0) + pnl).toFixed(2));
+        recomputeTaxLiability(G.human.taxLedger);
+        list.splice(idx, 1);
+        const label = b.kind === 'tbill' ? (b.termWeeks + '-week T-Bill') : (b.termYears + '-Yr Treasury Note');
+        G.human.logs.unshift('Day ' + G.day + ': Sold ' + label + ' (' + fmtMoney(b.face) + ' face) for ' + fmtMoney(proceeds) + ' (' + (pnl >= 0 ? '+' : '') + fmtMoney(pnl) + ').');
+        showToast('Bond Sold', 'Sold ' + label + ' for ' + fmtMoney(proceeds) + ' (' + (pnl >= 0 ? '+' : '') + fmtMoney(pnl) + ' vs cost).', true);
+        recalculateAllNetWorths(G);
+        renderAll();
+        return proceeds;
+      };
+
+      // Daily settlement: T-Bill maturities + note coupons + note maturities.
+      // Sim-automatic: runs on the day step even while working or jailed.
+      function processBondsDaily() {
+        if (typeof G === 'undefined' || !G || !G.human) return;
+        const st = ensureBondsState(G.human);
+        let paidInterest = 0, paidPrincipal = 0, matured = 0, coupons = 0;
+        for (let i = st.tbills.length - 1; i >= 0; i--) {
+          const b = st.tbills[i];
+          if (G.day >= (b.maturityDay || 0)) {
+            const interest = Number((b.face - b.cost).toFixed(2));
+            G.human.cash = Number((G.human.cash + b.face).toFixed(2));
+            G.human.taxLedger.ordinaryIncome = Number(((G.human.taxLedger.ordinaryIncome || 0) + interest).toFixed(2));
+            st.totalInterestEarned = Number((st.totalInterestEarned + interest).toFixed(2));
+            paidInterest += interest; paidPrincipal += b.face; matured++;
+            G.human.logs.unshift('Day ' + G.day + ': ' + b.termWeeks + '-week T-Bill matured — received ' + fmtMoney(b.face) + ' face value (' + fmtMoney(interest) + ' interest).');
+            st.tbills.splice(i, 1);
+          }
+        }
+        for (let i = st.notes.length - 1; i >= 0; i--) {
+          const b = st.notes[i];
+          let guard = 0;
+          while ((b.nextCouponDay || 0) <= G.day && (b.nextCouponDay || 0) < (b.maturityDay || 0) && guard++ < 200) {
+            const cpn = Number((b.face * (b.couponRate || 0) / 200).toFixed(2));
+            G.human.cash = Number((G.human.cash + cpn).toFixed(2));
+            G.human.taxLedger.ordinaryIncome = Number(((G.human.taxLedger.ordinaryIncome || 0) + cpn).toFixed(2));
+            st.totalInterestEarned = Number((st.totalInterestEarned + cpn).toFixed(2));
+            paidInterest += cpn; coupons++;
+            b.nextCouponDay = (b.nextCouponDay || 0) + 182;
+          }
+          if (G.day >= (b.maturityDay || 0)) {
+            G.human.cash = Number((G.human.cash + b.face).toFixed(2));
+            paidPrincipal += b.face; matured++;
+            G.human.logs.unshift('Day ' + G.day + ': ' + b.termYears + '-Yr Treasury Note matured — principal ' + fmtMoney(b.face) + ' returned.');
+            st.notes.splice(i, 1);
+          }
+        }
+        if (paidInterest > 0 || paidPrincipal > 0) {
+          recomputeTaxLiability(G.human.taxLedger);
+          recalculateAllNetWorths(G);
+          showToast('🏛️ Treasury Payment', 'Received ' + fmtMoney(paidPrincipal + paidInterest) + ' from your Treasuries (' + fmtMoney(paidInterest) + ' interest, taxed as ordinary income; ' + matured + ' matured, ' + coupons + ' coupon' + (coupons === 1 ? '' : 's') + ').', true);
+        }
+      }
+      window.processBondsDaily = processBondsDaily;
+
+      window.__bonds = {
+        ensure: ensureBondsState,
+        yieldForTerm: bondYieldForTerm,
+        fedRate: bondCurrentFedRate,
+        tbillCost: bondTbillCost,
+        notePrice: bondNotePrice,
+        value: bondCurrentValue,
+        valueAll: bondValueAll,
+        buyTBill: window.buyTBill,
+        buyNote: window.buyTreasuryNote,
+        sell: window.sellBond,
+        processDaily: processBondsDaily,
+        tbillTerms: BOND_TBILL_TERMS,
+        noteTerms: BOND_NOTE_TERMS,
+      };
+
+      function renderBondsTab() {
+        if (typeof G === 'undefined' || !G || !G.human) return;
+        const st = ensureBondsState(G.human);
+        const pill = document.getElementById('bondFedRatePill');
+        if (pill) pill.textContent = 'Fed Rate ' + bondCurrentFedRate().toFixed(2) + '%';
+        const yt = document.getElementById('bondYieldTable');
+        if (yt) {
+          const rows = [];
+          for (const t of BOND_TBILL_TERMS) rows.push({ label: t.w + '-Week T-Bill', y: bondYieldForTerm('TBILL:' + t.w) });
+          for (const t of BOND_NOTE_TERMS) rows.push({ label: t.y + '-Year Treasury Note', y: bondYieldForTerm('NOTE:' + t.y) });
+          yt.innerHTML = rows.map(r => '<div class="flex items-center justify-between gap-2 py-1 border-b border-[#1E2227] last:border-0"><span class="text-xs font-bold text-white">' + r.label + '</span><span class="font-mono text-xs text-[#00C805]">' + r.y.toFixed(2) + '%</span></div>').join('');
+        }
+        const all = bondValueAll();
+        const tb = document.getElementById('bondTotalsBar');
+        if (tb) tb.textContent = all.count + ' holding(s) • Value ' + fmtMoney(all.value) + ' • Interest earned ' + fmtMoney(st.totalInterestEarned);
+        const hl = document.getElementById('bondHoldingsList');
+        if (hl) {
+          const rows = [];
+          for (const b of st.tbills) {
+            rows.push('<div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-[#090D0B] border border-[#24282D]">'
+              + '<div><div class="font-extrabold text-white text-xs">' + b.termWeeks + '-Week T-Bill — ' + fmtMoney(b.face) + ' face</div>'
+              + '<div class="text-[11px] text-[#8A919E]">Bought Day ' + b.buyDay + ' for ' + fmtMoney(b.cost) + ' @ ' + (b.yieldAtBuy || 0).toFixed(2) + '% • Matures Day ' + b.maturityDay + '</div></div>'
+              + '<div class="flex items-center gap-2"><span class="font-mono text-xs text-white">' + fmtMoney(bondCurrentValue(b)) + '</span>'
+              + '<button type="button" data-bond-sell="tbill:' + b.id + '" onclick="sellBond(\'tbill\',' + b.id + ')" class="px-3 py-1.5 rounded-lg bg-[#FF5000]/20 hover:bg-[#FF5000]/30 text-[#FF5000] border border-[#FF5000]/40 font-bold text-xs">Sell</button></div></div>');
+          }
+          for (const b of st.notes) {
+            rows.push('<div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-[#090D0B] border border-[#24282D]">'
+              + '<div><div class="font-extrabold text-white text-xs">' + b.termYears + '-Year Treasury Note — ' + fmtMoney(b.face) + ' face</div>'
+              + '<div class="text-[11px] text-[#8A919E]">Bought Day ' + b.buyDay + ' at par @ ' + (b.couponRate || 0).toFixed(2) + '% coupon (' + fmtMoney(b.face * (b.couponRate || 0) / 200) + ' / 6 mo) • Next coupon Day ' + b.nextCouponDay + ' • Matures Day ' + b.maturityDay + '</div></div>'
+              + '<div class="flex items-center gap-2"><span class="font-mono text-xs text-white">' + fmtMoney(bondCurrentValue(b)) + '</span>'
+              + '<button type="button" data-bond-sell="note:' + b.id + '" onclick="sellBond(\'note\',' + b.id + ')" class="px-3 py-1.5 rounded-lg bg-[#FF5000]/20 hover:bg-[#FF5000]/30 text-[#FF5000] border border-[#FF5000]/40 font-bold text-xs">Sell</button></div></div>');
+          }
+          hl.innerHTML = rows.length ? rows.join('') : '<div class="text-xs text-[#8A919E] py-1">No bonds yet — buy your first T-Bill above. Maturities and coupons pay automatically.</div>';
+        }
+        updateBondBuyPreview();
+      }
+      window.updateBondBuyPreview = function() {
+        const sel = document.getElementById('bondBuyTerm');
+        const inp = document.getElementById('bondBuyFace');
+        const pv = document.getElementById('bondBuyPreview');
+        if (!sel || !inp || !pv || typeof G === 'undefined' || !G) return;
+        const parts = String(sel.value || '').split(':');
+        const face = Math.floor(Number(inp.value) || 0);
+        if (face < 100) { pv.textContent = 'Enter a face amount of at least $100.'; return; }
+        if (parts[0] === 'TBILL') {
+          const term = BOND_TBILL_TERMS.find(t => t.w === Number(parts[1]));
+          if (!term) return;
+          const y = bondYieldForTerm('TBILL:' + term.w);
+          const cost = bondTbillCost(face, term.days, y);
+          pv.textContent = 'Cost ' + fmtMoney(cost) + ' for ' + fmtMoney(face) + ' face @ ' + y.toFixed(2) + '% — matures Day ' + (G.day + term.days) + ' at full face value.';
+        } else if (parts[0] === 'NOTE') {
+          const term = BOND_NOTE_TERMS.find(t => t.y === Number(parts[1]));
+          if (!term) return;
+          const y = bondYieldForTerm('NOTE:' + term.y);
+          pv.textContent = 'Cost ' + fmtMoney(face) + ' (at par) for ' + fmtMoney(face) + ' face @ ' + y.toFixed(2) + '% coupon — ' + fmtMoney(face * y / 200) + ' every 6 months, principal back Day ' + (G.day + term.days) + '.';
+        }
+      };
+      window.buyBondFromForm = function() {
+        const sel = document.getElementById('bondBuyTerm');
+        const inp = document.getElementById('bondBuyFace');
+        if (!sel || !inp) return;
+        const parts = String(sel.value || '').split(':');
+        const face = Math.floor(Number(inp.value) || 0);
+        if (parts[0] === 'TBILL') window.buyTBill(Number(parts[1]), face);
+        else if (parts[0] === 'NOTE') window.buyTreasuryNote(Number(parts[1]), face);
+      };
+
       function recalculateAllNetWorths(state = G) {
         const stockMap = new Map(state.stocks.map(s => [s.ticker, s]));
         const commMap  = new Map(state.commodities.map(c => [c.sym, c]));
@@ -16798,6 +17143,12 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
               if (biz) smallBizVal += (biz.baseVal || sbPos.purchasePrice || 0);
             }
           }
+          let bondsVal = 0;
+          if (p.bonds && Array.isArray(p.bonds.tbills)) {
+            for (const b of p.bonds.tbills) bondsVal += bondCurrentValue(b);
+            if (Array.isArray(p.bonds.notes)) for (const b of p.bonds.notes) bondsVal += bondCurrentValue(b);
+          }
+          p.bondsVal = Number(bondsVal.toFixed(2));
           p.smallBizVal = Number(smallBizVal.toFixed(2));
           p.managedAccountsVal = Number(managedVal.toFixed(2));
           p.etfsVal      = etfVal;
@@ -16810,7 +17161,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           p.reVal       = reVal + privReVal + smallBizVal;
           const debt = isHuman ? (p.marginDebt || 0) : 0;
           const taxDue = isHuman ? (p.taxLedger?.accruedTax || 0) : 0;
-          p.netWorth    = Number(Math.max(10, p.cash + p.equitiesVal + optVal + commVal + forexVal + p.reVal + p.managedAccountsVal - debt - taxDue).toFixed(2));
+          p.netWorth    = Number(Math.max(10, p.cash + p.equitiesVal + optVal + commVal + forexVal + p.reVal + p.managedAccountsVal + bondsVal - debt - taxDue).toFixed(2));
           p.dayReturnPct = p.prevDayWorth > 0 ? (((p.netWorth - p.prevDayWorth) / p.prevDayWorth) * 100) : 0;
           p.totalReturnPct = (((p.netWorth - state.startingCapital) / state.startingCapital) * 100);
 
@@ -32410,6 +32761,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           ensurePayrollEtfState(base.human);
           ensureSixFeaturesState(base.human);
           ensureFullTimeInvestorState(base.human);
+          ensureBondsState(base.human);
         }
 
         if (snap.nextAiPlayerId) base.nextAiPlayerId = snap.nextAiPlayerId;
@@ -32763,6 +33115,12 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           noteTop(vPos.name || 'Venture', v);
         }
 
+        // --- Treasury bonds (T-Bills at yield-discount value, notes at PV
+        // of remaining coupons + principal, same pricing as net worth)
+        let bondsVal = 0;
+        for (const b of ((h.bonds && h.bonds.tbills) || [])) { const v = bondCurrentValue(b); bondsVal += v; noteTop((b.termWeeks || '?') + '-wk T-Bill', v); }
+        for (const b of ((h.bonds && h.bonds.notes) || [])) { const v = bondCurrentValue(b); bondsVal += v; noteTop((b.termYears || '?') + '-Yr Note', v); }
+
         // --- Managed accounts (reconciliation only, not an allocation class)
         let managedVal = 0;
         for (const acct of Object.values(h.managedAccounts || {})) {
@@ -32797,6 +33155,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           { key: 'vc',          label: 'Venture Capital',  value: r2(vcVal),      tab: 'vc' },
           { key: 'commodities', label: 'Commodities',      value: r2(commVal),    tab: 'commodities' },
           { key: 'forex',       label: 'Forex',            value: r2(fxVal),      tab: 'forex' },
+          { key: 'bonds',       label: 'Bonds',            value: r2(bondsVal),   tab: 'bonds' },
           { key: 'cash',        label: 'Cash',             value: cash,           tab: 'finance' },
         ];
         for (const c of classes) c.pct = nw > 0 ? c.value / nw : 0;
@@ -33841,6 +34200,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         renderForexTab();
         renderFinanceTab();
         renderCompetitorsTab();
+        renderBondsTab();
         saveLiveAutoSession(false);
       }
 
@@ -35773,6 +36133,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     { id: 'news', name: 'News', grad: 'linear-gradient(135deg,#0369a1,#38bdf8)', glyph: GL('<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H5.5A1.5 1.5 0 0 1 4 17.5z"/><path d="M19 15.5h1.5V6.5L19 5.5"/><path d="M7 8h7M7 11h7M7 14h4.5"/>'), desc: 'The wire: markets, rivals, shocks and the world economy.' },
     { id: 'settings', name: 'Settings', grad: 'linear-gradient(135deg,#3f3f46,#71717a)', glyph: GL('<path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2.1" fill="#0b0e11"/><circle cx="15" cy="12" r="2.1" fill="#0b0e11"/><circle cx="8" cy="17" r="2.1" fill="#0b0e11"/>'), desc: 'Save & load, new game, theme, music and About.' },
     { id: 'coaching', name: 'Coaching', grad: 'linear-gradient(135deg,#065f46,#10b981)', glyph: GL('<path d="M12 4 2.5 8.5 12 13l9.5-4.5z"/><path d="M6.5 10.8V16c0 1.6 2.5 3 5.5 3s5.5-1.4 5.5-3v-5.2"/><path d="M21 8.5V15"/>'), desc: 'The 12-step tutorial and your live investment coach.' },
+    { id: 'bonds', name: 'Bonds', grad: 'linear-gradient(135deg,#0f3d2e,#d4af37)', glyph: GL('<rect x="4" y="3.5" width="16" height="13" rx="2"/><path d="M8 8h8M8 11.5h5"/><circle cx="16.5" cy="16.5" r="2.5"/><path d="M15 18.5 14 21l2.5-1 2.5 1-1-2.5"/>'), desc: 'U.S. Treasury bills, notes & bonds — the safe place to park cash.' },
     { id: 'games', name: 'Games', grad: 'linear-gradient(135deg,#312e81,#7c3aed)', glyph: GL('<path d="M7 8.5h10a5 5 0 0 1 5 5v2.6a3 3 0 0 1-5.3 1.9L15 16H9l-1.7 2A3 3 0 0 1 2 16.1v-2.6a5 5 0 0 1 5-5z"/><path d="M7.5 11v3.4M5.8 12.7h3.4"/><circle cx="16" cy="11.8" r="1" fill="#fff" stroke="none"/><circle cx="18.2" cy="13.8" r="1" fill="#fff" stroke="none"/>'), desc: 'More free games from JMF Games — jmfgames.com.', external: 'https://jmfgames.com' }
   ];
   var APP_MAP = {};
@@ -35811,9 +36172,11 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
      A page may hold any number of apps (its grid scrolls if it overflows), so
      page membership never changes when the icon size changes. Migration: an
      order-only save becomes ONE page holding that exact order; a fresh save
-     gets the default single page. The flat `order` pref is kept as a mirror
-     of the flattened pages (existing harnesses read it); on load, a valid
-     `pages` value always wins over `order`. */
+     gets the default single page; a saved PAGES layout that is well-formed
+     except for apps added since the save keeps its splits, with the missing
+     apps appended to the last page (migratePages). The flat `order` pref is
+     kept as a mirror of the flattened pages (existing harnesses read it); on
+     load, a valid `pages` value always wins over `order`. */
   function validPages(pg) {
     if (!Array.isArray(pg) || !pg.length) return false;
     var seen = {}, n = 0;
@@ -35823,14 +36186,39 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     }
     return n === APPS.length;
   }
+  function migratePages(pg) {
+    /* Pages well-formed except for apps added since the save (e.g. Bonds):
+       keep the player's splits, append the missing apps (default order) to
+       the last page. Anything else (unknown/duplicate id, empty page,
+       non-array) returns null and the caller falls back to order. */
+    if (!Array.isArray(pg) || !pg.length) return null;
+    var seen = {}, out = [];
+    for (var i = 0; i < pg.length; i++) {
+      if (!Array.isArray(pg[i]) || !pg[i].length) return null;
+      var page = [];
+      for (var j = 0; j < pg[i].length; j++) {
+        if (!APP_MAP[pg[i][j]] || seen[pg[i][j]]) return null;
+        seen[pg[i][j]] = true; page.push(pg[i][j]);
+      }
+      out.push(page);
+    }
+    var missing = [];
+    DEFAULT_ORDER.forEach(function (id) { if (!seen[id]) missing.push(id); });
+    if (!missing.length) return out;
+    out[out.length - 1] = out[out.length - 1].concat(missing);
+    return out;
+  }
   function flattenPages(pg) {
     var out = [];
     pg.forEach(function (page) { page.forEach(function (id) { out.push(id); }); });
     return out;
   }
   var pages;
+  var migratedPages = migratePages(prefs.pages);
   if (validPages(prefs.pages)) {
     pages = prefs.pages.map(function (pg) { return pg.slice(); });
+  } else if (migratedPages) {
+    pages = migratedPages;
   } else {
     var flat = validOrder(prefs.order) ? prefs.order.slice() : (migrateOrder(prefs.order) || DEFAULT_ORDER.slice());
     pages = [flat];
@@ -35870,15 +36258,15 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   var extraNodes = { job: null, wire: null, monitor: null };
 
   /* ---------- Phase 2: per-app hosts, game tabs, re-parent map, hero labels ---------- */
-  var HOSTS = { stocks: 'stocks-host', realestate: 're-host', ereits: 'ereit-host', smallbiz: 'sb-host', forex: 'forex-host', commodities: 'cmd-host', vc: 'vc-host', casino: 'casino-host', job: 'job-host', rivals: 'rivals-host', managers: 'mgr-host', portfolio: 'portfolio-host', coaching: 'coaching-host' };
-  var APP_TAB = { bank: 'finance', realestate: 'realestate', ereits: 'privatere', smallbiz: 'smallbiz', forex: 'forex', commodities: 'commodities', vc: 'vc', casino: 'casino', rivals: 'competitors', managers: 'managers', portfolio: 'portfolio', news: 'finance', coaching: 'coaching' };
+  var HOSTS = { stocks: 'stocks-host', realestate: 're-host', ereits: 'ereit-host', smallbiz: 'sb-host', forex: 'forex-host', commodities: 'cmd-host', vc: 'vc-host', casino: 'casino-host', job: 'job-host', rivals: 'rivals-host', managers: 'mgr-host', portfolio: 'portfolio-host', coaching: 'coaching-host', bonds: 'bonds-host' };
+  var APP_TAB = { bank: 'finance', realestate: 'realestate', ereits: 'privatere', smallbiz: 'smallbiz', forex: 'forex', commodities: 'commodities', vc: 'vc', casino: 'casino', rivals: 'competitors', managers: 'managers', portfolio: 'portfolio', news: 'finance', coaching: 'coaching', bonds: 'bonds' };
   var REPARENTS = [
     ['tab-finance', 'bank-host'], ['tab-stocks', 'stocks-host'], ['tab-etfs', 'stocks-host'], ['tab-options', 'stocks-host'],
     ['tab-realestate', 're-host'], ['tab-privatere', 'ereit-host'], ['tab-smallbiz', 'sb-host'],
     ['tab-forex', 'forex-host'], ['tab-commodities', 'cmd-host'], ['tab-vc', 'vc-host'],
-    ['tab-casino', 'casino-host'], ['tab-competitors', 'rivals-host'], ['tab-managers', 'mgr-host'], ['tab-portfolio', 'portfolio-host'], ['tab-coaching', 'coaching-host']
+    ['tab-casino', 'casino-host'], ['tab-competitors', 'rivals-host'], ['tab-managers', 'mgr-host'], ['tab-portfolio', 'portfolio-host'], ['tab-coaching', 'coaching-host'], ['tab-bonds', 'bonds-host']
   ];
-  var HERO_LABELS = { stocks: 'Trading Terminal', realestate: 'Property Equity', ereits: 'Private Real Estate', smallbiz: 'Business Portfolio', forex: 'Forex Equity', commodities: 'Commodities Desk', vc: 'Venture Portfolio', casino: 'Casino Balance', job: 'Casino Career', rivals: 'Championship Race', managers: 'Managed Capital', portfolio: 'Total Net Worth', coaching: 'Coaching Academy' };
+  var HERO_LABELS = { stocks: 'Trading Terminal', realestate: 'Property Equity', ereits: 'Private Real Estate', smallbiz: 'Business Portfolio', forex: 'Forex Equity', commodities: 'Commodities Desk', vc: 'Venture Portfolio', casino: 'Casino Balance', job: 'Casino Career', rivals: 'Championship Race', managers: 'Managed Capital', portfolio: 'Total Net Worth', coaching: 'Coaching Academy', bonds: 'Treasury Bonds' };
   function heroHtml(app) {
     return '<div class="ph-hero ph-hero-' + app.id + '" id="ph-hero-' + app.id + '"><div class="ph-hero-art" id="ph-hero-art-' + app.id + '" aria-hidden="true"></div><div class="ph-hero-label">' + esc(HERO_LABELS[app.id] || app.name) + '</div><div class="ph-hero-big" id="ph-hero-big-' + app.id + '">—</div><div class="ph-hero-row" id="ph-hero-row-' + app.id + '"></div></div>';
   }
@@ -36550,7 +36938,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   }
   /* ---------- deep links: one shareable hash per app (#portfolio, #stocks, …) ----------
      Home is the bare URL (no hash); #home is accepted as an alias and normalized
-     away. Slugs are the app ids, so all 17 apps (including #games, which still
+     away. Slugs are the app ids, so all 18 apps (including #games, which still
      redirects to jmfgames.com) have distinct, human-readable links.
      History model — one entry per app session, exactly as before, but the URL
      always shows the current app:
@@ -36853,8 +37241,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
      and opens the owning app when the visible tab moves out of the current
      window. The check runs on a short delay so the whole click handler,
      including chained actions after the switch, settles first. */
-  var TAB_APP = { finance: 'bank', stocks: 'stocks', etfs: 'stocks', options: 'stocks', realestate: 'realestate', privatere: 'ereits', smallbiz: 'smallbiz', forex: 'forex', commodities: 'commodities', vc: 'vc', casino: 'casino', competitors: 'rivals', managers: 'managers', portfolio: 'portfolio', coaching: 'coaching' };
-  var APP_TABS = { bank: ['finance'], stocks: ['stocks', 'etfs', 'options'], realestate: ['realestate'], ereits: ['privatere'], smallbiz: ['smallbiz'], forex: ['forex'], commodities: ['commodities'], vc: ['vc'], casino: ['casino'], rivals: ['competitors'], managers: ['managers'], portfolio: ['portfolio'], news: ['finance'], job: [], settings: [], coaching: ['coaching'] };
+  var TAB_APP = { finance: 'bank', stocks: 'stocks', etfs: 'stocks', options: 'stocks', realestate: 'realestate', privatere: 'ereits', smallbiz: 'smallbiz', forex: 'forex', commodities: 'commodities', vc: 'vc', casino: 'casino', competitors: 'rivals', managers: 'managers', portfolio: 'portfolio', coaching: 'coaching', bonds: 'bonds' };
+  var APP_TABS = { bank: ['finance'], stocks: ['stocks', 'etfs', 'options'], realestate: ['realestate'], ereits: ['privatere'], smallbiz: ['smallbiz'], forex: ['forex'], commodities: ['commodities'], vc: ['vc'], casino: ['casino'], rivals: ['competitors'], managers: ['managers'], portfolio: ['portfolio'], news: ['finance'], job: [], settings: [], coaching: ['coaching'], bonds: ['bonds'] };
   var routeTimer = null;
   function scheduleRouteCheck() {
     if (routeTimer) return;
@@ -37042,6 +37430,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     else if (id === 'managers') { var sp = elText('starPyramidSummaryBar'); r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Pyramid', sp.length > 26 ? sp.slice(0, 26) + '…' : sp); }
     else if (id === 'portfolio') { r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Market', elText('portfolioMarketHoursBadge')); }
     else if (id === 'coaching') { var cc = G.coaching || {}; b = cc.tutorialActive ? ('Tutorial Step ' + (cc.tutorialStep || 1) + ' / 12') : (cc.enabled ? 'Live Coach ON' : 'Coaching OFF'); r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Net Worth', fmtMoney(nw)); }
+    else if (id === 'bonds') { var bv = (window.__bonds && typeof window.__bonds.valueAll === 'function') ? window.__bonds.valueAll() : { value: 0, count: 0 }; b = fmtMoney(bv.value); r = heroStat('Holdings', String(bv.count)) + heroStat('Cash', cash) + heroStat('Fed Rate', (window.G && window.G.macro) ? (Number(window.G.macro.fedRate) || 0).toFixed(2) + '%' : '—'); }
     else return;
     big.textContent = b;
     row.innerHTML = r;
