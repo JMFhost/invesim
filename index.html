@@ -983,7 +983,8 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
 #phone-screen > .ph-contained { position: absolute !important; z-index: 70 !important; }
 #phone-screen #modalSmallBizReport .rh-card,
 #phone-screen #modalSaveLoad .rh-card,
-#phone-screen #modalNewGame .rh-card { max-height: calc(100% - 8px) !important; overflow-y: auto !important; }
+#phone-screen #modalNewGame .rh-card,
+#phone-screen #modalCoachingPrompt .rh-card { max-height: calc(100% - 8px) !important; overflow-y: auto !important; }
 
 /* casino game selector: 2 columns inside the phone */
 #casino-host .ph-casino-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
@@ -1237,6 +1238,40 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-300:not(input, s
 body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, select, textarea, option, [class*="bg-[#0C0E10]"], [class*="bg-[#0C0E10]"] *, [class*="bg-[#0D1014]"], [class*="bg-[#0D1014]"] *, [class*="bg-[#141820]"], [class*="bg-[#141820]"] *, [class*="bg-[#141923]"], [class*="bg-[#141923]"] *, [class*="bg-[#161B22]"], [class*="bg-[#161B22]"] *, [class*="bg-[#1B2230]"], [class*="bg-[#1B2230]"] *, [class*="bg-[#1C2024]"], [class*="bg-[#1C2024]"] *, [class*="bg-[#1E252E]"], [class*="bg-[#1E252E]"] *, [class*="bg-[#262B31]"], [class*="bg-[#262B31]"] *, [class*="bg-[#2A2F36]"], [class*="bg-[#2A2F36]"] *, [class*="bg-[#323942]"], [class*="bg-[#323942]"] *, [class*="bg-slate-800"], [class*="bg-slate-800"] *, [class*="bg-white"], [class*="bg-white"] *, [class*="bg-[#F8FAFC]"], [class*="bg-[#F8FAFC]"] *, [class*="/15"], [class*="/20"], [class*="/25"], [class*="/30"]) { color: #F472B6 !important; }
 
 
+/* ---------- first-run onboarding tour + home Coaching card (Nov 23, 2026) ---------- */
+/* Home-screen Coaching card: the phone-visible entry to the Coaching Academy.
+   The engine home tab (#tab-home) is not rendered inside the phone shell
+   (<main> is display:none), so the card lives here. Only #ph-pages shrinks
+   in the home column, so this fixed row takes its height from the icon grid,
+   which scrolls if needed. Hidden while arranging. */
+.ph-home-coaching { flex-shrink: 0; margin: 10px 16px 0; display: flex; align-items: center; gap: 10px; text-align: left; background: rgba(8,12,16,.55); border: 1px solid rgba(0,200,5,.45); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 14px; padding: 10px 12px; color: #fff; cursor: pointer; font-family: inherit; }
+.ph-home-coaching:active { transform: scale(.98); }
+.ph-hc-ic { font-size: 22px; line-height: 1; }
+.ph-hc-tx { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.ph-hc-tx b { font-size: 13.5px; font-weight: 800; }
+.ph-hc-tx i { font-size: 11.5px; font-style: normal; color: #9aa3b2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-hc-chev { font-size: 20px; color: #00e006; line-height: 1; }
+#ph-home.ph-editing #ph-home-coaching { display: none; }
+/* Tour sheet: bottom sheet above app windows (z 20) and the switcher (z 65),
+   below the notification banners (z 90). Lives in #phone-screen, never
+   inside a game-rebuilt container, so the 1s tick cannot disturb it.
+   Bottom edge sits 34px above the screen bottom, clear of the 30px home
+   indicator strip. */
+#ph-tour { position: absolute; left: 0; right: 0; bottom: 34px; z-index: 75; padding: 0 12px; }
+#ph-tour[hidden] { display: none; }
+.ph-tour-card { background: rgba(10,14,18,.97); border: 1px solid rgba(0,200,5,.45); border-radius: 18px; padding: 14px 16px 16px; box-shadow: 0 12px 40px rgba(0,0,0,.6); }
+.ph-tour-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+#ph-tour-steps { font-size: 11px; font-weight: 700; color: #00e006; letter-spacing: .04em; }
+.ph-tour-skip { background: none; border: none; color: #9aa3b2; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; padding: 6px 4px; }
+#ph-tour-title { font-size: 17px; font-weight: 800; color: #fff; margin: 0 0 6px; }
+#ph-tour-body { font-size: 13.5px; line-height: 1.5; color: #d7dce2; margin: 0 0 12px; }
+.ph-tour-btns { display: flex; gap: 8px; }
+.ph-tour-btn { flex: 1 1 0; border-radius: 999px; padding: 11px 6px; font-size: 13.5px; font-weight: 700; cursor: pointer; font-family: inherit; min-height: 44px; }
+.ph-tour-ghost { background: #1e2227; border: 1px solid #2c3137; color: #fff; }
+.ph-tour-show { background: #1e2227; border: 1px solid rgba(0,200,5,.5); color: #7dff8a; }
+.ph-tour-next { background: #00c805; border: 1px solid #00c805; color: #000; }
+.ph-tour-btn:disabled { opacity: .35; }
+
 </style>
 </head>
 <body class="light-theme min-h-screen flex flex-col selection:bg-[#00C805] selection:text-black ph-shell-active ph-locked">
@@ -1326,6 +1361,11 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           <button type="button" class="ph-pill-btn" id="ph-btn-stephour">+1 Hour</button>
           <button type="button" class="ph-pill-btn" id="ph-btn-music">&#9834; Music: Off</button>
         </div>
+        <button type="button" id="ph-home-coaching" class="ph-home-coaching" aria-label="Open Coaching Academy">
+          <span class="ph-hc-ic" aria-hidden="true">🎓</span>
+          <span class="ph-hc-tx"><b>Coaching Academy</b><i>12-step tutorial + live coach — learn as you play</i></span>
+          <span class="ph-hc-chev" aria-hidden="true">›</span>
+        </button>
         <div id="ph-edit-bar" role="toolbar" aria-label="Arrange apps">
           <button type="button" class="ph-edit-btn ph-edit-done" id="ph-edit-done">Done</button>
           <button type="button" class="ph-edit-btn" id="ph-edit-az">Sort A-Z</button>
@@ -1350,6 +1390,21 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
 
       <!-- App windows (built by shell JS) -->
       <div id="ph-app-layer"></div>
+
+      <!-- First-run onboarding tour (Nov 23, 2026): brand-new saves only.
+           Shell-owned bottom sheet; never inside a game-rebuilt container. -->
+      <div id="ph-tour" hidden aria-hidden="true">
+        <div class="ph-tour-card" role="dialog" aria-label="Welcome tour">
+          <div class="ph-tour-top"><span id="ph-tour-steps">Step 1 of 5</span><button type="button" id="ph-tour-skip" class="ph-tour-skip">Skip tour</button></div>
+          <h2 id="ph-tour-title">Welcome to InveSim</h2>
+          <p id="ph-tour-body"></p>
+          <div class="ph-tour-btns">
+            <button type="button" id="ph-tour-back" class="ph-tour-btn ph-tour-ghost">Back</button>
+            <button type="button" id="ph-tour-show" class="ph-tour-btn ph-tour-show">Show me</button>
+            <button type="button" id="ph-tour-next" class="ph-tour-btn ph-tour-next">Next</button>
+          </div>
+        </div>
+      </div>
 
       <!-- Notification Center -->
       <div id="ph-notif-center" aria-hidden="true">
@@ -1485,6 +1540,9 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         </button>
         <button type="button" data-tab="competitors" class="nav-tab text-[#8A919E] hover:text-white py-1.5 px-2 transition whitespace-nowrap">
           AI Rivals <span id="headerRank" class="ml-0.5 px-1.5 py-0.5 rounded-full bg-[#1C2024] text-white font-mono text-[10px]">#1/101</span>
+        </button>
+        <button type="button" data-tab="coaching" class="nav-tab text-[#8A919E] hover:text-white py-1.5 px-2 transition whitespace-nowrap">
+          🎓 Coaching <span id="navCoachingBadge" class="inline text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-[#1C2024] text-[#00C805]">ON</span>
         </button>
       </nav>
     </div>
@@ -1641,6 +1699,11 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             <div class="text-xs text-[#8A919E]">💱 Forex (8 Pairs • 24H)</div>
             <div id="homeForexVal" class="text-base font-bold text-white mono-num mt-1">$0.00</div>
             <div id="homeForexCount" class="text-[11px] text-cyan-300 mt-0.5">1:10 to 1:100 →</div>
+          </div>
+          <div class="rh-card p-3.5 cursor-pointer hover:border-[#00C805]/50 transition" onclick="switchMainTab('coaching')">
+            <div class="text-xs text-[#8A919E]">🎓 Coaching Academy</div>
+            <div class="text-base font-bold text-white mono-num mt-1">12-Step Tutorial</div>
+            <div class="text-[11px] text-[#00C805] mt-0.5">Learn as you play →</div>
           </div>
         </div>
 
@@ -3837,6 +3900,50 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       </div>
     </section>
 
+    <!-- =================================================================== -->
+    <!-- TAB: COACHING ACADEMY (12-STEP TUTORIAL + LIVE COACH)               -->
+    <!-- Revived Nov 23, 2026 (onboarding fix): the render function below was -->
+    <!-- dead behind an early return and none of these mount points existed. -->
+    <!-- =================================================================== -->
+    <section id="tab-coaching" class="tab-section hidden flex flex-col gap-5">
+      <div class="rh-card p-5 flex flex-col gap-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-lg font-extrabold text-white">🎓 Coaching Academy</h2>
+            <p class="text-xs text-[#8A919E]">Your step-by-step tutorial and live investment research coach — it reads your actual portfolio and market, then tells you what to check before you trade.</p>
+          </div>
+          <span id="coachModeStatusPill" class="px-2.5 py-1 rounded-full bg-[#1C2024] text-[#8A919E] text-[11px] font-bold">Coaching: ON</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-1.5">
+          <button type="button" onclick="chooseCoachingMode('FULL_TUTORIAL')" class="px-3 py-1.5 rounded-lg bg-[#00C805] hover:bg-[#00E006] text-black font-extrabold text-xs">🎓 Full 12-Step Tutorial</button>
+          <button type="button" onclick="chooseCoachingMode('COACH_ONLY')" class="px-3 py-1.5 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-white font-bold text-xs">🧭 Coach Only (Skip Tutorial)</button>
+          <button type="button" onclick="chooseCoachingMode('OFF')" class="px-3 py-1.5 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-white font-bold text-xs">🔕 Coaching Off</button>
+        </div>
+        <div id="liveCoachBanner" class="flex flex-col gap-3"></div>
+      </div>
+      <div class="rh-card p-5 flex flex-col gap-3">
+        <div id="coachingTutorialDeck" class="flex flex-col gap-2"></div>
+      </div>
+      <div class="flex flex-col gap-3">
+        <h2 class="text-base font-bold text-white">🔎 Live Asset Analyzer <span class="text-xs text-[#8A919E] font-normal">— your current stock, business &amp; top robot trader, graded by the coach</span></h2>
+        <div id="coachingLiveAssetAnalyzerGrid" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
+      </div>
+      <div class="flex flex-col gap-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h2 class="text-base font-bold text-white">📚 Research Playbooks</h2>
+          <div class="flex flex-wrap items-center gap-1 text-[11px]">
+            <button type="button" data-coach-topic="ALL" onclick="setCoachingTopicFilter('ALL')" class="coach-topic-btn px-2.5 py-1 rounded-lg font-extrabold bg-[#00C805] text-black">All</button>
+            <button type="button" data-coach-topic="BASICS" onclick="setCoachingTopicFilter('BASICS')" class="coach-topic-btn px-2.5 py-1 rounded-lg font-bold bg-[#1C2024] text-white">Basics</button>
+            <button type="button" data-coach-topic="STOCKS" onclick="setCoachingTopicFilter('STOCKS')" class="coach-topic-btn px-2.5 py-1 rounded-lg font-bold bg-[#1C2024] text-white">Stocks</button>
+            <button type="button" data-coach-topic="DERIVATIVES" onclick="setCoachingTopicFilter('DERIVATIVES')" class="coach-topic-btn px-2.5 py-1 rounded-lg font-bold bg-[#1C2024] text-white">Options</button>
+            <button type="button" data-coach-topic="REALASSETS" onclick="setCoachingTopicFilter('REALASSETS')" class="coach-topic-btn px-2.5 py-1 rounded-lg font-bold bg-[#1C2024] text-white">Real Assets</button>
+            <button type="button" data-coach-topic="BOTS" onclick="setCoachingTopicFilter('BOTS')" class="coach-topic-btn px-2.5 py-1 rounded-lg font-bold bg-[#1C2024] text-white">Bots &amp; Managers</button>
+          </div>
+        </div>
+        <div id="coachingPlaybookCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+      </div>
+    </section>
+
   </main>
 
   <!-- ==================== ANDROID PLAY STORE FIXED BOTTOM NAVIGATION BAR (MOBILE) ==================== -->
@@ -3894,6 +4001,29 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       </div>
     </div>
   </div>
+
+    <!-- ==================== MODAL: COACHING PROMPT (FIRST-RUN) ==================== -->
+    <!-- Shown once, only on a brand-new save, after the shell onboarding tour
+         ends (the shell sequences it — initApp deliberately does NOT show it,
+         so the tour and the prompt never stack). Any choice — or the X /
+         backdrop dismiss — sets coaching.promptShown=true and persists it. -->
+    <div id="modalCoachingPrompt" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="if (window.__coachingModalOpenedAt && Date.now() - window.__coachingModalOpenedAt < 350) return; if (event.target === this) closeCoachingPromptModal();">
+      <div class="rh-card max-w-lg w-full p-6 shadow-2xl flex flex-col gap-4">
+        <div class="flex items-center justify-between border-b border-[#24282D] pb-3">
+          <div>
+            <h2 class="text-lg font-extrabold text-white">🎓 Welcome to InveSim!</h2>
+            <p class="text-xs text-[#8A919E]">You start with $10,000. Want a coach to walk you through it?</p>
+          </div>
+          <button type="button" onclick="closeCoachingPromptModal()" class="text-[#8A919E] hover:text-white text-lg font-bold px-2">✕</button>
+        </div>
+        <p class="text-xs text-[#E2E8F0] leading-relaxed">The Coaching Academy teaches you to research stocks, ETFs, options, real estate, businesses, and more — with a live coach that reads your actual portfolio and tells you what to check before every trade.</p>
+        <div class="flex flex-col gap-2">
+          <button type="button" onclick="chooseCoachingMode('FULL_TUTORIAL')" class="w-full px-4 py-3 rounded-xl bg-[#00C805] hover:bg-[#00E006] text-black text-sm font-extrabold text-left">🎓 Full 12-Step Tutorial <span class="block text-xs font-bold opacity-80">Step-by-step lessons + live coach on every tab</span></button>
+          <button type="button" onclick="chooseCoachingMode('COACH_ONLY')" class="w-full px-4 py-3 rounded-xl bg-[#1C2024] hover:bg-[#262B31] text-white text-sm font-bold text-left">🧭 Live Coach Only <span class="block text-xs font-normal text-[#8A919E]">Skip the lessons — keep the live research coach</span></button>
+          <button type="button" onclick="chooseCoachingMode('OFF')" class="w-full px-4 py-3 rounded-xl bg-[#1C2024] hover:bg-[#262B31] text-white text-sm font-bold text-left">🔕 No Coaching <span class="block text-xs font-normal text-[#8A919E]">Play on your own — turn it back on anytime in the 🎓 Coaching tab</span></button>
+        </div>
+      </div>
+    </div>
 
     <!-- ==================== MODAL: SMALL BUSINESS 1% FEE FINANCIAL REPORT (1M - 10Y) ==================== -->
   <div id="modalSmallBizReport" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
@@ -32151,7 +32281,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         base.minuteOfDay = typeof snap.minuteOfDay === 'number' ? snap.minuteOfDay : 570;
         if (snap.coaching) base.coaching = snap.coaching;
         if (snap.theme) applyAppTheme(snap.theme);
-        if (snap.currentTab && snap.currentTab !== 'coaching') currentTab = snap.currentTab;
+        if (snap.currentTab) currentTab = snap.currentTab;
         base.autoPlayRunning = snap.autoPlayRunning !== undefined ? Boolean(snap.autoPlayRunning) : true;
         if (snap.worldEconomy) base.worldEconomy = snap.worldEconomy;
         if (snap.lotteryYesterdayResult) base.lotteryYesterdayResult = snap.lotteryYesterdayResult;
@@ -32914,7 +33044,16 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         }
       }
 
-      window.openCoachingPromptModal = function() {};
+      window.openCoachingPromptModal = function() {
+        if (!G) return;
+        ensureCoachingState(G);
+        if (G.coaching.promptShown) return;
+        const m = document.getElementById('modalCoachingPrompt');
+        if (!m) return;
+        // 350ms sheet self-cancel guard (see modal backdrop onclick below).
+        window.__coachingModalOpenedAt = Date.now();
+        m.classList.remove('hidden');
+      };
 
       window.closeCoachingPromptModal = function() {
         const m = document.getElementById('modalCoachingPrompt');
@@ -33103,7 +33242,6 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       }
 
       function renderCoachingAndLiveBanner() {
-        return;
         ensureCoachingState(G);
         const c = G.coaching;
 
@@ -33885,7 +34023,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
                   const fast = JSON.parse(rawFast);
                   if (fast && fast.seed === G.seed) {
                     if (fast.theme) applyAppTheme(fast.theme);
-                    if (fast.currentTab && fast.currentTab !== 'coaching') currentTab = fast.currentTab;
+                    if (fast.currentTab) currentTab = fast.currentTab;
                     if (fast.coaching) G.coaching = fast.coaching;
                     if (fast.autoPlayRunning !== undefined) G.autoPlayRunning = Boolean(fast.autoPlayRunning);
                     if (fast.day === G.day && typeof fast.minuteOfDay === 'number' && fast.minuteOfDay > G.minuteOfDay) {
@@ -33905,6 +34043,10 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           saveLiveAutoSession(true);
         }
 
+        // ONBOARDING (Nov 23, 2026): true only when no autosave snapshot
+        // existed at boot and a brand-new game was just created. The shell
+        // onboarding tour + coaching prompt run ONLY on a fresh save.
+        window.__invesimFreshSave = !restoredFromAutoSave;
         window.createNewGame = createNewGame;
         window.resetToSeed = (s) => {
           G = createNewGame(s, 10000, "BALANCED");
@@ -35244,6 +35386,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     { id: 'portfolio', name: 'Portfolio', grad: 'linear-gradient(135deg,#047857,#34d399)', glyph: GL('<path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5H12z"/><path d="M14.5 2.6A8.5 8.5 0 0 1 21.4 9.5H14.5z"/>'), desc: 'Everything you own, grouped by asset class.' },
     { id: 'news', name: 'News', grad: 'linear-gradient(135deg,#0369a1,#38bdf8)', glyph: GL('<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H5.5A1.5 1.5 0 0 1 4 17.5z"/><path d="M19 15.5h1.5V6.5L19 5.5"/><path d="M7 8h7M7 11h7M7 14h4.5"/>'), desc: 'The wire: markets, rivals, shocks and the world economy.' },
     { id: 'settings', name: 'Settings', grad: 'linear-gradient(135deg,#3f3f46,#71717a)', glyph: GL('<path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2.1" fill="#0b0e11"/><circle cx="15" cy="12" r="2.1" fill="#0b0e11"/><circle cx="8" cy="17" r="2.1" fill="#0b0e11"/>'), desc: 'Save & load, new game, theme, music and About.' },
+    { id: 'coaching', name: 'Coaching', grad: 'linear-gradient(135deg,#065f46,#10b981)', glyph: GL('<path d="M12 4 2.5 8.5 12 13l9.5-4.5z"/><path d="M6.5 10.8V16c0 1.6 2.5 3 5.5 3s5.5-1.4 5.5-3v-5.2"/><path d="M21 8.5V15"/>'), desc: 'The 12-step tutorial and your live investment coach.' },
     { id: 'games', name: 'Games', grad: 'linear-gradient(135deg,#312e81,#7c3aed)', glyph: GL('<path d="M7 8.5h10a5 5 0 0 1 5 5v2.6a3 3 0 0 1-5.3 1.9L15 16H9l-1.7 2A3 3 0 0 1 2 16.1v-2.6a5 5 0 0 1 5-5z"/><path d="M7.5 11v3.4M5.8 12.7h3.4"/><circle cx="16" cy="11.8" r="1" fill="#fff" stroke="none"/><circle cx="18.2" cy="13.8" r="1" fill="#fff" stroke="none"/>'), desc: 'More free games from JMF Games — jmfgames.com.', external: 'https://jmfgames.com' }
   ];
   var APP_MAP = {};
@@ -35262,8 +35405,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     return chars.length > 20 ? chars.slice(0, 20).join('') : s;
   }
   var PREFS_KEY = 'INVESIM_PHONE_PREFS';
-  var prefs = { music: false, order: null, stocksTab: 'stocks', playerName: '', musicTrack: 0, musicTheme: 'holidays', musicShuffle: false, sfxOn: true, wallpaper: 0, iconSize: 100, pages: null };
-  try { var raw = localStorage.getItem(PREFS_KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p.music === 'boolean') prefs.music = p.music; if (p && Array.isArray(p.order)) prefs.order = p.order; if (p && (p.stocksTab === 'stocks' || p.stocksTab === 'etfs' || p.stocksTab === 'options')) prefs.stocksTab = p.stocksTab; if (p && typeof p.playerName === 'string') prefs.playerName = normalizeName(p.playerName); if (p && typeof p.musicTrack === 'number' && isFinite(p.musicTrack)) prefs.musicTrack = Math.max(0, Math.min(30, Math.floor(p.musicTrack))); if (p && typeof p.musicTheme === 'string' && (p.musicTheme === 'holidays' || p.musicTheme === 'originals' || p.musicTheme === 'children' || p.musicTheme === 'movies')) prefs.musicTheme = p.musicTheme; if (p && typeof p.musicShuffle === 'boolean') prefs.musicShuffle = p.musicShuffle; if (p && typeof p.sfxOn === 'boolean') prefs.sfxOn = p.sfxOn; if (p && typeof p.wallpaper === 'number' && isFinite(p.wallpaper)) prefs.wallpaper = Math.max(0, Math.min(14, Math.floor(p.wallpaper))); if (p && ICON_SIZES.indexOf(p.iconSize) !== -1) prefs.iconSize = p.iconSize; if (p && Array.isArray(p.pages)) prefs.pages = p.pages; } } catch (e) {}
+  var prefs = { music: false, order: null, stocksTab: 'stocks', playerName: '', musicTrack: 0, musicTheme: 'holidays', musicShuffle: false, sfxOn: true, wallpaper: 0, iconSize: 100, pages: null, onboardingTourSeen: false };
+  try { var raw = localStorage.getItem(PREFS_KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p.music === 'boolean') prefs.music = p.music; if (p && Array.isArray(p.order)) prefs.order = p.order; if (p && (p.stocksTab === 'stocks' || p.stocksTab === 'etfs' || p.stocksTab === 'options')) prefs.stocksTab = p.stocksTab; if (p && typeof p.playerName === 'string') prefs.playerName = normalizeName(p.playerName); if (p && typeof p.musicTrack === 'number' && isFinite(p.musicTrack)) prefs.musicTrack = Math.max(0, Math.min(30, Math.floor(p.musicTrack))); if (p && typeof p.musicTheme === 'string' && (p.musicTheme === 'holidays' || p.musicTheme === 'originals' || p.musicTheme === 'children' || p.musicTheme === 'movies')) prefs.musicTheme = p.musicTheme; if (p && typeof p.musicShuffle === 'boolean') prefs.musicShuffle = p.musicShuffle; if (p && typeof p.sfxOn === 'boolean') prefs.sfxOn = p.sfxOn; if (p && typeof p.wallpaper === 'number' && isFinite(p.wallpaper)) prefs.wallpaper = Math.max(0, Math.min(14, Math.floor(p.wallpaper))); if (p && ICON_SIZES.indexOf(p.iconSize) !== -1) prefs.iconSize = p.iconSize; if (p && p.onboardingTourSeen === true) prefs.onboardingTourSeen = true; if (p && Array.isArray(p.pages)) prefs.pages = p.pages; } } catch (e) {}
   function savePrefs() { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {} }
   function validOrder(o) {
     if (!Array.isArray(o) || o.length !== APPS.length) return false;
@@ -35341,15 +35484,15 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   var extraNodes = { job: null, wire: null, monitor: null };
 
   /* ---------- Phase 2: per-app hosts, game tabs, re-parent map, hero labels ---------- */
-  var HOSTS = { stocks: 'stocks-host', realestate: 're-host', ereits: 'ereit-host', smallbiz: 'sb-host', forex: 'forex-host', commodities: 'cmd-host', vc: 'vc-host', casino: 'casino-host', job: 'job-host', rivals: 'rivals-host', managers: 'mgr-host', portfolio: 'portfolio-host' };
-  var APP_TAB = { bank: 'finance', realestate: 'realestate', ereits: 'privatere', smallbiz: 'smallbiz', forex: 'forex', commodities: 'commodities', vc: 'vc', casino: 'casino', rivals: 'competitors', managers: 'managers', portfolio: 'portfolio', news: 'finance' };
+  var HOSTS = { stocks: 'stocks-host', realestate: 're-host', ereits: 'ereit-host', smallbiz: 'sb-host', forex: 'forex-host', commodities: 'cmd-host', vc: 'vc-host', casino: 'casino-host', job: 'job-host', rivals: 'rivals-host', managers: 'mgr-host', portfolio: 'portfolio-host', coaching: 'coaching-host' };
+  var APP_TAB = { bank: 'finance', realestate: 'realestate', ereits: 'privatere', smallbiz: 'smallbiz', forex: 'forex', commodities: 'commodities', vc: 'vc', casino: 'casino', rivals: 'competitors', managers: 'managers', portfolio: 'portfolio', news: 'finance', coaching: 'coaching' };
   var REPARENTS = [
     ['tab-finance', 'bank-host'], ['tab-stocks', 'stocks-host'], ['tab-etfs', 'stocks-host'], ['tab-options', 'stocks-host'],
     ['tab-realestate', 're-host'], ['tab-privatere', 'ereit-host'], ['tab-smallbiz', 'sb-host'],
     ['tab-forex', 'forex-host'], ['tab-commodities', 'cmd-host'], ['tab-vc', 'vc-host'],
-    ['tab-casino', 'casino-host'], ['tab-competitors', 'rivals-host'], ['tab-managers', 'mgr-host'], ['tab-portfolio', 'portfolio-host']
+    ['tab-casino', 'casino-host'], ['tab-competitors', 'rivals-host'], ['tab-managers', 'mgr-host'], ['tab-portfolio', 'portfolio-host'], ['tab-coaching', 'coaching-host']
   ];
-  var HERO_LABELS = { stocks: 'Trading Terminal', realestate: 'Property Equity', ereits: 'Private Real Estate', smallbiz: 'Business Portfolio', forex: 'Forex Equity', commodities: 'Commodities Desk', vc: 'Venture Portfolio', casino: 'Casino Balance', job: 'Casino Career', rivals: 'Championship Race', managers: 'Managed Capital', portfolio: 'Total Net Worth' };
+  var HERO_LABELS = { stocks: 'Trading Terminal', realestate: 'Property Equity', ereits: 'Private Real Estate', smallbiz: 'Business Portfolio', forex: 'Forex Equity', commodities: 'Commodities Desk', vc: 'Venture Portfolio', casino: 'Casino Balance', job: 'Casino Career', rivals: 'Championship Race', managers: 'Managed Capital', portfolio: 'Total Net Worth', coaching: 'Coaching Academy' };
   function heroHtml(app) {
     return '<div class="ph-hero ph-hero-' + app.id + '" id="ph-hero-' + app.id + '"><div class="ph-hero-art" id="ph-hero-art-' + app.id + '" aria-hidden="true"></div><div class="ph-hero-label">' + esc(HERO_LABELS[app.id] || app.name) + '</div><div class="ph-hero-big" id="ph-hero-big-' + app.id + '">—</div><div class="ph-hero-row" id="ph-hero-row-' + app.id + '"></div></div>';
   }
@@ -35806,7 +35949,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   }
   /* ---------- deep links: one shareable hash per app (#portfolio, #stocks, …) ----------
      Home is the bare URL (no hash); #home is accepted as an alias and normalized
-     away. Slugs are the app ids, so all 16 apps (including #games, which still
+     away. Slugs are the app ids, so all 17 apps (including #games, which still
      redirects to jmfgames.com) have distinct, human-readable links.
      History model — one entry per app session, exactly as before, but the URL
      always shows the current app:
@@ -35937,6 +36080,100 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     goHome();
   }
 
+  /* ---------- first-run onboarding tour (Nov 23, 2026) ----------
+     Shell-owned bottom-sheet overlay, brand-new saves ONLY. Predicate — ALL
+     must hold:
+       1. window.__invesimFreshSave === true — the engine created a brand-new
+          game this boot because NO autosave snapshot existed. This is the
+          authoritative freshness signal: initApp saves the new game to
+          autosave immediately, so a localStorage check after boot would
+          always see an autosave even on a truly fresh profile.
+       2. No slot saves (INVESTSIM_SLOT_1..3 _DATA) — a slot save means a
+          returning player even if the autosave was deleted.
+       3. window.G.coaching.promptShown is false.
+       4. prefs.onboardingTourSeen is not true (INVESIM_PHONE_PREFS — never
+          the game save, so the tour never overwrites a saved preference).
+     Consequence, by construction: a returning save, a save loaded from any
+     slot, and a reload after finishing/skipping NEVER see the tour. A reload
+     mid-tour also loses it (autosave exists by then) — one shot, by design;
+     the Coaching card + Coaching app stay discoverable. A deep-link load
+     suppresses it too (tourSuppressed).
+     The tour never touches money or saves, never blocks play (Skip on every
+     step, dismissible any time), and lives in #phone-screen outside any
+     game-rebuilt container, so the 1s tick cannot disturb it; text writes
+     are equality-guarded. Finishing or skipping marks it seen in prefs,
+     then hands off to the engine coaching prompt modal — tour first, prompt
+     second, never both at once. Buttons ignore clicks within 350ms of the
+     sheet opening (trailing-click self-cancel guard). */
+  var TOUR_STEPS = [
+    { title: 'Welcome to InveSim', body: 'This is an investing simulator. Grow $10,000 into a fortune by buying stocks, real estate, businesses and more — while 100 AI rivals race you to the top.', showApp: null, showLabel: '' },
+    { title: 'You start with $10,000', body: 'Day 1, you have $10,000 cash and zero debt. Your cash, net worth and loans live in the Bank app.', showApp: 'bank', showLabel: 'Open Bank app' },
+    { title: 'Buy your first stock', body: 'The Stocks app has 15,025 companies. Tap one, check its P/E ratio and profit margin, then buy a few shares. You cannot learn investing without owning something.', showApp: 'stocks', showLabel: 'Open Stocks app' },
+    { title: 'Check your Portfolio app', body: 'Everything you own lives in Portfolio — stocks, ETFs, property, businesses — with the gain or loss on each. Check it after every few game days.', showApp: 'portfolio', showLabel: 'Open Portfolio app' },
+    { title: 'Your Job pays, Coaching teaches', body: 'The Job app pays a salary every shift — handy while your investments grow. And the Coaching tab has the full 12-step tutorial plus a live coach that grades your actual holdings.', showApp: 'coaching', showLabel: 'Open Coaching app' }
+  ];
+  var tourStep = 0, tourOpen = false, tourArmedAt = 0, tourTries = 0, tourSuppressed = false;
+  function tourSlotUsed(i) { try { return !!localStorage.getItem('INVESTSIM_SLOT_' + i + '_DATA'); } catch (e) { return false; } }
+  function tourEligible() {
+    if (window.__invesimFreshSave !== true) return false;
+    if (tourSlotUsed(1) || tourSlotUsed(2) || tourSlotUsed(3)) return false;
+    var G = window.G;
+    if (!G || !G.coaching || G.coaching.promptShown) return false;
+    if (prefs.onboardingTourSeen) return false;
+    return true;
+  }
+  function tourSetText(id, v) { var el = $(id); if (el && el.textContent !== v) el.textContent = v; }
+  function renderTourStep() {
+    var s = TOUR_STEPS[tourStep];
+    tourSetText('ph-tour-steps', 'Step ' + (tourStep + 1) + ' of ' + TOUR_STEPS.length);
+    tourSetText('ph-tour-title', s.title);
+    tourSetText('ph-tour-body', s.body);
+    var back = $('ph-tour-back'), show = $('ph-tour-show'), next = $('ph-tour-next');
+    if (back) back.disabled = tourStep === 0;
+    if (show) { show.style.display = s.showApp ? '' : 'none'; if (s.showApp) tourSetText('ph-tour-show', s.showLabel); }
+    if (next) tourSetText('ph-tour-next', tourStep === TOUR_STEPS.length - 1 ? 'Finish' : 'Next');
+  }
+  function showTour() {
+    var t = $('ph-tour'); if (!t) return;
+    tourOpen = true; tourArmedAt = Date.now();
+    t.hidden = false; t.setAttribute('aria-hidden', 'false');
+    renderTourStep();
+  }
+  function hideTour() {
+    var t = $('ph-tour'); if (t) { t.hidden = true; t.setAttribute('aria-hidden', 'true'); }
+    tourOpen = false;
+  }
+  function tourClickOk() { return Date.now() - tourArmedAt >= 350; }
+  function endTour() {
+    if (!tourOpen) return;
+    hideTour();
+    prefs.onboardingTourSeen = true; savePrefs();
+    /* Sequence: tour first, engine prompt second — never both at once.
+       reparent() first so the prompt modal is already contained in
+       #phone-screen (not stuck inside hidden <main>) when it opens. */
+    try { reparent(); } catch (e) {}
+    try {
+      if (window.__invesimFreshSave === true && window.G && window.G.coaching && !window.G.coaching.promptShown && typeof window.openCoachingPromptModal === 'function') window.openCoachingPromptModal();
+    } catch (e) {}
+  }
+  function maybeStartTour() {
+    if (tourSuppressed || tourOpen || prefs.onboardingTourSeen) return;
+    if (typeof window.__invesimFreshSave === 'undefined') {
+      if (tourTries < 10) { tourTries++; setTimeout(maybeStartTour, 300); }
+      return;
+    }
+    if (!tourEligible()) return;
+    tourStep = 0;
+    showTour();
+  }
+  function bindTour() {
+    var back = $('ph-tour-back'), show = $('ph-tour-show'), next = $('ph-tour-next'), skip = $('ph-tour-skip');
+    if (back) back.addEventListener('click', function () { if (!tourClickOk()) return; if (tourStep > 0) { tourStep--; renderTourStep(); } });
+    if (show) show.addEventListener('click', function () { if (!tourClickOk()) return; var s = TOUR_STEPS[tourStep]; if (s && s.showApp) openApp(s.showApp); });
+    if (next) next.addEventListener('click', function () { if (!tourClickOk()) return; if (tourStep < TOUR_STEPS.length - 1) { tourStep++; renderTourStep(); } else { endTour(); } });
+    if (skip) skip.addEventListener('click', function () { if (!tourClickOk()) return; endTour(); });
+  }
+
   /* ---------- casino sounds: button taps + win/loss stingers ----------
      Click sounds are matched on the game's own button ids/onclick handlers
      (btnBj*, btnBaccaratDeal, btnPokerDeal, btnSpinSlots, btnSpinRoulette,
@@ -36015,8 +36252,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
      and opens the owning app when the visible tab moves out of the current
      window. The check runs on a short delay so the whole click handler,
      including chained actions after the switch, settles first. */
-  var TAB_APP = { finance: 'bank', stocks: 'stocks', etfs: 'stocks', options: 'stocks', realestate: 'realestate', privatere: 'ereits', smallbiz: 'smallbiz', forex: 'forex', commodities: 'commodities', vc: 'vc', casino: 'casino', competitors: 'rivals', managers: 'managers', portfolio: 'portfolio' };
-  var APP_TABS = { bank: ['finance'], stocks: ['stocks', 'etfs', 'options'], realestate: ['realestate'], ereits: ['privatere'], smallbiz: ['smallbiz'], forex: ['forex'], commodities: ['commodities'], vc: ['vc'], casino: ['casino'], rivals: ['competitors'], managers: ['managers'], portfolio: ['portfolio'], news: ['finance'], job: [], settings: [] };
+  var TAB_APP = { finance: 'bank', stocks: 'stocks', etfs: 'stocks', options: 'stocks', realestate: 'realestate', privatere: 'ereits', smallbiz: 'smallbiz', forex: 'forex', commodities: 'commodities', vc: 'vc', casino: 'casino', competitors: 'rivals', managers: 'managers', portfolio: 'portfolio', coaching: 'coaching' };
+  var APP_TABS = { bank: ['finance'], stocks: ['stocks', 'etfs', 'options'], realestate: ['realestate'], ereits: ['privatere'], smallbiz: ['smallbiz'], forex: ['forex'], commodities: ['commodities'], vc: ['vc'], casino: ['casino'], rivals: ['competitors'], managers: ['managers'], portfolio: ['portfolio'], news: ['finance'], job: [], settings: [], coaching: ['coaching'] };
   var routeTimer = null;
   function scheduleRouteCheck() {
     if (routeTimer) return;
@@ -36028,7 +36265,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     for (var i = 0; i < secs.length; i++) {
       if (!secs[i].classList.contains('hidden')) { vis = secs[i].id.replace('tab-', ''); break; }
     }
-    if (!vis) return; /* no tab visible (legacy 'coaching' target): leave the view alone */
+    if (!vis) return; /* no tab visible: leave the view alone */
     var expected = APP_TABS[currentApp] || [];
     if (expected.indexOf(vis) !== -1) return;
     var owner = TAB_APP[vis];
@@ -36066,6 +36303,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
        fragment navigation already created its entry, so open without pushing
        and stamp it — Back returns home, Forward re-opens the app. */
     if (pendingDeepLink) { var id = pendingDeepLink; pendingDeepLink = null; openApp(id, null, { fromUrl: true }); try { history.replaceState({ phApp: id }, '', location.href); } catch (e) {} histPushed = true; }
+    else { setTimeout(maybeStartTour, 400); }
   }
   function bindLock() {
     var lock = $('ph-lock'), startY = null, dragged = false;
@@ -36200,6 +36438,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     else if (id === 'rivals') { r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Fear & Greed', fearGreedText()); }
     else if (id === 'managers') { var sp = elText('starPyramidSummaryBar'); r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Pyramid', sp.length > 26 ? sp.slice(0, 26) + '…' : sp); }
     else if (id === 'portfolio') { r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Market', elText('portfolioMarketHoursBadge')); }
+    else if (id === 'coaching') { var cc = G.coaching || {}; b = cc.tutorialActive ? ('Tutorial Step ' + (cc.tutorialStep || 1) + ' / 12') : (cc.enabled ? 'Live Coach ON' : 'Coaching OFF'); r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Net Worth', fmtMoney(nw)); }
     else return;
     big.textContent = b;
     row.innerHTML = r;
@@ -36581,7 +36820,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   function containOverlays() {
     var tc = $('toastContainer');
     if (tc && screenEl && tc.parentNode !== screenEl) screenEl.appendChild(tc);
-    ['modalSaveLoad', 'modalNewGame', 'modalSmallBizReport'].forEach(function (mid) {
+    ['modalSaveLoad', 'modalNewGame', 'modalSmallBizReport', 'modalCoachingPrompt'].forEach(function (mid) {
       var m = $(mid);
       if (m && screenEl && m.parentNode !== screenEl) { m.classList.add('ph-contained'); screenEl.appendChild(m); }
     });
@@ -36640,6 +36879,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     $('ph-btn-stephour').addEventListener('click', function () { var b = $('btnStepHour'); if (b) b.click(); setTimeout(refreshHUD, 300); });
     $('ph-btn-music').addEventListener('click', function () { setMusic(!prefs.music); playSfx('toggle'); });
     $('ph-edit-done').addEventListener('click', exitEditMode);
+    var hc = $('ph-home-coaching'); if (hc) hc.addEventListener('click', function () { if (!editing) openApp('coaching'); });
     $('ph-edit-az').addEventListener('click', sortAZ);
     $('ph-edit-reset').addEventListener('click', resetOrder);
     $('ph-pages').addEventListener('click', function (e) {
@@ -36662,6 +36902,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   buildWindows();
   bindLock();
   bindChrome();
+  bindTour();
   bindCasinoSfx();
   initAudio();
   /* Deep link on load (matches jmfgames.com): a valid #hash skips the lock
@@ -36670,6 +36911,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
      #home is normalized to the bare URL; a bare load shows the lock as normal. */
   pendingDeepLink = appFromHash();
   if (pendingDeepLink) {
+    tourSuppressed = true; /* a shared link lands in the app, not the tour */
     try { history.replaceState({ phLoad: true }, '', location.href); } catch (e) {}
     var _dl = pendingDeepLink; pendingDeepLink = null; /* clear first: unlock() would otherwise open it via its own remembered-link path (no push, stamp overwrite) */
     unlock();
@@ -36731,6 +36973,9 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     get iconSize() { return prefs.iconSize || 100; },
     get histPushed() { return histPushed; },
     get pendingDeepLink() { return pendingDeepLink; },
+    get tourOpen() { return tourOpen; },
+    get tourSeen() { return !!prefs.onboardingTourSeen; },
+    get tourEligible() { try { return tourEligible(); } catch (e) { return false; } },
     get deepLinks() { return APPS.map(function (a) { return '#' + a.id; }); },
     get audioRunning() { try { var m = musicMod(); return !!(m && m.getState && m.getState().running); } catch (e) { return false; } }
   };
