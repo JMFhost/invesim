@@ -691,6 +691,17 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
 .ph-bv-fit { margin: 0 auto; overflow: hidden; transform-origin: top left; }
 .ph-bv-fit > * { transform-origin: top left; }
 .ph-bv-fit iframe { display: block; border: 0; }
+/* ---- Solid white ad slots (Nov 24, Jesse: "only ad slots staying white") ----
+   Both ad slots render SOLID WHITE behind the creative so dark ad text
+   reads on every theme. White ONLY while filled (:not(.ph-banner-empty)):
+   an empty slot stays transparent (and display:none via ph-banner-empty),
+   so no blank white box ever shows. The .ph-bv-fit rule covers the same
+   painted box (the wrapper is exactly the creative's size when filled,
+   0-height when empty). Scope is the two slots + their wrappers ONLY —
+   every theme, wallpaper, and app/game screen is untouched. */
+#ph-banner:not(.ph-banner-empty),
+#ph-banner-lock:not(.ph-banner-empty) { background: #ffffff; }
+#ph-banner .ph-bv-fit, #ph-banner-lock .ph-bv-fit { background: #ffffff; }
 /* ---- tap-through while empty (Nov 24, lock-center fix) ----
    Both slots are pointer-events:none by DEFAULT (from first paint, before
    fitBanners() first runs): while a slot has no creative it must not
