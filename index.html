@@ -4049,6 +4049,14 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         </div>
         <div id="coachingPlaybookCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
       </div>
+      <div class="flex flex-col gap-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h2 class="text-base font-bold text-white">🏆 Trophies</h2>
+          <span id="trophiesCountPill" class="px-2.5 py-1 rounded-full bg-[#1C2024] text-white text-[11px] font-bold">0 / 10 unlocked</span>
+        </div>
+        <p class="text-xs text-[#8A919E]">Badges for your firsts and milestones — they unlock as you play, and they stay unlocked forever.</p>
+        <div id="trophiesGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+      </div>
     </section>
 
     <!-- =================================================================== -->
@@ -15700,6 +15708,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             const div = (pos.shares * st.price * (st.divYield / 100)) / 252;
             if (!applyDripReinvestment('STOCK', ticker, div, st.price)) G.human.cash += div;
             G.human.taxLedger.ordinaryIncome += div;
+            achFlag('dividend');
             humanPassiveToday += div;
           } else if (pos.shares < 0) {
             const borrowApr = Math.max(3.5, st.shortInterest * 0.75 + (st.divYield || 0));
@@ -15722,6 +15731,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
               const etfDiv = (posVal * (etf.divYield / 100)) / 252;
               if (!applyDripReinvestment('ETF', sym, etfDiv, etf.price)) G.human.cash += etfDiv;
               G.human.taxLedger.ordinaryIncome += etfDiv;
+              achFlag('dividend');
               humanPassiveToday += etfDiv;
             }
           }
@@ -15736,6 +15746,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             const div = (pPos.shares * pr.navPrice * (pr.divYield / 100)) / 252;
             if (!applyDripReinvestment('PRIVRE', sym, div, pr.navPrice)) G.human.cash += div;
             G.human.taxLedger.ordinaryIncome += div;
+            achFlag('dividend');
             humanPassiveToday += div;
           }
         }
@@ -16135,6 +16146,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           rePos.lastDailyCashflow = netCashflowAfterPI;
 
           G.human.cash += netCashflowAfterPI;
+          if (netCashflowAfterPI > 0) achFlag('rent');
           humanPassiveToday += netCashflowAfterPI;
 
           // IRS Depreciation Shield & Mortgage Interest Tax Deduction (Boosted +15% if 🛡️ Auto-Tax Shield Perk is active)!
@@ -16163,6 +16175,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
               if (opt.side === 'LONG') {
                 const costBasis = opt.entryPrice * lot * opt.contracts;
                 const gain = val - costBasis;
+                if (isHuman && gain > 0) achFlag('optionsWin');
                 ownerObj.cash += val;
                 if (isHuman) {
                   G.human.taxLedger.shortTermGains += gain;
@@ -16170,6 +16183,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
                 }
               } else {
                 ownerObj.cash -= val;
+                if (isHuman && (opt.entryPrice * lot * opt.contracts - val) > 0) achFlag('optionsWin');
               }
               optList.splice(i, 1);
             } else {
@@ -17033,6 +17047,148 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         if (parts[0] === 'TBILL') window.buyTBill(Number(parts[1]), face);
         else if (parts[0] === 'NOTE') window.buyTreasuryNote(Number(parts[1]), face);
       };
+
+      // =========================================================================
+      // ACHIEVEMENTS / TROPHIES (Nov 24, 2026) — badges for firsts + milestones.
+      // Trophies live as a section inside the Coaching app (#trophiesGrid),
+      // rendered by renderTrophies() from renderCoachingAndLiveBanner().
+      // State: G.human.achievements = { unlocked: {id: day}, flags: {...} }.
+      // Unlock = toast + newsFeed ACHIEVEMENT entry + log, mirroring the
+      // goals-milestone pattern; the unlocked map guard means it never fires
+      // twice. Live checks run at the tail of renderAll() (every action +
+      // day step). Existing saves are migrated SILENTLY in
+      // restoreFromSnapshot via grantAchievementsForState(): badges whose
+      // condition the save already meets FROM STATE are granted with no
+      // toast/news. Event flags (dividend / rent / options win / casino win)
+      // did not exist before this build, so old saves cannot prove them —
+      // they re-earn live on the next qualifying event.
+      // Flags are set at the single sites where a "first" can only be
+      // observed: recordCasinoDelta (delta > 0), the three daily dividend
+      // loops, the rent credit, and the options close/expiry sites (human
+      // only, pnl/gain > 0). First trade is evaluated from state (positions
+      // held or realized gains recorded) — no buy-site hooks needed.
+      // =========================================================================
+      const ACHIEVEMENT_DEFS = [
+        { id: 'first_trade',         icon: '📈', name: 'First Trade',         target: 'Make your first investment trade (stocks, ETFs, bonds or options).' },
+        { id: 'first_100k',          icon: '💰', name: 'Six Figures',         target: 'Reach $100,000 net worth.' },
+        { id: 'first_1m',            icon: '👑', name: 'Millionaire',         target: 'Reach $1,000,000 net worth.' },
+        { id: 'first_property',      icon: '🏠', name: 'Landlord',            target: 'Buy your first property.' },
+        { id: 'first_dividend',      icon: '💵', name: 'Dividend Collector',  target: 'Receive your first dividend.' },
+        { id: 'first_options_win',   icon: '🎯', name: 'Options Winner',      target: 'Close an options trade at a profit.' },
+        { id: 'first_rent',          icon: '🔑', name: 'Rent Check',          target: 'Collect your first rental income.' },
+        { id: 'first_business',      icon: '🏪', name: 'Business Owner',      target: 'Buy your first small business.' },
+        { id: 'first_casino_win',    icon: '🎰', name: 'Lucky Streak',        target: 'Win at a casino game.' },
+        { id: 'full_time_investor',  icon: '🌴', name: 'Full-Time Investor',  target: 'Retire from the casino job at $300,000 net worth.' },
+      ];
+      function ensureAchievementsState(human) {
+        if (!human || typeof human !== 'object') return null;
+        if (!human.achievements || typeof human.achievements !== 'object' || Array.isArray(human.achievements)) {
+          human.achievements = { unlocked: {}, flags: {} };
+        }
+        const a = human.achievements;
+        if (!a.unlocked || typeof a.unlocked !== 'object' || Array.isArray(a.unlocked)) a.unlocked = {};
+        if (!a.flags || typeof a.flags !== 'object' || Array.isArray(a.flags)) a.flags = {};
+        return a;
+      }
+      window.ensureAchievementsState = ensureAchievementsState;
+      function achFlag(name) {
+        if (typeof G === 'undefined' || !G || !G.human) return;
+        const a = ensureAchievementsState(G.human);
+        if (a) a.flags[name] = true;
+      }
+      function achievementMet(id, human) {
+        if (!human) return false;
+        const flags = (human.achievements && human.achievements.flags) || {};
+        const nw = Number(human.netWorth) || 0;
+        switch (id) {
+          case 'first_trade': {
+            if (flags.firstTrade) return true;
+            if (human.stocks && Object.keys(human.stocks).length) return true;
+            if (human.etfs && Object.keys(human.etfs).length) return true;
+            if (human.bonds && ((human.bonds.tbills && human.bonds.tbills.length) || (human.bonds.notes && human.bonds.notes.length))) return true;
+            if (human.options && human.options.length) return true;
+            const tl = human.taxLedger || {};
+            if ((tl.shortTermGains || 0) !== 0 || (tl.longTermGains || 0) !== 0) return true;
+            return false;
+          }
+          case 'first_100k': return nw >= 100000;
+          case 'first_1m': return nw >= 1000000;
+          case 'first_property': return Array.isArray(human.realEstate) && human.realEstate.length > 0;
+          case 'first_dividend': return !!flags.dividend;
+          case 'first_options_win': return !!flags.optionsWin;
+          case 'first_rent': return !!flags.rent;
+          case 'first_business': return Array.isArray(human.smallBusinesses) && human.smallBusinesses.length > 0;
+          case 'first_casino_win': return !!flags.casinoWin;
+          case 'full_time_investor': return human.fullTimeInvestor === true;
+          default: return false;
+        }
+      }
+      // Silent migration: grant every state-provable badge, no toast/news.
+      function grantAchievementsForState(human, day) {
+        const a = ensureAchievementsState(human);
+        if (!a) return 0;
+        let n = 0;
+        for (const d of ACHIEVEMENT_DEFS) {
+          if (!a.unlocked[d.id] && achievementMet(d.id, human)) {
+            a.unlocked[d.id] = day || 1;
+            n++;
+          }
+        }
+        return n;
+      }
+      function checkAchievements() {
+        if (typeof G === 'undefined' || !G || !G.human) return 0;
+        const a = ensureAchievementsState(G.human);
+        if (!a) return 0;
+        let n = 0;
+        for (const d of ACHIEVEMENT_DEFS) {
+          if (!a.unlocked[d.id] && achievementMet(d.id, G.human)) {
+            a.unlocked[d.id] = G.day;
+            n++;
+            showToast(`🏆 Achievement Unlocked — ${d.icon} ${d.name}!`, `${d.target} Earned Day ${G.day}.`, true);
+            G.newsFeed.unshift({ day: G.day, cat: 'ACHIEVEMENT', tag: '🏆 ACHIEVEMENT', text: `You earned the ${d.icon} ${d.name} trophy! ${d.target}` });
+            G.human.logs.unshift(`Day ${G.day}: 🏆 Achievement unlocked: ${d.icon} ${d.name}.`);
+          }
+        }
+        if (n > 0) renderTrophies();
+        return n;
+      }
+      window.checkAchievements = checkAchievements;
+      window.__achievements = {
+        defs: ACHIEVEMENT_DEFS,
+        ensure: ensureAchievementsState,
+        check: checkAchievements,
+        grant: grantAchievementsForState,
+        met: achievementMet,
+        flag: achFlag,
+      };
+
+      function renderTrophies() {
+        if (typeof G === 'undefined' || !G || !G.human) return;
+        const a = ensureAchievementsState(G.human);
+        const grid = document.getElementById('trophiesGrid');
+        const pill = document.getElementById('trophiesCountPill');
+        if (pill && a) {
+          const n = ACHIEVEMENT_DEFS.filter(d => a.unlocked[d.id]).length;
+          pill.textContent = n + ' / ' + ACHIEVEMENT_DEFS.length + ' unlocked';
+        }
+        if (!grid || !a) return;
+        grid.innerHTML = ACHIEVEMENT_DEFS.map(d => {
+          const day = a.unlocked[d.id];
+          if (day) {
+            return '<div class="p-4 rounded-xl bg-[#0C0E10] border border-[#D4AF37]/60 flex flex-col gap-1.5">'
+              + '<div class="flex items-center justify-between gap-2"><span class="text-xl">' + d.icon + '</span>'
+              + '<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#D4AF37] text-black">UNLOCKED • DAY ' + day + '</span></div>'
+              + '<div class="text-sm font-extrabold text-white">' + d.name + '</div>'
+              + '<div class="text-[11px] text-[#8A919E]">' + d.target + '</div></div>';
+          }
+          return '<div class="p-4 rounded-xl bg-[#0C0E10] border border-[#24282D] flex flex-col gap-1.5 opacity-70">'
+            + '<div class="flex items-center justify-between gap-2"><span class="text-xl grayscale">' + d.icon + '</span>'
+            + '<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#1C2024] text-[#8A919E]">🔒 LOCKED</span></div>'
+            + '<div class="text-sm font-extrabold text-white">' + d.name + '</div>'
+            + '<div class="text-[11px] text-[#8A919E]">' + d.target + '</div></div>';
+        }).join('');
+      }
 
       function recalculateAllNetWorths(state = G) {
         const stockMap = new Map(state.stocks.map(s => [s.ticker, s]));
@@ -18579,12 +18735,14 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         const curVal = opt.contracts * lot * opt.markPrice * (opt.side === 'LONG' ? 0.99 : 1.01);
         if (opt.side === 'LONG') {
           const pnl = curVal - (opt.entryPrice * lot * opt.contracts);
+          if (pnl > 0) achFlag('optionsWin');
           G.human.cash += curVal;
           G.human.taxLedger.shortTermGains += pnl;
           recomputeTaxLiability(G.human.taxLedger);
           showToast('Option Sold to Close', `Closed ${opt.ticker} $${opt.strike} ${opt.type} for ${fmtMoney(curVal)} (P&L: ${fmtMoney(pnl)}).`, pnl >= 0);
         } else {
           const pnl = (opt.entryPrice * lot * opt.contracts) - curVal;
+          if (pnl > 0) achFlag('optionsWin');
           G.human.cash = Math.max(0, G.human.cash - curVal);
           G.human.taxLedger.shortTermGains += pnl;
           recomputeTaxLiability(G.human.taxLedger);
@@ -24343,6 +24501,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         if (!G) return;
         G.human.cash = Math.max(0, Number((G.human.cash + delta).toFixed(2)));
         G.human.casinoNetProfit = Number(((G.human.casinoNetProfit || 0) + delta).toFixed(2));
+        if (delta > 0) achFlag('casinoWin');
+        checkAchievements();
         recalculateAllNetWorths(G);
         if (typeof saveLiveAutoSession === 'function') saveLiveAutoSession(true);
       }
@@ -32762,6 +32922,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           ensureSixFeaturesState(base.human);
           ensureFullTimeInvestorState(base.human);
           ensureBondsState(base.human);
+          ensureAchievementsState(base.human);
+          grantAchievementsForState(base.human, base.day || 1);
         }
 
         if (snap.nextAiPlayerId) base.nextAiPlayerId = snap.nextAiPlayerId;
@@ -34180,6 +34342,9 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             </div>
           `).join('');
         }
+
+        // 3. Render Trophies (#trophiesGrid) — Achievements, Nov 24, 2026.
+        renderTrophies();
       }
 
       function renderAll() {
@@ -34201,6 +34366,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         renderFinanceTab();
         renderCompetitorsTab();
         renderBondsTab();
+        checkAchievements();
         saveLiveAutoSession(false);
       }
 
