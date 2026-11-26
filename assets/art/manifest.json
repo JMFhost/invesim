@@ -66,7 +66,7 @@
     },
     {
       "file": "portraits.json",
-      "bytes": 565852,
+      "bytes": 966056,
       "keys": [
         "AI_1",
         "AI_2",
@@ -81,7 +81,17 @@
         "PORTFOLIO_MANAGER",
         "TRADER",
         "WEALTH_GROUP",
-        "TRADING_FIRM"
+        "TRADING_FIRM",
+        "MGR_M1",
+        "MGR_M2",
+        "MGR_M3",
+        "MGR_M4",
+        "MGR_M5",
+        "MGR_F1",
+        "MGR_F2",
+        "MGR_F3",
+        "MGR_F4",
+        "MGR_F5"
       ]
     },
     {
@@ -113,5 +123,5 @@
       ]
     }
   ],
-  "totalBytes": 3097398
+  "totalBytes": 3497602
 }
