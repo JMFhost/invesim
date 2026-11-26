@@ -718,7 +718,7 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
    EMPTY home renders exactly like live. Why it is needed (measured, name
    'Jesse' set, greeting shown, 468x60 creative): the filled strip costs
    the banner height + 18px margin from #ph-pages, so row 4
-   (Portfolio/News/Settings/Coaching, bottom 794.4 at 390 wide) overruns
+   (Portfolio/News/Settings/Trophies, bottom 794.4 at 390 wide) overruns
    #ph-pages' bottom by 56.3px at 390x844, 70.4px at 540x844, and — the
    deficit grows 1:1 as the viewport shortens — 113.4px at 540x801. Row 5
    (Games, single icon) scrolls even in the EMPTY live build, so the bar
@@ -733,11 +733,13 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
    padding), clear of the home-indicator strip. Reclaim ledger:
    band A (801-840) ~124px: banner margin 2 + pages margin-top 12 +
    row-gap 36 (16->4) + grid padding-top 6 + widgets margin 8 + widgets
-   gap 4 + widget padding 16 + controls margin 8 + coaching margin 8 +
+   gap 4 + widget padding 16 + controls margin 8 +
    greeting margin 8 + ticker padding 4 + goal-line margin 4 + btn gap 8.
+   (Coaching home card removed Nov 26, 2026 — its margin no longer exists;
+   bands keep their slack.)
    band B (841-880) ~80px: banner margin 2 + pages margin-top 10 +
    row-gap 30 (16->6) + grid padding-top 4 + widgets margin 4 + widgets
-   gap 2 + widget padding 8 + controls margin 4 + coaching margin 4 +
+   gap 2 + widget padding 8 + controls margin 4 +
    greeting margin 4 + ticker padding 4 + goal-line margin 4.
    band C (881-915) ~42px: banner margin 2 + pages margin-top 10 +
    row-gap 18 (16->10) + grid padding-top 4 + widgets margin 4 + widgets
@@ -751,7 +753,6 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
   #ph-home.ph-banner-on .ph-widget { padding: 6px 14px; }
   #ph-home.ph-banner-on #ph-goal-line { margin-top: 3px; }
   #ph-home.ph-banner-on #ph-controls { margin-top: 2px; }
-  #ph-home.ph-banner-on #ph-home-coaching { margin-top: 2px; }
   #ph-home.ph-banner-on #ph-greeting { margin-top: 2px; }
   #ph-home.ph-banner-on #ph-ticker { padding-top: 5px; padding-bottom: 5px; }
 }
@@ -764,7 +765,6 @@ body.ph-shell-active #androidBottomNav { display: none !important; }
   #ph-home.ph-banner-on .ph-widget { padding: 8px 14px; }
   #ph-home.ph-banner-on #ph-goal-line { margin-top: 3px; }
   #ph-home.ph-banner-on #ph-controls { margin-top: 6px; }
-  #ph-home.ph-banner-on #ph-home-coaching { margin-top: 6px; }
   #ph-home.ph-banner-on #ph-greeting { margin-top: 6px; }
   #ph-home.ph-banner-on #ph-ticker { padding-top: 5px; padding-bottom: 5px; }
 }
@@ -1085,8 +1085,7 @@ button.ph-set-row:active, a.ph-set-row:active { background: #1c2024; }
 #phone-screen > .ph-contained { position: absolute !important; z-index: 70 !important; }
 #phone-screen #modalSmallBizReport .rh-card,
 #phone-screen #modalSaveLoad .rh-card,
-#phone-screen #modalNewGame .rh-card,
-#phone-screen #modalCoachingPrompt .rh-card { max-height: calc(100% - 8px) !important; overflow-y: auto !important; }
+#phone-screen #modalNewGame .rh-card { max-height: calc(100% - 8px) !important; overflow-y: auto !important; }
 
 /* casino game selector: 2 columns inside the phone */
 #casino-host .ph-casino-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
@@ -1340,20 +1339,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-300:not(input, s
 body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, select, textarea, option, [class*="bg-[#0C0E10]"], [class*="bg-[#0C0E10]"] *, [class*="bg-[#0D1014]"], [class*="bg-[#0D1014]"] *, [class*="bg-[#141820]"], [class*="bg-[#141820]"] *, [class*="bg-[#141923]"], [class*="bg-[#141923]"] *, [class*="bg-[#161B22]"], [class*="bg-[#161B22]"] *, [class*="bg-[#1B2230]"], [class*="bg-[#1B2230]"] *, [class*="bg-[#1C2024]"], [class*="bg-[#1C2024]"] *, [class*="bg-[#1E252E]"], [class*="bg-[#1E252E]"] *, [class*="bg-[#262B31]"], [class*="bg-[#262B31]"] *, [class*="bg-[#2A2F36]"], [class*="bg-[#2A2F36]"] *, [class*="bg-[#323942]"], [class*="bg-[#323942]"] *, [class*="bg-slate-800"], [class*="bg-slate-800"] *, [class*="bg-white"], [class*="bg-white"] *, [class*="bg-[#F8FAFC]"], [class*="bg-[#F8FAFC]"] *, [class*="/15"], [class*="/20"], [class*="/25"], [class*="/30"]) { color: #F472B6 !important; }
 
 
-/* ---------- first-run onboarding tour + home Coaching card (Nov 23, 2026) ---------- */
-/* Home-screen Coaching card: the phone-visible entry to the Coaching Academy.
-   The engine home tab (#tab-home) is not rendered inside the phone shell
-   (<main> is display:none), so the card lives here. Only #ph-pages shrinks
-   in the home column, so this fixed row takes its height from the icon grid,
-   which scrolls if needed. Hidden while arranging. */
-.ph-home-coaching { flex-shrink: 0; margin: 10px 16px 0; display: flex; align-items: center; gap: 10px; text-align: left; background: rgba(8,12,16,.55); border: 1px solid rgba(0,200,5,.45); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 14px; padding: 10px 12px; color: #fff; cursor: pointer; font-family: inherit; }
-.ph-home-coaching:active { transform: scale(.98); }
-.ph-hc-ic { font-size: 22px; line-height: 1; }
-.ph-hc-tx { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
-.ph-hc-tx b { font-size: 13.5px; font-weight: 800; }
-.ph-hc-tx i { font-size: 11.5px; font-style: normal; color: #9aa3b2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ph-hc-chev { font-size: 20px; color: #00e006; line-height: 1; }
-#ph-home.ph-editing #ph-home-coaching { display: none; }
+/* ---------- first-run onboarding tour (Nov 23, 2026) ---------- */
 /* Tour sheet: bottom sheet above app windows (z 20) and the switcher (z 65),
    below the notification banners (z 90). Lives in #phone-screen, never
    inside a game-rebuilt container, so the 1s tick cannot disturb it.
@@ -1463,11 +1449,6 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           <button type="button" class="ph-pill-btn" id="ph-btn-stephour">+1 Hour</button>
           <button type="button" class="ph-pill-btn" id="ph-btn-music">&#9834; Music: Off</button>
         </div>
-        <button type="button" id="ph-home-coaching" class="ph-home-coaching" aria-label="Open Coaching Academy">
-          <span class="ph-hc-ic" aria-hidden="true">🎓</span>
-          <span class="ph-hc-tx"><b>Coaching Academy</b><i>12-step tutorial + live coach — learn as you play</i></span>
-          <span class="ph-hc-chev" aria-hidden="true">›</span>
-        </button>
         <div id="ph-edit-bar" role="toolbar" aria-label="Arrange apps">
           <button type="button" class="ph-edit-btn ph-edit-done" id="ph-edit-done">Done</button>
           <button type="button" class="ph-edit-btn" id="ph-edit-az">Sort A-Z</button>
@@ -1644,9 +1625,6 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         <button type="button" data-tab="competitors" class="nav-tab text-[#8A919E] hover:text-white py-1.5 px-2 transition whitespace-nowrap">
           AI Rivals <span id="headerRank" class="ml-0.5 px-1.5 py-0.5 rounded-full bg-[#1C2024] text-white font-mono text-[10px]">#1/101</span>
         </button>
-        <button type="button" data-tab="coaching" class="nav-tab text-[#8A919E] hover:text-white py-1.5 px-2 transition whitespace-nowrap">
-          🎓 Coaching <span id="navCoachingBadge" class="inline text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-[#1C2024] text-[#00C805]">ON</span>
-        </button>
         <button type="button" data-tab="bonds" class="nav-tab text-[#8A919E] hover:text-white py-1.5 px-2 transition whitespace-nowrap">
           🏛️ Bonds <span class="inline text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-[#00C805]/15 text-[#00C805]">T-Bills</span>
         </button>
@@ -1805,11 +1783,6 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
             <div class="text-xs text-[#8A919E]">💱 Forex (8 Pairs • 24H)</div>
             <div id="homeForexVal" class="text-base font-bold text-white mono-num mt-1">$0.00</div>
             <div id="homeForexCount" class="text-[11px] text-cyan-300 mt-0.5">1:10 to 1:100 →</div>
-          </div>
-          <div class="rh-card p-3.5 cursor-pointer hover:border-[#00C805]/50 transition" onclick="switchMainTab('coaching')">
-            <div class="text-xs text-[#8A919E]">🎓 Coaching Academy</div>
-            <div class="text-base font-bold text-white mono-num mt-1">12-Step Tutorial</div>
-            <div class="text-[11px] text-[#00C805] mt-0.5">Learn as you play →</div>
           </div>
         </div>
 
@@ -4008,47 +3981,12 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     </section>
 
     <!-- =================================================================== -->
-    <!-- TAB: COACHING ACADEMY (12-STEP TUTORIAL + LIVE COACH)               -->
-    <!-- Revived Nov 23, 2026 (onboarding fix): the render function below was -->
-    <!-- dead behind an early return and none of these mount points existed. -->
     <!-- =================================================================== -->
-    <section id="tab-coaching" class="tab-section hidden flex flex-col gap-5">
-      <div class="rh-card p-5 flex flex-col gap-3">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h2 class="text-lg font-extrabold text-white">🎓 Coaching Academy</h2>
-            <p class="text-xs text-[#8A919E]">Your step-by-step tutorial and live investment research coach — it reads your actual portfolio and market, then tells you what to check before you trade.</p>
-          </div>
-          <span id="coachModeStatusPill" class="px-2.5 py-1 rounded-full bg-[#1C2024] text-[#8A919E] text-[11px] font-bold">Coaching: ON</span>
-        </div>
-        <div class="flex flex-wrap items-center gap-1.5">
-          <button type="button" onclick="chooseCoachingMode('FULL_TUTORIAL')" class="px-3 py-1.5 rounded-lg bg-[#00C805] hover:bg-[#00E006] text-black font-extrabold text-xs">🎓 Full 12-Step Tutorial</button>
-          <button type="button" onclick="chooseCoachingMode('COACH_ONLY')" class="px-3 py-1.5 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-white font-bold text-xs">🧭 Coach Only (Skip Tutorial)</button>
-          <button type="button" onclick="chooseCoachingMode('OFF')" class="px-3 py-1.5 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-white font-bold text-xs">🔕 Coaching Off</button>
-        </div>
-        <div id="liveCoachBanner" class="flex flex-col gap-3"></div>
-      </div>
-      <div class="rh-card p-5 flex flex-col gap-3">
-        <div id="coachingTutorialDeck" class="flex flex-col gap-2"></div>
-      </div>
-      <div class="flex flex-col gap-3">
-        <h2 class="text-base font-bold text-white">🔎 Live Asset Analyzer <span class="text-xs text-[#8A919E] font-normal">— your current stock, business &amp; top robot trader, graded by the coach</span></h2>
-        <div id="coachingLiveAssetAnalyzerGrid" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
-      </div>
-      <div class="flex flex-col gap-3">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <h2 class="text-base font-bold text-white">📚 Research Playbooks</h2>
-          <div class="flex flex-wrap items-center gap-1 text-[11px]">
-            <button type="button" data-coach-topic="ALL" onclick="setCoachingTopicFilter('ALL')" class="coach-topic-btn px-2.5 py-1 rounded-lg font-extrabold bg-[#00C805] text-black">All</button>
-            <button type="button" data-coach-topic="BASICS" onclick="setCoachingTopicFilter('BASICS')" class="coach-topic-btn px-2.5 py-1 rounded-lg font-bold bg-[#1C2024] text-white">Basics</button>
-            <button type="button" data-coach-topic="STOCKS" onclick="setCoachingTopicFilter('STOCKS')" class="coach-topic-btn px-2.5 py-1 rounded-lg font-bold bg-[#1C2024] text-white">Stocks</button>
-            <button type="button" data-coach-topic="DERIVATIVES" onclick="setCoachingTopicFilter('DERIVATIVES')" class="coach-topic-btn px-2.5 py-1 rounded-lg font-bold bg-[#1C2024] text-white">Options</button>
-            <button type="button" data-coach-topic="REALASSETS" onclick="setCoachingTopicFilter('REALASSETS')" class="coach-topic-btn px-2.5 py-1 rounded-lg font-bold bg-[#1C2024] text-white">Real Assets</button>
-            <button type="button" data-coach-topic="BOTS" onclick="setCoachingTopicFilter('BOTS')" class="coach-topic-btn px-2.5 py-1 rounded-lg font-bold bg-[#1C2024] text-white">Bots &amp; Managers</button>
-          </div>
-        </div>
-        <div id="coachingPlaybookCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-      </div>
+    <!-- TAB: TROPHIES (ACHIEVEMENTS) — moved here Nov 26, 2026 when the    -->
+    <!-- Coaching Academy was removed; Trophies previously lived inside the -->
+    <!-- Coaching tab. Rendered by renderTrophies() from renderAll().       -->
+    <!-- =================================================================== -->
+    <section id="tab-trophies" class="tab-section hidden flex flex-col gap-5">
       <div class="flex flex-col gap-3">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <h2 class="text-base font-bold text-white">🏆 Trophies</h2>
@@ -4059,7 +3997,6 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       </div>
     </section>
 
-    <!-- =================================================================== -->
     <!-- TAB: BONDS & T-BILLS (TREASURIES ONLY) — added Nov 24, 2026.        -->
     <!-- Buy form is STATIC markup: renderBondsTab() only writes the three  -->
     <!-- mount divs below, never the form, so an open <select> is never     -->
@@ -4167,29 +4104,6 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       </div>
     </div>
   </div>
-
-    <!-- ==================== MODAL: COACHING PROMPT (FIRST-RUN) ==================== -->
-    <!-- Shown once, only on a brand-new save, after the shell onboarding tour
-         ends (the shell sequences it — initApp deliberately does NOT show it,
-         so the tour and the prompt never stack). Any choice — or the X /
-         backdrop dismiss — sets coaching.promptShown=true and persists it. -->
-    <div id="modalCoachingPrompt" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="if (window.__coachingModalOpenedAt && Date.now() - window.__coachingModalOpenedAt < 350) return; if (event.target === this) closeCoachingPromptModal();">
-      <div class="rh-card max-w-lg w-full p-6 shadow-2xl flex flex-col gap-4">
-        <div class="flex items-center justify-between border-b border-[#24282D] pb-3">
-          <div>
-            <h2 class="text-lg font-extrabold text-white">🎓 Welcome to InveSim!</h2>
-            <p class="text-xs text-[#8A919E]">You start with $10,000. Want a coach to walk you through it?</p>
-          </div>
-          <button type="button" onclick="closeCoachingPromptModal()" class="text-[#8A919E] hover:text-white text-lg font-bold px-2">✕</button>
-        </div>
-        <p class="text-xs text-[#E2E8F0] leading-relaxed">The Coaching Academy teaches you to research stocks, ETFs, options, real estate, businesses, and more — with a live coach that reads your actual portfolio and tells you what to check before every trade.</p>
-        <div class="flex flex-col gap-2">
-          <button type="button" onclick="chooseCoachingMode('FULL_TUTORIAL')" class="w-full px-4 py-3 rounded-xl bg-[#00C805] hover:bg-[#00E006] text-black text-sm font-extrabold text-left">🎓 Full 12-Step Tutorial <span class="block text-xs font-bold opacity-80">Step-by-step lessons + live coach on every tab</span></button>
-          <button type="button" onclick="chooseCoachingMode('COACH_ONLY')" class="w-full px-4 py-3 rounded-xl bg-[#1C2024] hover:bg-[#262B31] text-white text-sm font-bold text-left">🧭 Live Coach Only <span class="block text-xs font-normal text-[#8A919E]">Skip the lessons — keep the live research coach</span></button>
-          <button type="button" onclick="chooseCoachingMode('OFF')" class="w-full px-4 py-3 rounded-xl bg-[#1C2024] hover:bg-[#262B31] text-white text-sm font-bold text-left">🔕 No Coaching <span class="block text-xs font-normal text-[#8A919E]">Play on your own — turn it back on anytime in the 🎓 Coaching tab</span></button>
-        </div>
-      </div>
-    </div>
 
     <!-- ==================== MODAL: SMALL BUSINESS 1% FEE FINANCIAL REPORT (1M - 10Y) ==================== -->
   <div id="modalSmallBizReport" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
@@ -17050,8 +16964,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
 
       // =========================================================================
       // ACHIEVEMENTS / TROPHIES (Nov 24, 2026) — badges for firsts + milestones.
-      // Trophies live as a section inside the Coaching app (#trophiesGrid),
-      // rendered by renderTrophies() from renderCoachingAndLiveBanner().
+      // Trophies live in their own app (#tab-trophies / #trophiesGrid),
+      // rendered by renderTrophies() from renderAll().
       // State: G.human.achievements = { unlocked: {id: day}, flags: {...} }.
       // Unlock = toast + newsFeed ACHIEVEMENT entry + log, mirroring the
       // goals-milestone pattern; the unlocked map guard means it never fires
@@ -18758,6 +18672,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       // =========================================================================
       function switchMainTab(tabId) {
         if (tabId === 'private') tabId = 'privatere';
+        if (tabId !== 'home' && !document.getElementById('tab-' + tabId)) tabId = 'home'; /* removed tab (e.g. coaching, Nov 26, 2026): stale saves fall back to home, never a blank tab */
         currentTab = tabId;
         document.querySelectorAll('.tab-section').forEach(s => s.classList.add('hidden'));
         const sec = document.getElementById('tab-' + tabId);
@@ -33723,9 +33638,11 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       };
 
       // =========================================================================
-      // COACHING ACADEMY, 12-STEP INTERACTIVE TUTORIAL & LIVE ASSET RESEARCH MENTOR
+      // 12-STEP TUTORIAL DATA (retained Nov 26, 2026) — the Coaching Academy
+      // UI + live coach were removed, but the tutorial step data is kept as
+      // data only. Nothing renders it; do not re-add Academy UI around it
+      // without Jesse's say-so.
       // =========================================================================
-      let activeCoachingTopicFilter = 'ALL';
 
       const COACHING_TUTORIAL_STEPS = [
         {
@@ -33826,531 +33743,10 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         }
       ];
 
-      const COACHING_PLAYBOOK_MODULES = [
-        {
-          cat: 'BASICS',
-          icon: '🎮',
-          title: '1. Game Controls, Time Speed & Light/Black Theme',
-          tab: 'home',
-          metrics: 'Clock Speed (1m/s), +1 Day / +1 Week Buttons, Theme Toggle (☀️ Light / 🌙 Black), Global Search Bar',
-          howToAnalyze: 'Start by reviewing your $10,000 starting cash, the Macro Economic Regime badge, and the 6-Country Economic Cycle table. Pause the clock whenever you are researching financial statements or due diligence reports.',
-          proTip: 'Light Theme is ON by default with high-contrast dark text; click 🌙 Black Theme in the top header anytime to toggle themes.'
-        },
-        {
-          cat: 'BASICS',
-          icon: '💾',
-          title: '2. How to Save, Load & Delete Game Saves',
-          tab: 'home',
-          metrics: '3 Local Save Slots (Slot #1, #2, #3), 🗑️ Delete Save Button, Delete All Saves, Export/Import JSON',
-          howToAnalyze: 'Click the 💾 icon in the top-right header bar. Each slot displays the saved Day, Net Worth, Market Seed, and timestamp. Clicking 🗑️ Delete immediately removes that save slot and resets it to (Empty).',
-          proTip: 'Keep one rolling save slot before major market transitions or leveraged options/forex trades.'
-        },
-        {
-          cat: 'STOCKS',
-          icon: '📈',
-          title: '3. How to Research & Analyze Stocks (15,025 Global Stocks)',
-          tab: 'stocks',
-          metrics: 'P/E Ratio, P/B Ratio, Net Margin %, Revenue Growth %, Debt/Equity, Dividend Yield %, 10/25/100/200-Day Moving Averages',
-          howToAnalyze: 'Open any stock to inspect its 30-Year Candlestick/Line Chart and Income Statement, Balance Sheet & Cash Flow tabs. Filter by Country (US, Canada, UK, EU, Japan, Australia) and check the World Economy tab to see which countries are in Expansion vs. Recession.',
-          proTip: 'Combine Fundamental Value (P/E < 20, Debt/Equity < 0.8, positive FCF) with Technical Trend (Price above 25-Day and 100-Day Moving Average).'
-        },
-        {
-          cat: 'STOCKS',
-          icon: '🧺',
-          title: '4. How to Research & Analyze ETFs (150 US, Sector & Country ETFs)',
-          tab: 'etfs',
-          metrics: 'Annual Expense Ratio %, Dividend Yield %, Management Style (Passive Index, Active, Covered Call), Top 15 Holdings Weights',
-          howToAnalyze: 'Use the Country ETF filter pills (🇺🇸 US, 🇨🇦 Canada, 🇯🇵 Japan, 🇦🇺 Australia, 🇬🇧 Great Britain, 🇪🇺 EU) to gain instant diversified exposure to an entire country or sector. Check the underlying holdings table to see exact constituent weights.',
-          proTip: 'Low-fee Core Index ETFs (0.03%–0.12% ER) compound best in bull expansions, while Covered Call ETFs (10%–13% yield) shine in sideways markets.'
-        },
-        {
-          cat: 'DERIVATIVES',
-          icon: '⚡',
-          title: '5. How to Research & Trade Options (CALLs & PUTs)',
-          tab: 'options',
-          metrics: 'Strike Price, Expiration (7d to 180d), Option Premium, Implied Volatility (IV), Breakeven Price & Payoff Curve',
-          howToAnalyze: 'Select a stock in the Options tab, choose CALL (bullish) or PUT (bearish/hedge), and inspect the interactive P&L Payoff Diagram at expiration. Compare the required % move to reach breakeven against the stock’s historical volatility.',
-          proTip: 'Avoid putting more than 2%–5% of your portfolio into 7-day options; 30-to-90-day near-the-money contracts reduce daily Theta decay.'
-        },
-        {
-          cat: 'DERIVATIVES',
-          icon: '💱',
-          title: '6. How to Research & Trade Forex (FX) & Commodities',
-          tab: 'forex',
-          metrics: 'Central Bank Interest Rates, Inflation CPI %, GDP Growth %, Pip Spread, Leverage (1x–50x), Fear & Greed Index',
-          howToAnalyze: 'In Forex, currencies of countries hiking interest rates with strong GDP tend to appreciate against low-rate/recession currencies. In Commodities, track Gold/Silver during inflation/fear spikes and Crude Oil/Copper/Lithium during industrial booms.',
-          proTip: 'High leverage (25x–50x) magnifies a 1% currency move into a 25%–50% gain or loss — use 2x–5x leverage for swing positions.'
-        },
-        {
-          cat: 'REALASSETS',
-          icon: '🏪',
-          title: '7. How to Research Small Businesses (52,000 Businesses & 1% Fee Reports)',
-          tab: 'smallbiz',
-          metrics: 'Asking Price ($50,000 min), Years in Business, Customer Base Multiples (3x+ for established), Net Cash Flow Yield (8%–18%/yr), 1% Fee 30-Day Financial Report (1M–10Y)',
-          howToAnalyze: 'All small businesses run 100% autonomously. A newly built Nail Salon with no customers yet costs ~$50,000, whereas a well-managed Nail Salon in business for years with a loyal customer base costs 3x+ ($150,000+). Before buying, click "Order 1% Fee Financial Report" (valid 30 days) to review 1M, 3M, 6M, 1Y, 2Y, 3Y, 5Y & 10Y financials!',
-          proTip: 'Distressed businesses with negative cash flow have discounted prices and can turn around to positive cash flow, but some go bankrupt due to lawsuits, mismanagement, or low customers — always inspect the 1% Financial Report first!'
-        },
-        {
-          cat: 'REALASSETS',
-          icon: '🏠',
-          title: '8. How to Research Real Estate (21,500 Properties) & Private eREITs',
-          tab: 'realestate',
-          metrics: 'Gross Cap Rate %, Net Cap Rate % (after Tax/Ins/Maint), Mortgage Rate & Term (10Y–30Y), eREIT Star Rating (1★ = 1% fee to 5★ = 5% fee)',
-          howToAnalyze: 'In Direct Real Estate, filter by Net Cap Rate and City Tier. Check that Monthly Net Rent exceeds your Monthly Mortgage P&I payment. In Private eREITs, compare the gross dividend yield minus the star-based annual expense ratio (1% to 5%).',
-          proTip: 'Buying properties with 15Y–30Y fixed mortgages during low-interest-rate expansions locks in cheap debt while rents grow with inflation.'
-        },
-        {
-          cat: 'REALASSETS',
-          icon: '🚀',
-          title: '9. How to Evaluate Venture Capital (VC) Startups',
-          tab: 'vc',
-          metrics: 'Round Stage (Seed, Series A/B/C), Pre-Money Valuation, Monthly Burn Rate, Founder Score, Exit Multiple Potential',
-          howToAnalyze: 'Review each startup’s sector, growth rate, and burn runway. Early Seed deals have the highest failure probability but 20x–100x upside if they reach IPO or buyout; Series B/C deals have lower failure rates and closer exit horizons.',
-          proTip: 'Build a basket of at least 5–8 VC startups rather than betting on a single startup.'
-        },
-        {
-          cat: 'BOTS',
-          icon: '🤖',
-          title: '10. How to Filter & Rent 5,200 Robot Traders',
-          tab: 'managers',
-          metrics: 'Win Percentage Record (<50%, >50%, >60%, >70%, >80%), Market Category (Forex, Commodities, Options, Stocks, ETFs, All-Markets), Monthly Rent (<$10/mo to >$1,000/mo)',
-          howToAnalyze: 'Use the Win-Rate Filter Bar and Market Category Filter Bar in Managers, Firms & Bots. Higher win percentage strictly produces higher overall profits (+0.10%–0.30% per winning micro-trade vs. small routine stops), though every once in a while a bigger loss (-0.55% to -1.00%) hits that takes 3–10 winning trades to recoup.',
-          proTip: 'Avoid Below 50% win-rate bots even though they cost <$10/mo; start with Over 60% or Over 70% bots once your capital covers their monthly rent.'
-        },
-        {
-          cat: 'BOTS',
-          icon: '👔',
-          title: '11. Hiring Portfolio Managers, Wealth Groups & Trading Firms',
-          tab: 'managers',
-          metrics: 'Net Worth Gate ($500,000 Standard / $10,000,000 Elite), Star Rating (1★–5★), Target Annual Return (8%–100%/yr; ~50%/yr Elite), Country Stock Specialty',
-          howToAnalyze: 'Once your Net Worth reaches $500,000 ($10M for Elite), you can allocate segregated capital to professional Wealth Groups, Trading Firms, Ranked PMs, and Traders specializing in US, Canada, Japan, Australia, UK, EU, or Global stocks. Beware of >100%–2x high-octane outlier pros who carry account blow-up risk!',
-          proTip: 'Elite 4★–5★ managers targeting ~40%–55%/yr offer the best risk-adjusted compounding with very low blow-up risk.'
-        },
-        {
-          cat: 'BOTS',
-          icon: '🎰',
-          title: '12. 2D Casino Floor, Daily Lottery, Banking & Tax Jail Rules',
-          tab: 'casino',
-          metrics: '7 Casino Table Games + $2 Daily Lottery, Credit Score (300–850), Bank Loans, Annual Tax Bill & $50/Day Tax Jail Credit',
-          howToAnalyze: 'In the 2D Casino, move your player avatar to any table to play. In Banking & Taxes, monitor your Estimated Tax Due on realized investment/business gains. If you fail to pay taxes and go to Tax Jail, you earn $50/day in credit until your tax debt is paid off.',
-          proTip: 'Always check your Tax Ledger in Banking & Taxes before year-end (Day 252) so you never get locked in Tax Jail!'
-        }
-      ];
-
-      function ensureCoachingState(state) {
-        if (!state) return;
-        if (!state.coaching) {
-          state.coaching = {
-            promptShown: false,
-            enabled: true,
-            tutorialActive: true,
-            tutorialSkipped: false,
-            tutorialStep: 1,
-            minimizedBanner: false
-          };
-        }
-      }
-
-      window.openCoachingPromptModal = function() {
-        if (!G) return;
-        ensureCoachingState(G);
-        if (G.coaching.promptShown) return;
-        const m = document.getElementById('modalCoachingPrompt');
-        if (!m) return;
-        // 350ms sheet self-cancel guard (see modal backdrop onclick below).
-        window.__coachingModalOpenedAt = Date.now();
-        m.classList.remove('hidden');
-      };
-
-      window.closeCoachingPromptModal = function() {
-        const m = document.getElementById('modalCoachingPrompt');
-        if (m) m.classList.add('hidden');
-        if (G) {
-          ensureCoachingState(G);
-          G.coaching.promptShown = true;
-        }
-      };
-
-      window.chooseCoachingMode = function(mode) {
-        if (!G) return;
-        ensureCoachingState(G);
-        G.coaching.promptShown = true;
-        if (mode === 'FULL_TUTORIAL') {
-          G.coaching.enabled = true;
-          G.coaching.tutorialActive = true;
-          G.coaching.tutorialSkipped = false;
-          G.coaching.tutorialStep = 1;
-          showToast('🎓 Coaching + Interactive Tutorials ON', 'Step-by-step tutorial and live investment research coach activated!', true);
-        } else if (mode === 'COACH_ONLY') {
-          G.coaching.enabled = true;
-          G.coaching.tutorialActive = false;
-          G.coaching.tutorialSkipped = true;
-          showToast('🧭 Live Coaching ON (Tutorials Skipped)', 'Tutorials skipped! Your live coach will guide your research across every asset tab.', true);
-        } else {
-          G.coaching.enabled = false;
-          G.coaching.tutorialActive = false;
-          showToast('🔕 Coaching Turned OFF', 'You can turn Coaching or Tutorials back on anytime in the 🎓 Coaching tab.', true);
-        }
-        closeCoachingPromptModal();
-        renderAll();
-      };
-
-      window.setCoachingTutorialStep = function(nextStep, openTargetTab = false) {
-        if (!G) return;
-        ensureCoachingState(G);
-        const maxSteps = COACHING_TUTORIAL_STEPS.length;
-        if (nextStep > maxSteps) {
-          G.coaching.tutorialActive = false;
-          G.coaching.tutorialSkipped = true;
-          showToast('🎉 12-Step Tutorial Completed!', 'Ongoing Live Investment & Research Coaching remains active across all tabs.', true);
-          renderAll();
-          return;
-        }
-        G.coaching.tutorialStep = Math.max(1, Math.min(maxSteps, nextStep));
-        G.coaching.tutorialActive = true;
-        G.coaching.enabled = true;
-        const stepObj = COACHING_TUTORIAL_STEPS[G.coaching.tutorialStep - 1];
-        if (openTargetTab && stepObj && stepObj.targetTab) {
-          switchMainTab(stepObj.targetTab);
-        } else {
-          renderAll();
-        }
-      };
-
-      window.skipTutorialKeepCoachingOn = function() {
-        chooseCoachingMode('COACH_ONLY');
-      };
-
-      window.setCoachingTopicFilter = function(topic) {
-        activeCoachingTopicFilter = topic || 'ALL';
-        document.querySelectorAll('.coach-topic-btn').forEach(btn => {
-          const isAct = btn.dataset.coachTopic === activeCoachingTopicFilter;
-          btn.className = isAct
-            ? 'coach-topic-btn px-2.5 py-1 rounded-lg font-extrabold bg-[#00C805] text-black'
-            : 'coach-topic-btn px-2.5 py-1 rounded-lg font-bold bg-[#1C2024] text-white';
-        });
-              };
-
-      function buildLiveContextCoachInsight() {
-        if (!G) return { title: 'Live Investment Coach', lookFor: '', actionTip: '' };
-        const st = (G.stocks || []).find(s => s.ticker === G.activeTicker) || (G.stocks || [])[0];
-        const etf = (G.etfs || []).find(e => e.sym === G.activeEtfSym) || (G.etfs || [])[0];
-        const sb = (G.smallBusinesses || []).find(b => b.listedForSale) || (G.smallBusinesses || [])[0];
-        const prop = (G.properties || [])[0];
-        const reit = (G.privateReFunds || [])[0];
-        const vc = (G.vcStartups || [])[0];
-        const topBot = (G.robotTradersPool || []).find(r => r.winRatePct >= 75) || (G.robotTradersPool || [])[0];
-
-        if (currentTab === 'stocks' && st) {
-          const peRating = st.pe > 0 && st.pe < 18 ? 'Attractive Value P/E (<18x)' : (st.pe > 32 ? 'Growth Premium P/E (>32x — verify high revenue growth)' : 'Fair Core Valuation');
-          const debtRating = (st.debtToEquity || 0) < 0.8 ? 'Low Debt/Equity (<0.8x — strong balance sheet)' : 'Elevated Leverage (watch interest rates)';
-          return {
-            badge: `📈 STOCK RESEARCH COACH • ${st.countryFlag || '🇺🇸'} ${st.ticker} (${ fmtMoney(st.price) })`,
-            title: `How to Analyze ${st.name} (${st.ticker}) Before Trading`,
-            lookFor: `1) Valuation: P/E is ${st.pe ? st.pe.toFixed(1) + 'x' : 'N/A'} (${peRating}), P/B is ${(st.pb || 2.1).toFixed(1)}x. 2) Profitability & Growth: Net Margin ${(st.netMargin || 12).toFixed(1)}%, Rev Growth ${(st.revGrowth || 8).toFixed(1)}%/yr. 3) Balance Sheet: ${debtRating}, Div Yield ${(st.divYield || 0).toFixed(2)}%.`,
-            actionTip: `Check the 10/25/100/200-Day Moving Averages on the chart and inspect the Income Statement, Balance Sheet & Cash Flow tabs below before placing a Buy or Short order.`
-          };
-        }
-        if (currentTab === 'etfs' && etf) {
-          return {
-            badge: `🧺 ETF RESEARCH COACH • ${etf.sym} (${fmtMoney(etf.price)})`,
-            title: `How to Analyze ${etf.name} (${etf.sym})`,
-            lookFor: `1) Expense Ratio: ${etf.expenseRatio.toFixed(2)}%/yr (lower fees compound faster). 2) Distribution Yield: ${etf.divYield.toFixed(2)}%/yr (${etf.mgmt}). 3) Country/Theme Focus: ${etf.theme}.`,
-            actionTip: `Use the Country ETF filter buttons (US, Canada, Japan, Australia, Great Britain, EU) to rotate into countries experiencing Economic Expansion.`
-          };
-        }
-        if (currentTab === 'options' && st) {
-          return {
-            badge: `⚡ OPTIONS RESEARCH COACH • ${st.ticker} (${fmtMoney(st.price)})`,
-            title: `How to Analyze CALL & PUT Option Chains on ${st.ticker}`,
-            lookFor: `1) Strike vs. Spot (${fmtMoney(st.price)}): In-the-money (ITM) options have intrinsic value; Out-of-the-money (OTM) options are cheaper but require a larger move before expiration. 2) Expiration Window: Choose 30d–90d to reduce daily Theta time decay.`,
-            actionTip: `Use the Option Payoff Curve preview to check your exact Breakeven Stock Price and Maximum Risk before executing.`
-          };
-        }
-        if (currentTab === 'smallbiz' && sb) {
-          const fee1Pct = Math.round(sb.price * 0.01);
-          return {
-            badge: `🏪 SMALL BUSINESS DUE DILIGENCE COACH • 52,000 Autonomous Businesses`,
-            title: `What to Look For When Buying Small Businesses ($50,000+ Floor)`,
-            lookFor: `1) Valuation Multiple: Newly built businesses with no customer base start near $50,000, while established businesses with loyal customers cost 3x+ ($150,000+). 2) Cash Flow Yield: Positive businesses yield 8%–18%/yr. Negative cash flow businesses have dropped prices and may turn around or go bankrupt!`,
-            actionTip: `Always click "📋 1% Fee Financial Report" (e.g. ${fmtMoney(fee1Pct)} on a ${fmtMoney(sb.price)} business, valid for 30 days) to inspect 1M, 3M, 6M, 1Y, 2Y, 3Y, 5Y & 10Y financials before buying!`
-          };
-        }
-        if (currentTab === 'realestate' && prop) {
-          return {
-            badge: `🏠 REAL ESTATE RESEARCH COACH • 21,500 Properties`,
-            title: `How to Analyze Rental Properties & Mortgage Leverage`,
-            lookFor: `1) Gross vs. Net Cap Rate: Focus on Net Cap Rate (after Property Tax, Insurance, HOA & Maintenance). 2) Financing Spread: Compare the property's Net Cap Rate against the 10Y–30Y Mortgage Interest Rate.`,
-            actionTip: `Filter by "Highest Net Cap Rate" and verify that monthly net rental income covers your mortgage payment with positive cash flow.`
-          };
-        }
-        if (currentTab === 'privatere' && reit) {
-          return {
-            badge: `🏢 PRIVATE eREIT RESEARCH COACH • 24 Funds`,
-            title: `How to Evaluate Private Real Estate Investment Trusts (eREITs)`,
-            lookFor: `1) Star-Based Expense Ratio: 1★ charges 1%/yr up to 5★ charging 5%/yr. 2) Net Distribution Yield: Subtract the annual expense ratio from the gross yield to see your true net cash distribution.`,
-            actionTip: `eREITs pay daily/monthly passive property dividends without requiring a 20% mortgage down payment.`
-          };
-        }
-        if (currentTab === 'vc' && vc) {
-          return {
-            badge: `🚀 VENTURE CAPITAL RESEARCH COACH • 28 Startup Deals`,
-            title: `How to Analyze High-Risk / High-Reward Startups`,
-            lookFor: `1) Stage & Valuation: Seed deals are cheapest with highest failure risk; Series B/C deals are closer to IPO/Buyout. 2) Burn Rate & Runway: Ensure the startup has strong revenue growth relative to burn.`,
-            actionTip: `Diversify across 4–6 startups and limit total VC allocation to 5%–15% of your net worth.`
-          };
-        }
-        if (currentTab === 'managers') {
-          return {
-            badge: `🤖 MANAGERS, FIRMS & 5,200 ROBOT TRADERS COACH`,
-            title: `How to Filter Robot Traders & Professional Wealth Groups/Firms`,
-            lookFor: `1) Robot Traders (No Net Worth Min): Filter by Category (Forex, Commodities, Options, Stocks, ETFs) and Win Rate (Over 60%, Over 70%, Over 80%). Higher win % = higher overall profit (+0.10%–0.30% per win), with an occasional bigger loss (-0.55% to -1.00%) taking 3–10 wins to recoup. 2) Pro Firms/PMs: Require $500K+ NW ($10M+ Elite).`,
-            actionTip: `Use the Country Stock Specialty filter bar to hire managers or bots focused on US, Canada, Japan, Australia, UK, or EU markets!`
-          };
-        }
-        if (currentTab === 'commodities') {
-          return {
-            badge: `🛢️ COMMODITIES RESEARCH COACH • 16 Global Futures`,
-            title: `How to Trade Gold, Silver, Crude Oil, NatGas & Critical Minerals`,
-            lookFor: `1) Inflation & Fear Hedges: Gold (GC1) and Silver (SI1) rally during high inflation and market fear. 2) Cyclical Supply/Demand: Crude Oil (CL1), Copper (HG1), Uranium (UX1) & Lithium respond to industrial expansion and supply shocks.`,
-            actionTip: `Check the Macro Cycle badge and Commodities News Wire before sizing futures contracts.`
-          };
-        }
-        if (currentTab === 'forex') {
-          return {
-            badge: `💱 FOREX (FX) RESEARCH COACH • Major Currency Pairs`,
-            title: `How to Analyze Currency Pairs & Leverage Safely`,
-            lookFor: `1) Interest Rate Differentials: Currencies backed by higher central bank rates and low inflation strengthen over time. 2) Leverage Control: Choose 1x–5x leverage for macro swing trades; 25x–50x is for tight short-term scalps.`,
-            actionTip: `Compare the 6-Country Economic Indicators (US, Canada, UK, EU, Japan, Australia) to spot strong vs. weak currencies.`
-          };
-        }
-        if (currentTab === 'casino') {
-          return {
-            badge: `🎰 2D CASINO & DAILY LOTTERY COACH`,
-            title: `How to Navigate the 2D Casino Floor & Manage Bankroll`,
-            lookFor: `1) Table Navigation: Click any table on the 2D floor (or use WASD / Arrow keys) to walk to Blackjack, Roulette, Baccarat, Craps, Poker, Slots, or Wheel of Fortune. 2) House Edge: Blackjack & Baccarat Banker bets offer the best odds.`,
-            actionTip: `Never gamble money needed for taxes or loan payments — keep casino bets under 1% of your cash!`
-          };
-        }
-        if (currentTab === 'finance') {
-          return {
-            badge: `🏦 BANKING, CREDIT SCORE & TAX JAIL COACH`,
-            title: `How to Manage Loans, Credit Score (300–850) & Annual Taxes`,
-            lookFor: `1) Credit Score: On-time loan/mortgage payments raise your score toward 850, unlocking lower borrowing rates. 2) Tax Reserve: Track your YTD Realized Gains tax bill so you are never caught short at year-end.`,
-            actionTip: `Failure to pay taxes sends you to Tax Jail (where you earn $50/day credit toward unpaid taxes). Keep cash set aside for taxes!`
-          };
-        }
-        return {
-          badge: `🧭 LIVE PORTFOLIO & MACRO STRATEGY COACH`,
-          title: `How to Build & Compound Your Portfolio from $10,000`,
-          lookFor: `1) Asset Allocation: Combine liquid Stocks/ETFs, cash-flowing Real Estate/eREITs/Small Businesses, and high-win-rate Robot Traders. 2) Country Macro Cycles: Check the 6-Country World Economy table (US, Canada, Japan, Australia, UK, EU) on this tab!`,
-          actionTip: `Click any tab above (or open the 🎓 Coaching tab to the left of Investing) for deep-dive research playbooks and live deal analysis.`
-        };
-      }
-
-      function renderCoachingAndLiveBanner() {
-        ensureCoachingState(G);
-        const c = G.coaching;
-
-        // Update nav badge
-        const navBadge = document.getElementById('navCoachingBadge');
-        if (navBadge) {
-          if (c.enabled) {
-            navBadge.textContent = c.tutorialActive ? `TUTORIAL ${c.tutorialStep}/12` : 'ON';
-            navBadge.className = 'inline text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-[#00C805] text-black font-extrabold';
-          } else {
-            navBadge.textContent = 'OFF';
-            navBadge.className = 'inline text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-[#1C2024] text-[#8A919E] font-bold';
-          }
-        }
-
-        const statusPill = document.getElementById('coachModeStatusPill');
-        if (statusPill) {
-          statusPill.textContent = c.enabled
-            ? (c.tutorialActive ? `Coaching: ON (Tutorial Step ${c.tutorialStep}/12 + Live Coach)` : 'Coaching: ON (Live Research Coach Only — Tutorials Skipped)')
-            : 'Coaching: OFF (Click a button on the right to turn ON)';
-        }
-
-        // 1. Render Live Context-Sensitive Banner (#liveCoachBanner) across tabs when Coaching is ON
-        const bannerEl = document.getElementById('liveCoachBanner');
-        if (bannerEl) {
-          if (!c.enabled) {
-            bannerEl.classList.add('hidden');
-          } else {
-            bannerEl.classList.remove('hidden');
-            const insight = buildLiveContextCoachInsight();
-            const stepObj = COACHING_TUTORIAL_STEPS[(c.tutorialStep || 1) - 1] || COACHING_TUTORIAL_STEPS[0];
-
-            const tutorialHtml = c.tutorialActive ? `
-              <div class="p-3 rounded-xl bg-[#09120E] border border-[#00C805]/40 flex flex-col gap-2">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <div class="flex flex-wrap items-center gap-2">
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#00C805] text-black">🎓 INTERACTIVE TUTORIAL • STEP ${stepObj.step} OF ${COACHING_TUTORIAL_STEPS.length}</span>
-                    <span class="font-extrabold text-white text-xs sm:text-sm">${stepObj.title}</span>
-                  </div>
-                  <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
-                    <button type="button" onclick="setCoachingTutorialStep(${stepObj.step - 1}, true)" ${stepObj.step <= 1 ? 'disabled' : ''} class="px-2.5 py-1 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-white font-bold disabled:opacity-40">◀ Prev</button>
-                    <button type="button" onclick="switchMainTab('${stepObj.targetTab}')" class="px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-extrabold">📍 Go to ${stepObj.tabLabel}</button>
-                    <button type="button" onclick="setCoachingTutorialStep(${stepObj.step + 1}, true)" class="px-2.5 py-1 rounded-lg bg-[#00C805] hover:bg-[#00E006] text-black font-extrabold">${stepObj.step >= COACHING_TUTORIAL_STEPS.length ? '✓ Finish Tutorial' : 'Next Step ▶'}</button>
-                    <button type="button" onclick="skipTutorialKeepCoachingOn()" class="px-2.5 py-1 rounded-lg bg-sky-400/20 hover:bg-sky-400/30 text-sky-300 border border-sky-400/40 font-extrabold">⏭️ Skip Tutorials (Keep Coaching ON)</button>
-                  </div>
-                </div>
-                <p class="text-xs text-[#E2E8F0] leading-relaxed">${stepObj.summary}</p>
-                <div class="text-[11px] text-emerald-300 font-semibold">🔎 What to Look For: <span class="text-[#8A919E] font-normal">${stepObj.whatToLookFor}</span></div>
-              </div>
-            ` : '';
-
-            bannerEl.innerHTML = `
-              ${tutorialHtml}
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
-                <div class="flex flex-col gap-1">
-                  <div class="flex flex-wrap items-center gap-2">
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-sky-400 text-black">${insight.badge}</span>
-                    <strong class="text-white font-extrabold text-xs sm:text-sm">${insight.title}</strong>
-                  </div>
-                  <div class="text-[#E2E8F0] leading-relaxed"><strong>📊 Research Checklist:</strong> ${insight.lookFor}</div>
-                  <div class="text-emerald-300 font-semibold">💡 Coach Action Tip: <span class="text-[#8A919E] font-normal">${insight.actionTip}</span></div>
-                </div>
-                <div class="flex sm:flex-col items-center sm:items-end gap-1.5 shrink-0">
-                  <button type="button" onclick="switchMainTab('coaching')" class="px-3 py-1.5 rounded-xl bg-[#1C2024] hover:bg-[#262B31] text-white border border-[#2E343B] font-extrabold text-[11px] whitespace-nowrap">
-                    🎓 Open Full Coaching Tab →
-                  </button>
-                  <button type="button" onclick="chooseCoachingMode('OFF')" class="px-2.5 py-1 rounded-lg text-[10px] text-[#8A919E] hover:text-white">
-                    Hide Coach
-                  </button>
-                </div>
-              </div>
-            `;
-          }
-        }
-
-        // 2. Render #tab-coaching contents if present
-        const deckEl = document.getElementById('coachingTutorialDeck');
-        if (deckEl) {
-          const stepObj = COACHING_TUTORIAL_STEPS[(c.tutorialStep || 1) - 1] || COACHING_TUTORIAL_STEPS[0];
-          const stepPills = COACHING_TUTORIAL_STEPS.map(s => `
-            <button type="button" onclick="setCoachingTutorialStep(${s.step}, false)" class="px-2.5 py-1 rounded-lg font-mono text-[11px] font-bold ${s.step === stepObj.step ? 'bg-[#00C805] text-black font-extrabold' : 'bg-[#1C2024] text-[#8A919E] hover:text-white'}">
-              #${s.step}
-            </button>
-          `).join('');
-
-          deckEl.innerHTML = `
-            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1E2B24] pb-2.5">
-              <div class="flex flex-wrap items-center gap-1.5">
-                <span class="font-extrabold text-white mr-1">🎯 Interactive 12-Step Tutorial:</span>
-                ${stepPills}
-              </div>
-              <div class="flex items-center gap-1.5">
-                <button type="button" onclick="setCoachingTutorialStep(${stepObj.step - 1}, false)" ${stepObj.step <= 1 ? 'disabled' : ''} class="px-3 py-1 rounded-lg bg-[#1C2024] text-white font-bold disabled:opacity-40">◀ Prev</button>
-                <button type="button" onclick="setCoachingTutorialStep(${stepObj.step + 1}, false)" class="px-3 py-1 rounded-lg bg-[#00C805] text-black font-extrabold">${stepObj.step >= COACHING_TUTORIAL_STEPS.length ? 'Finish Tutorial' : 'Next Step ▶'}</button>
-              </div>
-            </div>
-            <div class="flex flex-col gap-1.5 pt-1">
-              <div class="flex flex-wrap items-center justify-between gap-2">
-                <h3 class="text-sm sm:text-base font-extrabold text-white">Step ${stepObj.step}: ${stepObj.title}</h3>
-                <button type="button" onclick="switchMainTab('${stepObj.targetTab}')" class="px-3 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-extrabold text-xs">
-                  📍 Practice in ${stepObj.tabLabel} →
-                </button>
-              </div>
-              <p class="text-xs text-[#E2E8F0] leading-relaxed">${stepObj.summary}</p>
-              <div class="p-2.5 rounded-xl bg-[#111916] border border-[#24352D] text-xs">
-                <strong class="text-emerald-300">🔎 What to Look For &amp; How to Research:</strong>
-                <span class="text-[#E2E8F0] ml-1">${stepObj.whatToLookFor}</span>
-              </div>
-            </div>
-          `;
-        }
-
-        const analyzerEl = document.getElementById('coachingLiveAssetAnalyzerGrid');
-        if (analyzerEl) {
-          const st = (G.stocks || []).find(s => s.ticker === G.activeTicker) || (G.stocks || [])[0];
-          const etf = (G.etfs || []).find(e => e.sym === G.activeEtfSym) || (G.etfs || [])[0];
-          const sb = (G.smallBusinesses || []).find(b => b.listedForSale) || (G.smallBusinesses || [])[0];
-          const prop = (G.properties || [])[0];
-          const reit = (G.privateReFunds || [])[0];
-          const topBot = (G.robotTradersPool || []).find(r => r.winRatePct >= 80) || (G.robotTradersPool || [])[0];
-
-          analyzerEl.innerHTML = `
-            <div class="p-3.5 rounded-xl bg-[#0C0E10] border border-[#24282D] flex flex-col justify-between gap-2">
-              <div>
-                <div class="flex items-center justify-between">
-                  <span class="font-extrabold text-emerald-300">📈 Active Stock Analysis</span>
-                  <span class="font-mono font-bold text-white">${st ? `${st.countryFlag || '🇺🇸'} ${st.ticker} (${fmtMoney(st.price)})` : 'N/A'}</span>
-                </div>
-                <p class="text-[11px] text-[#8A919E] mt-1">
-                  P/E: <strong class="text-white">${st && st.pe ? st.pe.toFixed(1) + 'x' : 'N/A'}</strong> • Net Margin: <strong class="text-white">${st ? (st.netMargin || 12).toFixed(1) + '%' : 'N/A'}</strong> • Debt/Eq: <strong class="text-white">${st ? (st.debtToEquity || 0.4).toFixed(2) + 'x' : 'N/A'}</strong> • Div: <strong class="text-white">${st ? (st.divYield || 0).toFixed(2) + '%' : '0%'}</strong>
-                </p>
-                <p class="text-[11px] text-[#E2E8F0] mt-1">
-                  <strong>Coach Verdict:</strong> ${st && st.pe > 0 && st.pe < 22 && (st.netMargin || 0) > 10 ? '✅ Strong fundamental value & healthy profit margin.' : '⚖️ Growth/cyclical valuation — verify chart trend & country economy before sizing.'}
-                </p>
-              </div>
-              <button type="button" onclick="switchMainTab('stocks')" class="w-full py-1.5 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-white font-bold text-[11px]">Analyze in Stocks Tab →</button>
-            </div>
-
-            <div class="p-3.5 rounded-xl bg-[#0C0E10] border border-[#24282D] flex flex-col justify-between gap-2">
-              <div>
-                <div class="flex items-center justify-between">
-                  <span class="font-extrabold text-amber-300">🏪 Small Business Analysis</span>
-                  <span class="font-mono font-bold text-white">${sb ? fmtMoney(sb.price) : 'N/A'}</span>
-                </div>
-                <p class="text-[11px] text-[#8A919E] mt-1">
-                  Sample: <strong class="text-white">${sb ? sb.name : 'N/A'}</strong> • Cash Flow Yield: <strong class="${sb && sb.netYieldPct >= 0 ? 'text-[#00C805]' : 'text-[#FF5000]'}">${sb ? sb.netYieldPct.toFixed(1) + '%/yr' : 'N/A'}</strong> • 1% Report Fee: <strong class="text-white">${sb ? fmtMoney(Math.round(sb.price * 0.01)) : '$500'}</strong>
-                </p>
-                <p class="text-[11px] text-[#E2E8F0] mt-1">
-                  <strong>Coach Verdict:</strong> Always pay the 1% fee to review 1M, 3M, 6M, 1Y, 2Y, 3Y, 5Y &amp; 10Y financials (valid 30 days) so you spot turnaround gems vs. bankruptcy traps!
-                </p>
-              </div>
-              <button type="button" onclick="switchMainTab('smallbiz')" class="w-full py-1.5 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-white font-bold text-[11px]">Analyze in Small Biz Tab →</button>
-            </div>
-
-            <div class="p-3.5 rounded-xl bg-[#0C0E10] border border-[#24282D] flex flex-col justify-between gap-2">
-              <div>
-                <div class="flex items-center justify-between">
-                  <span class="font-extrabold text-cyan-300">🤖 Robot Trader &amp; Manager Analysis</span>
-                  <span class="font-mono font-bold text-white">${topBot ? `${topBot.winRatePct}% Win Rate` : '5,200 Bots'}</span>
-                </div>
-                <p class="text-[11px] text-[#8A919E] mt-1">
-                  Top Bot: <strong class="text-white">${topBot ? topBot.name : 'N/A'}</strong> (${topBot ? topBot.botCategoryBadge : ''}) • Rent: <strong class="text-white">${topBot ? fmtMoney(topBot.monthlyRent) + '/mo' : ''}</strong>
-                </p>
-                <p class="text-[11px] text-[#E2E8F0] mt-1">
-                  <strong>Coach Verdict:</strong> Higher win % bots generate strictly higher profits overall (+0.10%–0.30% per win), with periodic -0.55% to -1.00% big losses taking 3–10 wins to recoup.
-                </p>
-              </div>
-              <button type="button" onclick="switchMainTab('managers')" class="w-full py-1.5 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-white font-bold text-[11px]">Browse 5,200 Bots &amp; Pros →</button>
-            </div>
-          `;
-        }
-
-        const pbGrid = document.getElementById('coachingPlaybookCardsGrid');
-        if (pbGrid) {
-          const mods = activeCoachingTopicFilter === 'ALL'
-            ? COACHING_PLAYBOOK_MODULES
-            : COACHING_PLAYBOOK_MODULES.filter(m => m.cat === activeCoachingTopicFilter);
-          pbGrid.innerHTML = mods.map(m => `
-            <div class="p-4 rounded-xl bg-[#0C0E10] border border-[#24282D] flex flex-col justify-between gap-2.5">
-              <div class="flex flex-col gap-1.5">
-                <div class="flex items-center justify-between gap-2">
-                  <h3 class="text-sm font-extrabold text-white">${m.icon} ${m.title}</h3>
-                  <button type="button" onclick="switchMainTab('${m.tab}')" class="px-2.5 py-1 rounded-lg bg-[#1C2024] hover:bg-[#262B31] text-emerald-300 font-bold text-[11px] shrink-0">Open Tab →</button>
-                </div>
-                <div class="text-[11px] font-mono text-sky-300"><strong>Key Metrics to Watch:</strong> ${m.metrics}</div>
-                <p class="text-xs text-[#E2E8F0] leading-relaxed"><strong>How to Research &amp; Analyze:</strong> ${m.howToAnalyze}</p>
-              </div>
-              <div class="p-2.5 rounded-lg bg-[#11161B] border border-[#1E2631] text-[11px] text-amber-300">
-                <strong>💡 Coach Pro Tip:</strong> <span class="text-[#E2E8F0]">${m.proTip}</span>
-              </div>
-            </div>
-          `).join('');
-        }
-
-        // 3. Render Trophies (#trophiesGrid) — Achievements, Nov 24, 2026.
-        renderTrophies();
-      }
-
       function renderAll() {
         if (!G) return;
         renderTopBarAndHome();
-        renderCoachingAndLiveBanner();
+        renderTrophies(); /* was renderCoachingAndLiveBanner — Academy removed Nov 26, 2026 */
         renderPortfolioTab();
         renderStocksTab();
         renderEtfsTab();
@@ -34957,7 +34353,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
 
         // ONBOARDING (Nov 23, 2026): true only when no autosave snapshot
         // existed at boot and a brand-new game was just created. The shell
-        // onboarding tour + coaching prompt run ONLY on a fresh save.
+        // onboarding tour runs ONLY on a fresh save. (The coaching prompt
+        // that used to follow the tour was removed Nov 26, 2026.)
         window.__invesimFreshSave = !restoredFromAutoSave;
         window.createNewGame = createNewGame;
         window.resetToSeed = (s) => {
@@ -34972,10 +34369,6 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
         window.renderAll = renderAll;
         bindEvents();
         if (restoredFromAutoSave) {
-          if (G.coaching && G.coaching.promptShown) {
-            const mPrompt = document.getElementById('modalCoachingPrompt');
-            if (mPrompt) mPrompt.classList.add('hidden');
-          }
           if (currentTab && currentTab !== 'home') {
             switchMainTab(currentTab);
           }
@@ -36298,7 +35691,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     { id: 'portfolio', name: 'Portfolio', grad: 'linear-gradient(135deg,#047857,#34d399)', glyph: GL('<path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5H12z"/><path d="M14.5 2.6A8.5 8.5 0 0 1 21.4 9.5H14.5z"/>'), desc: 'Everything you own, grouped by asset class.' },
     { id: 'news', name: 'News', grad: 'linear-gradient(135deg,#0369a1,#38bdf8)', glyph: GL('<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H5.5A1.5 1.5 0 0 1 4 17.5z"/><path d="M19 15.5h1.5V6.5L19 5.5"/><path d="M7 8h7M7 11h7M7 14h4.5"/>'), desc: 'The wire: markets, rivals, shocks and the world economy.' },
     { id: 'settings', name: 'Settings', grad: 'linear-gradient(135deg,#3f3f46,#71717a)', glyph: GL('<path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2.1" fill="#0b0e11"/><circle cx="15" cy="12" r="2.1" fill="#0b0e11"/><circle cx="8" cy="17" r="2.1" fill="#0b0e11"/>'), desc: 'Save & load, new game, theme, music and About.' },
-    { id: 'coaching', name: 'Coaching', grad: 'linear-gradient(135deg,#065f46,#10b981)', glyph: GL('<path d="M12 4 2.5 8.5 12 13l9.5-4.5z"/><path d="M6.5 10.8V16c0 1.6 2.5 3 5.5 3s5.5-1.4 5.5-3v-5.2"/><path d="M21 8.5V15"/>'), desc: 'The 12-step tutorial and your live investment coach.' },
+    { id: 'trophies', name: 'Trophies', grad: 'linear-gradient(135deg,#854d0e,#eab308)', glyph: GL('<path d="M7 4h10v4.5a5 5 0 0 1-10 0z"/><path d="M7 5.5H4.5a2.8 2.8 0 0 0 2.9 3.5M17 5.5h2.5a2.8 2.8 0 0 1-2.9 3.5"/><path d="M12 13.5V17M8.5 20.5h7M9.8 17h4.4"/>'), desc: 'Your 10 achievement badges — firsts and milestones.' },
     { id: 'bonds', name: 'Bonds', grad: 'linear-gradient(135deg,#0f3d2e,#d4af37)', glyph: GL('<rect x="4" y="3.5" width="16" height="13" rx="2"/><path d="M8 8h8M8 11.5h5"/><circle cx="16.5" cy="16.5" r="2.5"/><path d="M15 18.5 14 21l2.5-1 2.5 1-1-2.5"/>'), desc: 'U.S. Treasury bills, notes & bonds — the safe place to park cash.' },
     { id: 'games', name: 'Games', grad: 'linear-gradient(135deg,#312e81,#7c3aed)', glyph: GL('<path d="M7 8.5h10a5 5 0 0 1 5 5v2.6a3 3 0 0 1-5.3 1.9L15 16H9l-1.7 2A3 3 0 0 1 2 16.1v-2.6a5 5 0 0 1 5-5z"/><path d="M7.5 11v3.4M5.8 12.7h3.4"/><circle cx="16" cy="11.8" r="1" fill="#fff" stroke="none"/><circle cx="18.2" cy="13.8" r="1" fill="#fff" stroke="none"/>'), desc: 'More free games from JMF Games — jmfgames.com.', external: 'https://jmfgames.com' }
   ];
@@ -36353,19 +35746,23 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     return n === APPS.length;
   }
   function migratePages(pg) {
-    /* Pages well-formed except for apps added since the save (e.g. Bonds):
-       keep the player's splits, append the missing apps (default order) to
-       the last page. Anything else (unknown/duplicate id, empty page,
-       non-array) returns null and the caller falls back to order. */
+    /* Pages well-formed except for apps added since the save (e.g. Bonds) or
+       removed since the save (e.g. Coaching, Nov 26, 2026): keep the
+       player's splits, drop removed ids, append the missing apps (default
+       order) to the last page. Anything else (duplicate id, a page emptied
+       by drops, empty page, non-array) returns null and the caller falls
+       back to order. */
     if (!Array.isArray(pg) || !pg.length) return null;
     var seen = {}, out = [];
     for (var i = 0; i < pg.length; i++) {
       if (!Array.isArray(pg[i]) || !pg[i].length) return null;
       var page = [];
       for (var j = 0; j < pg[i].length; j++) {
-        if (!APP_MAP[pg[i][j]] || seen[pg[i][j]]) return null;
+        if (seen[pg[i][j]]) return null;
+        if (!APP_MAP[pg[i][j]]) continue; /* removed app: drop it, keep the splits */
         seen[pg[i][j]] = true; page.push(pg[i][j]);
       }
+      if (!page.length) return null; /* a page emptied by drops is corrupt, not a migration */
       out.push(page);
     }
     var missing = [];
@@ -36424,15 +35821,15 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   var extraNodes = { job: null, wire: null, monitor: null };
 
   /* ---------- Phase 2: per-app hosts, game tabs, re-parent map, hero labels ---------- */
-  var HOSTS = { stocks: 'stocks-host', realestate: 're-host', ereits: 'ereit-host', smallbiz: 'sb-host', forex: 'forex-host', commodities: 'cmd-host', vc: 'vc-host', casino: 'casino-host', job: 'job-host', rivals: 'rivals-host', managers: 'mgr-host', portfolio: 'portfolio-host', coaching: 'coaching-host', bonds: 'bonds-host' };
-  var APP_TAB = { bank: 'finance', realestate: 'realestate', ereits: 'privatere', smallbiz: 'smallbiz', forex: 'forex', commodities: 'commodities', vc: 'vc', casino: 'casino', rivals: 'competitors', managers: 'managers', portfolio: 'portfolio', news: 'finance', coaching: 'coaching', bonds: 'bonds' };
+  var HOSTS = { stocks: 'stocks-host', realestate: 're-host', ereits: 'ereit-host', smallbiz: 'sb-host', forex: 'forex-host', commodities: 'cmd-host', vc: 'vc-host', casino: 'casino-host', job: 'job-host', rivals: 'rivals-host', managers: 'mgr-host', portfolio: 'portfolio-host', trophies: 'trophies-host', bonds: 'bonds-host' };
+  var APP_TAB = { bank: 'finance', realestate: 'realestate', ereits: 'privatere', smallbiz: 'smallbiz', forex: 'forex', commodities: 'commodities', vc: 'vc', casino: 'casino', rivals: 'competitors', managers: 'managers', portfolio: 'portfolio', news: 'finance', trophies: 'trophies', bonds: 'bonds' };
   var REPARENTS = [
     ['tab-finance', 'bank-host'], ['tab-stocks', 'stocks-host'], ['tab-etfs', 'stocks-host'], ['tab-options', 'stocks-host'],
     ['tab-realestate', 're-host'], ['tab-privatere', 'ereit-host'], ['tab-smallbiz', 'sb-host'],
     ['tab-forex', 'forex-host'], ['tab-commodities', 'cmd-host'], ['tab-vc', 'vc-host'],
-    ['tab-casino', 'casino-host'], ['tab-competitors', 'rivals-host'], ['tab-managers', 'mgr-host'], ['tab-portfolio', 'portfolio-host'], ['tab-coaching', 'coaching-host'], ['tab-bonds', 'bonds-host']
+    ['tab-casino', 'casino-host'], ['tab-competitors', 'rivals-host'], ['tab-managers', 'mgr-host'], ['tab-portfolio', 'portfolio-host'], ['tab-trophies', 'trophies-host'], ['tab-bonds', 'bonds-host']
   ];
-  var HERO_LABELS = { stocks: 'Trading Terminal', realestate: 'Property Equity', ereits: 'Private Real Estate', smallbiz: 'Business Portfolio', forex: 'Forex Equity', commodities: 'Commodities Desk', vc: 'Venture Portfolio', casino: 'Casino Balance', job: 'Casino Career', rivals: 'Championship Race', managers: 'Managed Capital', portfolio: 'Total Net Worth', coaching: 'Coaching Academy', bonds: 'Treasury Bonds' };
+  var HERO_LABELS = { stocks: 'Trading Terminal', realestate: 'Property Equity', ereits: 'Private Real Estate', smallbiz: 'Business Portfolio', forex: 'Forex Equity', commodities: 'Commodities Desk', vc: 'Venture Portfolio', casino: 'Casino Balance', job: 'Casino Career', rivals: 'Championship Race', managers: 'Managed Capital', portfolio: 'Total Net Worth', trophies: 'Trophies', bonds: 'Treasury Bonds' };
   function heroHtml(app) {
     return '<div class="ph-hero ph-hero-' + app.id + '" id="ph-hero-' + app.id + '"><div class="ph-hero-art" id="ph-hero-art-' + app.id + '" aria-hidden="true"></div><div class="ph-hero-label">' + esc(HERO_LABELS[app.id] || app.name) + '</div><div class="ph-hero-big" id="ph-hero-big-' + app.id + '">—</div><div class="ph-hero-row" id="ph-hero-row-' + app.id + '"></div></div>';
   }
@@ -37235,7 +36632,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     goHome();
   }
 
-  /* ---------- first-run onboarding tour (Nov 23, 2026) ----------
+  /* ---------- first-run onboarding tour (Nov 23, 2026; prompt removed Nov 26) ----------
      Shell-owned bottom-sheet overlay, brand-new saves ONLY. Predicate — ALL
      must hold:
        1. window.__invesimFreshSave === true — the engine created a brand-new
@@ -37245,35 +36642,33 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
           always see an autosave even on a truly fresh profile.
        2. No slot saves (INVESTSIM_SLOT_1..3 _DATA) — a slot save means a
           returning player even if the autosave was deleted.
-       3. window.G.coaching.promptShown is false.
-       4. prefs.onboardingTourSeen is not true (INVESIM_PHONE_PREFS — never
+       3. prefs.onboardingTourSeen is not true (INVESIM_PHONE_PREFS — never
           the game save, so the tour never overwrites a saved preference).
      Consequence, by construction: a returning save, a save loaded from any
      slot, and a reload after finishing/skipping NEVER see the tour. A reload
      mid-tour also loses it (autosave exists by then) — one shot, by design;
-     the Coaching card + Coaching app stay discoverable. A deep-link load
-     suppresses it too (tourSuppressed).
+     the Trophies app stays discoverable. A deep-link load suppresses it too
+     (tourSuppressed).
      The tour never touches money or saves, never blocks play (Skip on every
      step, dismissible any time), and lives in #phone-screen outside any
      game-rebuilt container, so the 1s tick cannot disturb it; text writes
-     are equality-guarded. Finishing or skipping marks it seen in prefs,
-     then hands off to the engine coaching prompt modal — tour first, prompt
-     second, never both at once. Buttons ignore clicks within 350ms of the
-     sheet opening (trailing-click self-cancel guard). */
+     are equality-guarded. Finishing or skipping marks it seen in prefs and
+     the tour ends there — the engine coaching prompt that used to follow
+     it was removed with the Coaching Academy (Nov 26, 2026). Buttons
+     ignore clicks within 350ms of the sheet opening (trailing-click
+     self-cancel guard). */
   var TOUR_STEPS = [
     { title: 'Welcome to InveSim', body: 'This is an investing simulator. Grow $10,000 into a fortune by buying stocks, real estate, businesses and more — while 100 AI rivals race you to the top.', showApp: null, showLabel: '' },
     { title: 'You start with $10,000', body: 'Day 1, you have $10,000 cash and zero debt. Your cash, net worth and loans live in the Bank app.', showApp: 'bank', showLabel: 'Open Bank app' },
     { title: 'Buy your first stock', body: 'The Stocks app has 15,025 companies. Tap one, check its P/E ratio and profit margin, then buy a few shares. You cannot learn investing without owning something.', showApp: 'stocks', showLabel: 'Open Stocks app' },
     { title: 'Check your Portfolio app', body: 'Everything you own lives in Portfolio — stocks, ETFs, property, businesses — with the gain or loss on each. Check it after every few game days.', showApp: 'portfolio', showLabel: 'Open Portfolio app' },
-    { title: 'Your Job pays, Coaching teaches', body: 'The Job app pays a salary every shift — handy while your investments grow. And the Coaching tab has the full 12-step tutorial plus a live coach that grades your actual holdings.', showApp: 'coaching', showLabel: 'Open Coaching app' }
+    { title: 'Your Job pays, Trophies track you', body: 'The Job app pays a salary every shift — handy while your investments grow. And the Trophies app tracks your milestones — first trade, first $100K, all the way to full-time investor.', showApp: 'trophies', showLabel: 'Open Trophies app' }
   ];
   var tourStep = 0, tourOpen = false, tourArmedAt = 0, tourTries = 0, tourSuppressed = false;
   function tourSlotUsed(i) { try { return !!localStorage.getItem('INVESTSIM_SLOT_' + i + '_DATA'); } catch (e) { return false; } }
   function tourEligible() {
     if (window.__invesimFreshSave !== true) return false;
     if (tourSlotUsed(1) || tourSlotUsed(2) || tourSlotUsed(3)) return false;
-    var G = window.G;
-    if (!G || !G.coaching || G.coaching.promptShown) return false;
     if (prefs.onboardingTourSeen) return false;
     return true;
   }
@@ -37303,13 +36698,6 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     if (!tourOpen) return;
     hideTour();
     prefs.onboardingTourSeen = true; savePrefs();
-    /* Sequence: tour first, engine prompt second — never both at once.
-       reparent() first so the prompt modal is already contained in
-       #phone-screen (not stuck inside hidden <main>) when it opens. */
-    try { reparent(); } catch (e) {}
-    try {
-      if (window.__invesimFreshSave === true && window.G && window.G.coaching && !window.G.coaching.promptShown && typeof window.openCoachingPromptModal === 'function') window.openCoachingPromptModal();
-    } catch (e) {}
   }
   function maybeStartTour() {
     if (tourSuppressed || tourOpen || prefs.onboardingTourSeen) return;
@@ -37407,8 +36795,8 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
      and opens the owning app when the visible tab moves out of the current
      window. The check runs on a short delay so the whole click handler,
      including chained actions after the switch, settles first. */
-  var TAB_APP = { finance: 'bank', stocks: 'stocks', etfs: 'stocks', options: 'stocks', realestate: 'realestate', privatere: 'ereits', smallbiz: 'smallbiz', forex: 'forex', commodities: 'commodities', vc: 'vc', casino: 'casino', competitors: 'rivals', managers: 'managers', portfolio: 'portfolio', coaching: 'coaching', bonds: 'bonds' };
-  var APP_TABS = { bank: ['finance'], stocks: ['stocks', 'etfs', 'options'], realestate: ['realestate'], ereits: ['privatere'], smallbiz: ['smallbiz'], forex: ['forex'], commodities: ['commodities'], vc: ['vc'], casino: ['casino'], rivals: ['competitors'], managers: ['managers'], portfolio: ['portfolio'], news: ['finance'], job: [], settings: [], coaching: ['coaching'], bonds: ['bonds'] };
+  var TAB_APP = { finance: 'bank', stocks: 'stocks', etfs: 'stocks', options: 'stocks', realestate: 'realestate', privatere: 'ereits', smallbiz: 'smallbiz', forex: 'forex', commodities: 'commodities', vc: 'vc', casino: 'casino', competitors: 'rivals', managers: 'managers', portfolio: 'portfolio', trophies: 'trophies', bonds: 'bonds' };
+  var APP_TABS = { bank: ['finance'], stocks: ['stocks', 'etfs', 'options'], realestate: ['realestate'], ereits: ['privatere'], smallbiz: ['smallbiz'], forex: ['forex'], commodities: ['commodities'], vc: ['vc'], casino: ['casino'], rivals: ['competitors'], managers: ['managers'], portfolio: ['portfolio'], news: ['finance'], job: [], settings: [], trophies: ['trophies'], bonds: ['bonds'] };
   var routeTimer = null;
   function scheduleRouteCheck() {
     if (routeTimer) return;
@@ -37595,7 +36983,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     else if (id === 'rivals') { r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Fear & Greed', fearGreedText()); }
     else if (id === 'managers') { var sp = elText('starPyramidSummaryBar'); r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Pyramid', sp.length > 26 ? sp.slice(0, 26) + '…' : sp); }
     else if (id === 'portfolio') { r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Market', elText('portfolioMarketHoursBadge')); }
-    else if (id === 'coaching') { var cc = G.coaching || {}; b = cc.tutorialActive ? ('Tutorial Step ' + (cc.tutorialStep || 1) + ' / 12') : (cc.enabled ? 'Live Coach ON' : 'Coaching OFF'); r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Net Worth', fmtMoney(nw)); }
+    else if (id === 'trophies') { var _tn = 0; try { var _ac = window.__achievements; if (_ac && G && G.human) { var _aa = _ac.ensure(G.human); _tn = _ac.defs.filter(function (d) { return _aa.unlocked[d.id]; }).length; } } catch (e) {} b = _tn + ' / 10 trophies'; r = heroStat('Day Change', dayChg) + heroStat('Cash', cash) + heroStat('Net Worth', fmtMoney(nw)); }
     else if (id === 'bonds') { var bv = (window.__bonds && typeof window.__bonds.valueAll === 'function') ? window.__bonds.valueAll() : { value: 0, count: 0 }; b = fmtMoney(bv.value); r = heroStat('Holdings', String(bv.count)) + heroStat('Cash', cash) + heroStat('Fed Rate', (window.G && window.G.macro) ? (Number(window.G.macro.fedRate) || 0).toFixed(2) + '%' : '—'); }
     else return;
     big.textContent = b;
@@ -37978,7 +37366,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   function containOverlays() {
     var tc = $('toastContainer');
     if (tc && screenEl && tc.parentNode !== screenEl) screenEl.appendChild(tc);
-    ['modalSaveLoad', 'modalNewGame', 'modalSmallBizReport', 'modalCoachingPrompt'].forEach(function (mid) {
+    ['modalSaveLoad', 'modalNewGame', 'modalSmallBizReport'].forEach(function (mid) {
       var m = $(mid);
       if (m && screenEl && m.parentNode !== screenEl) { m.classList.add('ph-contained'); screenEl.appendChild(m); }
     });
@@ -38037,7 +37425,6 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     $('ph-btn-stephour').addEventListener('click', function () { var b = $('btnStepHour'); if (b) b.click(); setTimeout(refreshHUD, 300); });
     $('ph-btn-music').addEventListener('click', function () { setMusic(!prefs.music); playSfx('toggle'); });
     $('ph-edit-done').addEventListener('click', exitEditMode);
-    var hc = $('ph-home-coaching'); if (hc) hc.addEventListener('click', function () { if (!editing) openApp('coaching'); });
     $('ph-edit-az').addEventListener('click', sortAZ);
     $('ph-edit-reset').addEventListener('click', resetOrder);
     $('ph-pages').addEventListener('click', function (e) {
