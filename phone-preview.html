@@ -1206,7 +1206,6 @@ body.light-theme .ph-index-chip-on { color: #fff; background: #007A03; border-co
 /* ---- Phase 4 art: grid photos, portraits, felts ---- */
 .ph-grid-photo { width: 100%; height: 110px; object-fit: cover; border-radius: 12px; display: block; margin-bottom: 8px; }
 .ph-dossier-portrait { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; float: right; margin: 0 0 8px 10px; border: 2px solid rgba(255,255,255,.2); }
-.ph-portrait { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; float: right; margin: 0 0 6px 8px; border: 2px solid rgba(255,255,255,.15); }
 .ph-felt { background-size: cover; background-position: center; }
 
 /* ---- Casino felt legibility in LIGHT theme (Nov 13, 2026) ----
@@ -37550,7 +37549,6 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
      getBizPhoto(catIndex)      data URI or null (0-7, SMALL_BIZ_CATEGORIES id)
      getPortrait(key)           data URI or null (AI_1..AI_9, manager keys)
      getRivalPortrait(ai)       data URI or null (ai.id or ai.shortTag)
-     getManagerPortrait(text)   data URI or null (card header text -> family)
      getHero(appId)             SVG data URI or null
      getFelt(family)            SVG data URI or null
      FELT_FAMILY                casino game key -> felt family map
@@ -37574,7 +37572,7 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     realestate: ['svg', 'photos'],
     smallbiz: ['svg', 'photos'],
     rivals: ['svg', 'portraits'],
-    managers: ['svg', 'portraits'],
+    managers: ['svg'],
     casino: ['svg'],
     settings: ['svg', 'wallpapers']
   };
@@ -37702,67 +37700,12 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     if (ai.shortTag && RIVAL_BY_TAG[ai.shortTag]) return getPortrait(RIVAL_BY_TAG[ai.shortTag]);
     return null;
   }
-  function getManagerPortrait(headerText) {
-    var t = headerText || '';
-    if (t.indexOf('ROBOT TRADER') !== -1) return getPortrait('ROBOT_TRADER');
-    if (t.indexOf('TRADING FIRM') !== -1) return getPortrait('TRADING_FIRM');
-    if (t.indexOf('WEALTH GROUP') !== -1) return getPortrait('WEALTH_GROUP');
-    return null;
-  }
-  /* Manager portrait rotation (Nov 26, 2026): the old lookup returned ONE
-     portrait per category, so all 80 wealth groups showed the same woman.
-     Each non-robot entity now gets one portrait deterministically from its
-     id (hash of id + role), so the same group/PM shows the same portrait
-     on every load and reload. The pool is the 4 legacy non-robot manager
-     keys + the 10 MGR_* portraits. Robots keep their single ROBOT_TRADER
-     image by design. Category images remain only as the fallback for a
-     card with no extractable entity id. */
-  var MANAGER_PORTRAIT_POOL = [
-    'WEALTH_GROUP', 'TRADING_FIRM', 'PORTFOLIO_MANAGER', 'TRADER',
-    'MGR_M1', 'MGR_M2', 'MGR_M3', 'MGR_M4', 'MGR_M5',
-    'MGR_F1', 'MGR_F2', 'MGR_F3', 'MGR_F4', 'MGR_F5'
-  ];
-  function hashString(str) {
-    var h = 5381;
-    for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
-    return h;
-  }
-  function managerRoleFromId(id) {
-    if (!id) return '';
-    if (id.indexOf('ROBOT_') === 0) return 'ROBOT';
-    if (id.indexOf('PM_FX_') === 0 || id.indexOf('PM_COMM_') === 0 ||
-        id.indexOf('PM_OPT_') === 0 || id.indexOf('PM_ALL3_') === 0) return 'FIRM';
-    if (id.indexOf('PM_AVG_') === 0 || id.indexOf('PM_ELITE_') === 0) return 'GROUP';
-    if (id.indexOf('PROF_PM_') === 0) return 'PM';
-    if (id.indexOf('PROF_TRD_') === 0) return 'TRADER';
-    return '';
-  }
-  function getManagerPortraitForId(id) {
-    if (!id) return null;
-    if (managerRoleFromId(id) === 'ROBOT') return getPortrait('ROBOT_TRADER');
-    return getPortrait(MANAGER_PORTRAIT_POOL[hashString(id + '|' + managerRoleFromId(id)) % MANAGER_PORTRAIT_POOL.length]);
-  }
-  /* The entity id on a manager card: grid cards carry exactly one
-     pmAllocInput_<id>; hired-desk cards carry exactly one btnFirePm_<id>.
-     A container holding 0 or 2+ of them is a wrapper/header, not an entity. */
-  function managerCardId(card) {
-    var inputs = card.querySelectorAll('[id^="pmAllocInput_"]');
-    if (inputs.length === 1) return inputs[0].id.slice('pmAllocInput_'.length);
-    var fires = card.querySelectorAll('[id^="btnFirePm_"]');
-    if (fires.length === 1) return fires[0].id.slice('btnFirePm_'.length);
-    return null;
-  }
-  function managerCardHasManyIds(card) {
-    return card.querySelectorAll('[id^="pmAllocInput_"], [id^="btnFirePm_"]').length > 1;
-  }
-  function getManagerPortraitForCard(card, headerText) {
-    if (managerCardHasManyIds(card)) return null; /* wrapper: no portrait */
-    var t = headerText || '';
-    if (t.indexOf('ROBOT TRADER') !== -1) return getPortrait('ROBOT_TRADER');
-    var id = managerCardId(card);
-    if (id) return getManagerPortraitForId(id);
-    return getManagerPortrait(t); /* legacy category fallback */
-  }
+  /* Manager portraits REMOVED Nov 26, 2026 (Jesse: "Just remove all "
+     faces"): the manager-portrait getters, the per-entity rotation pool
+     and helpers, the card/grid applier functions, and the manager
+     observer are all gone. Manager cards render with no face. Rival
+     portraits (getRivalPortrait) are untouched; portraits.json and
+     manifest.json stay on disk, unused by the managers app. */
   function getHero(appId) {
     if (loadState.svg !== 'ready' || !cache.svg || !appId) return null;
     return svgUri(cache.svg['hero:' + appId]);
@@ -37805,39 +37748,6 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
       else { card.style.backgroundImage = ''; card.classList.remove('ph-felt'); }
     }
   }
-  function processManagerCard(card) {
-    if (!card || card.getAttribute('data-ph-art-done')) return;
-    /* Don't settle while portraits are still loading: the card must be
-       revisited once they arrive. Only mark done when the group is ready
-       (apply or no-match) or failed (fallback: no portrait). */
-    if (loadState.portraits === 'idle') { loadGroup('portraits'); return; }
-    if (loadState.portraits === 'loading') return;
-    card.setAttribute('data-ph-art-done', '1');
-    var header = (card.textContent || '').slice(0, 400);
-    var uri = getManagerPortraitForCard(card, header);
-    if (!uri) return;
-    var img = document.createElement('img');
-    img.className = 'ph-portrait';
-    img.alt = '';
-    img.src = uri;
-    card.insertBefore(img, card.firstChild);
-  }
-  function processManagerGrid(gridId) {
-    var grid = $(gridId);
-    if (!grid) return;
-    var cards = grid.querySelectorAll(':scope > div');
-    for (var i = 0; i < cards.length; i++) processManagerCard(cards[i]);
-    if (gridId === 'activePortfolioManagerDesk') {
-      /* Hired cards live one level deeper, inside the .space-y-2.5 wrapper;
-         the wrapper itself holds several ids and gets no portrait. */
-      var hired = grid.querySelectorAll('.space-y-2\\.5 > div');
-      for (var j = 0; j < hired.length; j++) processManagerCard(hired[j]);
-    }
-  }
-  function applyManagerPortraits() {
-    processManagerGrid('portfolioManagersGrid');
-    processManagerGrid('activePortfolioManagerDesk');
-  }
   function currentOpenApp() {
     var wins = document.querySelectorAll('.ph-window.ph-open');
     if (!wins.length) return null;
@@ -37846,7 +37756,6 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   function applyForApp(appId) {
     applyHeroArt(appId);
     if (appId === 'casino') applyFelt();
-    if (appId === 'managers') applyManagerPortraits();
   }
 
   /* ---------- observers ------------------------------------------------- */
@@ -37871,18 +37780,6 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     Array.prototype.forEach.call(wins, function (w) { obs.observe(w, { attributes: true, attributeFilter: ['class'] }); });
     var open = currentOpenApp();
     if (open) ensureForApp(open);
-  }
-  function armManagerObserver() {
-    ['portfolioManagersGrid', 'activePortfolioManagerDesk'].forEach(function (gid) {
-      var grid = $(gid);
-      if (!grid || grid.getAttribute('data-ph-art-watched')) return;
-      grid.setAttribute('data-ph-art-watched', '1');
-      /* Synchronous re-injection like ph-data.js: the game's tick rebuilds
-         grid innerHTML; the microtask callback restores portraits before
-         the next paint. */
-      new MutationObserver(function () { processManagerGrid(gid); }).observe(grid, { childList: true, subtree: false });
-      processManagerGrid(gid);
-    });
   }
   function armCasinoObserver() {
     document.addEventListener('click', function (e) {
@@ -37910,7 +37807,6 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     if (!window.G || !window.G.human || !$('ph-app-layer')) return;
     armed = true;
     armAppObserver();
-    armManagerObserver();
     armCasinoObserver();
     /* Wallpaper fan-out: if the shell asked for an art wallpaper before
        this module armed, applying it now keeps home/lock consistent. */
@@ -37918,9 +37814,6 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
   }
   setInterval(tryArm, 500);
   tryArm();
-  /* Re-arm the manager observer on a slow backstop: the managers grid is
-     rendered by the game after tab switches. */
-  setInterval(function () { if (armed) armManagerObserver(); }, 5000);
 
   window.__phArt = {
     ensureWallpapers: function () { return loadGroup('wallpapers'); },
@@ -37938,14 +37831,11 @@ body.light-theme #tab-casino [class*="bg-[#0F172A]"] .text-pink-400:not(input, s
     getBizPhoto: getBizPhoto,
     getPortrait: getPortrait,
     getRivalPortrait: getRivalPortrait,
-    getManagerPortrait: getManagerPortrait,
-    getManagerPortraitForId: getManagerPortraitForId,
     getHero: getHero,
     getFelt: getFelt,
     FELT_FAMILY: FELT_FAMILY,
     applyHeroArt: applyHeroArt,
     applyFelt: applyFelt,
-    applyManagerPortraits: applyManagerPortraits,
     applyForApp: applyForApp,
     get loadState() { return { wallpapers: loadState.wallpapers, photos: loadState.photos, portraits: loadState.portraits, svg: loadState.svg }; },
     get fetchCount() { return { wallpapers: fetchCount.wallpapers, photos: fetchCount.photos, portraits: fetchCount.portraits, svg: fetchCount.svg }; },
